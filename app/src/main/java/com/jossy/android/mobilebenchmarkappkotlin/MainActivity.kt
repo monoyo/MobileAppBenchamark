@@ -1,87 +1,171 @@
 package com.jossy.android.mobilebenchmarkappkotlin
 
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.SystemClock
+import android.app.ActivityManager
+import android.content.Context
+import android.graphics.Color
+import android.os.*
 import android.widget.Button
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.github.mikephil.charting.charts.ScatterChart
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.ScatterData
+import com.github.mikephil.charting.data.ScatterDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var startupTimeView: TextView
-    private lateinit var executionTimeView: TextView
-    private lateinit var ramUsageView: TextView
-    private lateinit var cpuUsageView: TextView
-    private lateinit var uiLatencyView: TextView
 
-    private var startupTime: Long = 0
+    private lateinit var chart: ScatterChart
+    private lateinit var btnStart: Button
+    private lateinit var tvLiveCpu: TextView
+    private lateinit var tvLiveRam: TextView
+
+    private var monitoring = false
+
+    data class BenchmarkResult(val label: String, val cpuUsage: Double, val ramUsage: Double)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val startTime = SystemClock.elapsedRealtime()
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        // Inicjalizacja widoków
-        startupTimeView = findViewById(R.id.startupTime)
-        executionTimeView = findViewById(R.id.executionTime)
-        ramUsageView = findViewById(R.id.ramUsage)
-        cpuUsageView = findViewById(R.id.cpuUsage)
-        uiLatencyView = findViewById(R.id.uiLatency)
 
-        // Pomiar czasu uruchomienia
-        val loadedTime = SystemClock.elapsedRealtime()
-        startupTime = loadedTime - startTime
-        startupTimeView.text = "Czas uruchomienia: ${startupTime}ms"
+        chart = findViewById(R.id.chart)
+        btnStart = findViewById(R.id.btnStartBenchmark)
+        tvLiveCpu = findViewById(R.id.tvLiveCpu)
+        tvLiveRam = findViewById(R.id.tvLiveRam)
 
-        // Przypisanie przycisków
-        findViewById<Button>(R.id.btnExecution).setOnClickListener {
-            measureExecutionTime()
-        }
+        startLiveMonitoring()
 
-        findViewById<Button>(R.id.btnSimulateUsage).setOnClickListener {
-            simulateRamCpuUsage()
-        }
-
-        findViewById<Button>(R.id.btnUILatency).setOnClickListener {
-            measureUILatency()
+        btnStart.setOnClickListener {
+            performBenchmarks { results ->
+                drawChart(results)
+            }
         }
     }
 
-    private fun measureExecutionTime() {
-        val start = SystemClock.elapsedRealtime()
-        for (i in 0..100_000) {
-            val x = i.toDouble()
-            val result = sqrt(x * x + x) * ln(x + 1)
-        }
-        val end = SystemClock.elapsedRealtime()
-        val duration = end - start
-        executionTimeView.text = "Czas wykonania operacji: ${duration}ms"
+    private fun startLiveMonitoring() {
+        monitoring = true
+        Thread {
+            while (monitoring) {
+                val cpuTime = SystemClock.currentThreadTimeMillis()
+                val ram = getUsedMemoryMB()
+                runOnUiThread {
+                    tvLiveCpu.text = "CPU Time: ${cpuTime}ms"
+                    tvLiveRam.text = "RAM: %.1fMB".format(ram)
+                }
+                Thread.sleep(1000)
+            }
+        }.start()
     }
 
-    private fun simulateRamCpuUsage() {
-        val ram = Random.nextDouble(100.0, 200.0)
-        val cpu = Random.nextDouble(10.0, 60.0)
-        ramUsageView.text = "Zużycie RAM: %.1f MB".format(ram)
-        cpuUsageView.text = "Zużycie CPU: %.1f %%".format(cpu)
+    override fun onDestroy() {
+        monitoring = false
+        super.onDestroy()
     }
 
-    private fun measureUILatency() {
-        val start = SystemClock.uptimeMillis()
-        Handler(Looper.getMainLooper()).post {
-            val end = SystemClock.uptimeMillis()
-            val latency = end - start
-            uiLatencyView.text = "Latencja UI: ${latency}ms"
+    private fun performBenchmarks(onResult: (List<BenchmarkResult>) -> Unit) {
+        val results = mutableListOf<BenchmarkResult>()
+
+        fun measure(label: String, block: () -> Unit) {
+            val cpuStart = SystemClock.currentThreadTimeMillis()
+            val wallStart = SystemClock.elapsedRealtime()
+            val ramBefore = getUsedMemoryMB()
+
+            block()
+
+            val cpuEnd = SystemClock.currentThreadTimeMillis()
+            val wallEnd = SystemClock.elapsedRealtime()
+            val ramAfter = getUsedMemoryMB()
+
+            val cpuTime = cpuEnd - cpuStart
+            val wallTime = wallEnd - wallStart
+            val cpuUsagePercent = (cpuTime.toDouble() / wallTime) * 100
+            val ramUsage = (ramBefore + ramAfter) / 2
+
+            results.add(BenchmarkResult(label, cpuUsagePercent, ramUsage))
         }
+
+        Thread {
+            measure("O(1)") { val x = 42 + 58 }
+            measure("O(log n)") {
+                val list = (1..1_000_000).toList()
+                list.binarySearch(999_999)
+            }
+            measure("O(n)") {
+                val list = (1..1_000_000).toList()
+                var sum = 0L
+                for (item in list) sum += item
+            }
+            measure("O(n log n)") {
+                val list = List(100_000) { Random.nextInt() }
+                list.sorted()
+            }
+            measure("O(n^2)") {
+                val size = 300
+                val matrix = Array(size) { IntArray(size) { Random.nextInt(0, 100) } }
+                var total = 0
+                for (i in 0 until size) {
+                    for (j in 0 until size) {
+                        total += matrix[i][j]
+                    }
+                }
+            }
+
+            results.forEach {
+                println("[Benchmark] ${it.label}: CPU = %.2f%%, RAM = %.2fMB".format(it.cpuUsage, it.ramUsage))
+            }
+
+            runOnUiThread { onResult(results) }
+        }.start()
+    }
+
+    private fun drawChart(results: List<BenchmarkResult>) {
+        val entries = results.map { Entry(it.cpuUsage.toFloat(), it.ramUsage.toFloat()) }
+        val dataSet = ScatterDataSet(entries, "Benchmark")
+        dataSet.setScatterShape(ScatterChart.ScatterShape.CIRCLE)
+        dataSet.setDrawValues(false)
+        dataSet.color = Color.CYAN
+
+        chart.data = ScatterData(dataSet)
+
+        chart.xAxis.apply {
+            isEnabled = true
+            textSize = 12f
+            position = XAxis.XAxisPosition.BOTTOM
+            valueFormatter = object : ValueFormatter() {
+                override fun getAxisLabel(value: Float, axis: com.github.mikephil.charting.components.AxisBase?): String {
+                    return "%.0f%%".format(value)
+                }
+            }
+            setDrawAxisLine(true)
+            setDrawGridLines(true)
+        }
+
+        chart.axisLeft.apply {
+            isEnabled = true
+            textSize = 12f
+            valueFormatter = object : ValueFormatter() {
+                override fun getAxisLabel(value: Float, axis: com.github.mikephil.charting.components.AxisBase?): String {
+                    return "%.1f MB".format(value)
+                }
+            }
+            setDrawAxisLine(true)
+            setDrawGridLines(true)
+        }
+
+        chart.axisRight.isEnabled = false
+        chart.description = Description().apply { text = "" }
+        chart.legend.isEnabled = false
+        chart.invalidate()
+    }
+
+    private fun getUsedMemoryMB(): Double {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val info = activityManager.getProcessMemoryInfo(intArrayOf(Process.myPid()))
+        return info[0].totalPss / 1024.0
     }
 }
