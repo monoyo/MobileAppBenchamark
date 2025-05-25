@@ -1,82 +1,232 @@
 package com.jossy.android.mobilebenchmarkappjava;
 
+import android.Manifest;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.widget.Button;
-import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.app.ActivityCompat;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    private LineChart chartMain;
+    private LineChart chartFactorial;
+    private Button btnStart;
+    private final List<BenchmarkResult> results = new ArrayList<>();
 
-    private TextView startupTimeView;
-    private TextView executionTimeView;
-    private TextView ramUsageView;
-    private TextView cpuUsageView;
-    private TextView uiLatencyView;
+    static class BenchmarkResult {
+        String label;
+        long timeMillis;
+        int inputSize;
+        int color;
+
+        BenchmarkResult(String label, long timeMillis, int inputSize, int color) {
+            this.label = label;
+            this.timeMillis = timeMillis;
+            this.inputSize = inputSize;
+            this.color = color;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        long startTime = SystemClock.elapsedRealtime();
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.container), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        startupTimeView = findViewById(R.id.startupTime);
-        executionTimeView = findViewById(R.id.executionTime);
-        ramUsageView = findViewById(R.id.ramUsage);
-        cpuUsageView = findViewById(R.id.cpuUsage);
-        uiLatencyView = findViewById(R.id.uiLatency);
 
-        long loadedTime = SystemClock.elapsedRealtime();
-        long startupTime = loadedTime - startTime;
-        startupTimeView.setText("Czas uruchomienia: " + startupTime + "ms");
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
-        Button btnExecution = findViewById(R.id.btnExecution);
-        Button btnSimulateUsage = findViewById(R.id.btnSimulateUsage);
-        Button btnUILatency = findViewById(R.id.btnUILatency);
+        chartMain = findViewById(R.id.chartMain);
+        chartFactorial = findViewById(R.id.chartFactorial);
+        btnStart = findViewById(R.id.btnStartBenchmark);
 
-        btnExecution.setOnClickListener(v -> measureExecutionTime());
-        btnSimulateUsage.setOnClickListener(v -> simulateRamCpuUsage());
-        btnUILatency.setOnClickListener(v -> measureUiLatency());
+        chartMain.setDescription(new Description());
+        chartMain.getDescription().setText("Wykres dla O(n), O(n log n)");
+        chartMain.setNoDataText("Brak danych do wyświetlenia");
+
+        chartFactorial.setDescription(new Description());
+        chartFactorial.getDescription().setText("Wykres dla O(n^2), O(n!)");
+        chartFactorial.setNoDataText("Brak danych do wyświetlenia");
+
+        btnStart.setOnClickListener(v -> performBenchmarks());
     }
 
-    private void measureExecutionTime() {
-        long start = SystemClock.elapsedRealtime();
-        for (int i = 0; i <= 100000; i++) {
-            double x = (double) i;
-            double result = Math.sqrt(x * x + x) * Math.log(x + 1);
+    private void performBenchmarks() {
+        results.clear();
+
+        new Thread(() -> {
+            benchmarkWithInput("O(n)", new int[]{1000, 5000, 10000, 20000, 40000}, android.graphics.Color.BLUE, size -> {
+                List<Integer> list = new ArrayList<>();
+                for (int i = 1; i <= size; i++) list.add(i);
+                long sum = 0;
+                for (int item : list) sum += item;
+            });
+
+            benchmarkWithInput("O(n log n)", new int[]{1000, 5000, 10000, 20000, 40000}, android.graphics.Color.GREEN, size -> {
+                List<Integer> list = new ArrayList<>();
+                Random random = new Random();
+                for (int i = 0; i < size; i++) list.add(random.nextInt());
+                list.sort(Integer::compareTo);
+            });
+
+            benchmarkWithInput("O(n^2)", new int[]{100, 200, 300, 400, 500}, android.graphics.Color.RED, size -> {
+                int[][] matrix = new int[size][size];
+                Random random = new Random();
+                for (int i = 0; i < size; i++)
+                    for (int j = 0; j < size; j++)
+                        matrix[i][j] = random.nextInt();
+                int total = 0;
+                for (int i = 0; i < size; i++)
+                    for (int j = 0; j < size; j++)
+                        total += matrix[i][j];
+            });
+
+            benchmarkWithInput("O(n!)", new int[]{5, 6, 7, 8, 9}, android.graphics.Color.MAGENTA, size -> {
+                generatePermutations(createList(size));
+            });
+        }).start();
+    }
+
+    private void benchmarkWithInput(String label, int[] inputSizes, int color, BenchmarkTask task) {
+        for (int size : inputSizes) {
+            long wallStart = SystemClock.elapsedRealtime();
+            task.execute(size);
+            long wallEnd = SystemClock.elapsedRealtime();
+            long duration = wallEnd - wallStart;
+
+            if (duration >= 0) {
+                results.add(new BenchmarkResult(label, duration, size, color));
+                runOnUiThread(() -> {
+                    drawCharts();
+                    exportToCsv();
+                });
+            }
         }
-        long end = SystemClock.elapsedRealtime();
-        long duration = end - start;
-        executionTimeView.setText("Czas wykonania operacji: " + duration + "ms");
     }
 
-    private void simulateRamCpuUsage() {
-        double ram = 100 + new Random().nextDouble() * 100;
-        double cpu = 10 + new Random().nextDouble() * 50;
-        ramUsageView.setText(String.format("Zużycie RAM: %.1f MB", ram));
-        cpuUsageView.setText(String.format("Zużycie CPU: %.1f %%", cpu));
+    private interface BenchmarkTask {
+        void execute(int size);
     }
 
-    private void measureUiLatency() {
-        long start = SystemClock.uptimeMillis();
-        new Handler(Looper.getMainLooper()).post(() -> {
-            long end = SystemClock.uptimeMillis();
-            long latency = end - start;
-            uiLatencyView.setText("Latencja UI: " + latency + "ms");
+    private List<Integer> createList(int size) {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 1; i <= size; i++) list.add(i);
+        return list;
+    }
+
+    private List<List<Integer>> generatePermutations(List<Integer> list) {
+        if (list.size() <= 1) return List.of(list);
+        List<List<Integer>> perms = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            Integer current = list.get(i);
+            List<Integer> remaining = new ArrayList<>(list);
+            remaining.remove(i);
+            for (List<Integer> perm : generatePermutations(remaining)) {
+                List<Integer> combined = new ArrayList<>();
+                combined.add(current);
+                combined.addAll(perm);
+                perms.add(combined);
+            }
+        }
+        return perms;
+    }
+
+    private void drawCharts() {
+        LineData mainData = new LineData();
+        LineData factorialData = new LineData();
+
+        Map<String, List<Entry>> grouped = new HashMap<>();
+        Map<String, Integer> colors = new HashMap<>();
+
+        for (BenchmarkResult result : results) {
+            grouped.computeIfAbsent(result.label, k -> new ArrayList<>())
+                    .add(new Entry(result.inputSize, result.timeMillis));
+            colors.put(result.label, result.color);
+        }
+
+        for (Map.Entry<String, List<Entry>> entry : grouped.entrySet()) {
+            String label = entry.getKey();
+            List<Entry> entries = entry.getValue();
+            LineDataSet dataSet = new LineDataSet(entries, label);
+            dataSet.setDrawValues(false);
+            dataSet.setDrawCircles(true);
+            dataSet.setDrawCircleHole(false);
+            dataSet.setColor(colors.get(label));
+            dataSet.setCircleColor(colors.get(label));
+            dataSet.setLineWidth(2f);
+
+            if (label.equals("O(n^2)") || label.equals("O(n!)")) {
+                factorialData.addDataSet(dataSet);
+            } else {
+                mainData.addDataSet(dataSet);
+            }
+        }
+
+        chartMain.setData(mainData);
+        chartFactorial.setData(factorialData);
+        configureAxis(chartMain);
+        configureAxis(chartFactorial);
+    }
+
+    private void configureAxis(LineChart chart) {
+        chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getXAxis().setGranularity(1f);
+        chart.getXAxis().setTextSize(12f);
+        chart.getXAxis().setTextColor(android.graphics.Color.BLACK);
+        chart.getXAxis().setDrawAxisLine(true);
+        chart.getXAxis().setDrawGridLines(true);
+        chart.getXAxis().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, com.github.mikephil.charting.components.AxisBase axis) {
+                return "n = " + (int) value;
+            }
         });
+
+        chart.getAxisLeft().setTextSize(12f);
+        chart.getAxisLeft().setTextColor(android.graphics.Color.BLACK);
+        chart.getAxisLeft().setDrawAxisLine(true);
+        chart.getAxisLeft().setDrawGridLines(true);
+        chart.getAxisLeft().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getAxisLabel(float value, com.github.mikephil.charting.components.AxisBase axis) {
+                return value + " ms";
+            }
+        });
+
+        chart.getAxisRight().setEnabled(false);
+        chart.invalidate();
+    }
+
+    private void exportToCsv() {
+        try {
+            File file = new File(getExternalFilesDir(null), "benchmark_results.csv");
+            FileWriter writer = new FileWriter(file, false);
+            writer.append("Label,Input Size,Time (ms)\n");
+            for (BenchmarkResult result : results) {
+                writer.append(result.label).append(",")
+                        .append(String.valueOf(result.inputSize)).append(",")
+                        .append(String.valueOf(result.timeMillis)).append("\n");
+            }
+            writer.flush();
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

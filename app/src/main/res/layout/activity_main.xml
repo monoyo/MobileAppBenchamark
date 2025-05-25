@@ -1,79 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chartMain"
+        android:layout_width="0dp"
+        android:layout_height="400dp"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chartFactorial"
+        android:layout_width="0dp"
+        android:layout_height="400dp"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/chartMain"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnStartBenchmark"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:text="Start Benchmark"
+        app:layout_constraintTop_toBottomOf="@id/chartFactorial"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
 
-        <TextView
-            android:id="@+id/titleText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test Wydajności Aplikacji"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
-        <LinearLayout
-            android:id="@+id/card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="#EEEEEE"
-            android:layout_marginBottom="16dp"
-            android:elevation="2dp">
-
-            <TextView android:id="@+id/startupTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Czas uruchomienia: -" />
-
-            <TextView android:id="@+id/executionTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Czas wykonania operacji: -" />
-
-            <TextView android:id="@+id/ramUsage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Zużycie RAM: -" />
-
-            <TextView android:id="@+id/cpuUsage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Zużycie CPU: -" />
-
-            <TextView android:id="@+id/uiLatency"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Latencja UI: -" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btnExecution"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mierz czas wykonania" />
-
-        <Button
-            android:id="@+id/btnSimulateUsage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Symuluj RAM/CPU" />
-
-        <Button
-            android:id="@+id/btnUILatency"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Mierz UI Latency" />
-    </LinearLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
