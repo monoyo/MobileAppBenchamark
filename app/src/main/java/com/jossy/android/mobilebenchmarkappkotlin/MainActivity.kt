@@ -1,9 +1,11 @@
 package com.jossy.android.mobilebenchmarkappkotlin
 
+import android.Manifest
 import android.os.Bundle
 import android.os.SystemClock
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
@@ -11,6 +13,8 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import java.io.File
+import java.io.FileWriter
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -30,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
 
         chartMain = findViewById(R.id.chartMain)
         chartFactorial = findViewById(R.id.chartFactorial)
@@ -65,7 +71,10 @@ class MainActivity : AppCompatActivity() {
 
                 if (duration >= 0) {
                     results.add(BenchmarkResult(label, duration, size, color))
-                    runOnUiThread { drawCharts() }
+                    runOnUiThread {
+                        drawCharts()
+                        exportToCsv()
+                    }
                 }
             }
         }
@@ -82,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                 list.sorted()
             }
 
-            benchmarkWithInput("O(n^2)", listOf(100, 500, 1000, 2000, 4000), android.graphics.Color.RED) { size ->
+            benchmarkWithInput("O(n^2)", listOf(100, 200, 300, 400, 500), android.graphics.Color.RED) { size ->
                 val matrix = Array(size) { IntArray(size) { Random.nextInt() } }
                 var total = 0
                 for (i in 0 until size) {
@@ -186,5 +195,20 @@ class MainActivity : AppCompatActivity() {
 
         configureAxis(chartMain)
         configureAxis(chartFactorial)
+    }
+
+    private fun exportToCsv() {
+        try {
+            val file = File(getExternalFilesDir(null), "benchmark_results.csv")
+            val writer = FileWriter(file, false)
+            writer.append("Label,Input Size,Time (ms)\n")
+            for (result in results) {
+                writer.append("${result.label},${result.inputSize},${result.timeMillis}\n")
+            }
+            writer.flush()
+            writer.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
