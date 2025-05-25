@@ -22,4 +22,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "MobileBenchmarkAppKotlin"
 include(":app")
- 
