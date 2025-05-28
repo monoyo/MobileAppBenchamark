@@ -18,7 +18,7 @@ class BenchmarkActivity : AppCompatActivity() {
         val ramUsages = mutableListOf<Pair<Long, Long>>()
         val uiLatencies = mutableListOf<Long>()
         val cpuResults = mutableListOf<Int>()
-        val runs = 50
+        val runs = intent.getIntExtra("runs", 50)
 
         fun runSingleBenchmark(
             runIdx: Int,
@@ -40,8 +40,18 @@ class BenchmarkActivity : AppCompatActivity() {
             bigArray.fill(0)
             System.gc()
 
+            // Mocniejszy test latencji UI: renderowanie dużej liczby widoków
             val uiStart = System.nanoTime()
             runOnUiThread {
+                // Tworzenie i dodawanie wielu TextView do tymczasowego layoutu
+                val tempLayout = android.widget.LinearLayout(this)
+                tempLayout.orientation = android.widget.LinearLayout.VERTICAL
+                for (i in 1..200) {
+                    val tv = TextView(this)
+                    tv.text = "Test $i"
+                    tempLayout.addView(tv)
+                }
+                // Pomiar po dodaniu widoków
                 val uiEnd = System.nanoTime()
                 val uiLatency = (uiEnd - uiStart) / 1_000_000
                 uiLatencies.add(uiLatency)
