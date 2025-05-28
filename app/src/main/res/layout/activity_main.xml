@@ -2,35 +2,85 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
+    android:padding="16dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chartMain"
-        android:layout_width="0dp"
-        android:layout_height="300dp"
-        android:layout_margin="16dp"
+    <TextView
+        android:id="@+id/welcomeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:text="Welcome to the Mobile Benchmark App"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#222222"
+        android:layout_marginTop="32dp"/>
+
+    <TextView
+        android:id="@+id/appLaunchTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:text="App Launch Time: 0 ms"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chartFactorial"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcomeText"
+        android:textSize="16sp"
+        android:textColor="#444444"/>
+
+    <TextView
+        android:id="@+id/nextInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:text="Next steps: Click the button below to start the benchmark."
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appLaunchTime"
+        android:textSize="15sp"
+        android:textColor="#666666"/>
+
+    <TextView
+        android:id="@+id/benchmarkStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:text="Benchmark Status: Not Started"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nextInfo"
+        android:textSize="15sp"
+        android:textColor="#666666"/>
+
+    <EditText
+        android:id="@+id/editRuns"
         android:layout_width="0dp"
-        android:layout_height="300dp"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/chartMain"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Liczba powtórzeń testu (np. 50)"
+        app:layout_constraintTop_toBottomOf="@id/benchmarkStatus"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"/>
 
     <Button
         android:id="@+id/btnStartBenchmark"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Start Benchmark"
-        app:layout_constraintTop_toBottomOf="@id/chartFactorial"
+        app:layout_constraintTop_toBottomOf="@id/editRuns"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:backgroundTint="#1976D2"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:elevation="4dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
