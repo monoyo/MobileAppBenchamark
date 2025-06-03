@@ -54,25 +54,12 @@
         android:textSize="15sp"
         android:textColor="#666666"/>
 
-    <EditText
-        android:id="@+id/editRuns"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:hint="Liczba powtórzeń testu (np. 50)"
-        app:layout_constraintTop_toBottomOf="@id/benchmarkStatus"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"/>
-
     <Button
         android:id="@+id/btnStartBenchmark"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Start Benchmark"
-        app:layout_constraintTop_toBottomOf="@id/editRuns"
+        app:layout_constraintTop_toBottomOf="@id/benchmarkStatus"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"

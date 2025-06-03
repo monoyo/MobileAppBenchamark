@@ -1,116 +1,141 @@
 package com.jossy.android.mobilebenchmarkappkotlin
 
-import android.app.Activity
-import android.content.Intent
+import android.animation.ObjectAnimator
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
+import android.view.Choreographer
+import android.view.View
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+import kotlin.random.Random
 
 class BenchmarkActivity : AppCompatActivity() {
+    private lateinit var container: FrameLayout
+    private var frameCount = 0
+    private var startTime = 0L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val textView = TextView(this)
-        setContentView(textView)
-        textView.text = "Benchmark Status: Running..."
+        startFPSCounter()
+        setContentView(R.layout.activity_benchmark)
+        container = findViewById(R.id.container)
+        startUITest()
+        lifecycleScope.launch(Dispatchers.IO) {
+            delay(10000)
+            launch(Dispatchers.Main) {
+                container.removeAllViews()
+                container.setBackgroundColor(Color.WHITE)
+                // Notify that the benchmark is complete
+                container.addView(
+                    TextView(this@BenchmarkActivity).apply {
+                        text = "Benchmark UI zakończony."
+                        setTextColor(Color.BLACK)
+                        textSize = 20f
+                        layoutParams =
+                            FrameLayout
+                                .LayoutParams(
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                ).apply {
+                                    setMargins(16, 16, 16, 16)
+                                }
+                    },
+                )
+            }
+            CPUTest.runBenchmark()
+            launch(Dispatchers.Main) {
+                container.addView(
+                    TextView(this@BenchmarkActivity).apply {
+                        text = "Test CPU zakończony."
+                        setTextColor(Color.BLACK)
+                        textSize = 20f
+                        layoutParams =
+                            FrameLayout
+                                .LayoutParams(
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                ).apply {
+                                    setMargins(16, 16, 16, 16)
+                                    setPadding(0, 80, 0, 0)
+                                }
+                    },
+                )
+            }
+            RAMTest.runBenchmark()
+            launch(Dispatchers.Main) {
+                container.addView(
+                    TextView(this@BenchmarkActivity).apply {
+                        text = "Test RAM zakończony."
+                        setTextColor(Color.BLACK)
+                        textSize = 20f
+                        layoutParams =
+                            FrameLayout
+                                .LayoutParams(
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                ).apply {
+                                    setMargins(16, 16, 16, 16)
+                                    setPadding(0, 160, 0, 0)
+                                }
+                    },
+                )
+            }
+        }
+    }
 
-        val cpuTimes = mutableListOf<Long>()
-        val ramTimes = mutableListOf<Long>()
-        val ramUsages = mutableListOf<Pair<Long, Long>>()
-        val uiLatencies = mutableListOf<Long>()
-        val cpuResults = mutableListOf<Int>()
-        val runs = intent.getIntExtra("runs", 50)
+    private fun startUITest() {
+        val size = 50
+        val screenWidth = resources.displayMetrics.widthPixels
+        val screenHeight = resources.displayMetrics.heightPixels
 
-        fun runSingleBenchmark(
-            runIdx: Int,
-            onFinish: () -> Unit,
-        ) {
-            val cpuStart = System.nanoTime()
-            val cpuResult = countPrimes(100_000)
-            val cpuTime = (System.nanoTime() - cpuStart) / 1_000_000
-            cpuTimes.add(cpuTime)
-            cpuResults.add(cpuResult)
-
-            val ramStart = System.nanoTime()
-            val ramUsageBefore = getUsedMemoryMB()
-            val bigArray = IntArray(500_000) { it } // zmniejszony rozmiar tablicy
-            val ramUsageAfter = getUsedMemoryMB()
-            val ramTime = (System.nanoTime() - ramStart) / 1_000_000
-            ramTimes.add(ramTime)
-            ramUsages.add(ramUsageBefore to ramUsageAfter)
-            bigArray.fill(0)
-            System.gc()
-
-            // Mocniejszy test latencji UI: renderowanie dużej liczby widoków
-            val uiStart = System.nanoTime()
-            runOnUiThread {
-                // Tworzenie i dodawanie wielu TextView do tymczasowego layoutu
-                val tempLayout = android.widget.LinearLayout(this)
-                tempLayout.orientation = android.widget.LinearLayout.VERTICAL
-                for (i in 1..200) {
-                    val tv = TextView(this)
-                    tv.text = "Test $i"
-                    tempLayout.addView(tv)
+        repeat(900) {
+            val view =
+                View(this).apply {
+                    setBackgroundColor(Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)))
+                    layoutParams = FrameLayout.LayoutParams(size, size)
+                    x = Random.nextInt(screenWidth - size).toFloat()
+                    y = Random.nextInt(screenHeight - size).toFloat()
                 }
-                // Pomiar po dodaniu widoków
-                val uiEnd = System.nanoTime()
-                val uiLatency = (uiEnd - uiStart) / 1_000_000
-                uiLatencies.add(uiLatency)
-                onFinish()
-            }
-        }
+            container.addView(view)
 
-        fun runBenchmarks(current: Int = 0) {
-            if (current >= runs) {
-                val cpuAvg = cpuTimes.average()
-                val ramAvg = ramTimes.average()
-                val uiAvg = uiLatencies.average()
-                val ramBeforeAvg = ramUsages.map { it.first }.average()
-                val ramAfterAvg = ramUsages.map { it.second }.average()
-                val resultIntent =
-                    Intent().apply {
-                        putExtra("cpuAvg", cpuAvg)
-                        putExtra("ramAvg", ramAvg)
-                        putExtra("uiAvg", uiAvg)
-                        putExtra("ramBeforeAvg", ramBeforeAvg)
-                        putExtra("ramAfterAvg", ramAfterAvg)
-                        putExtra("runs", runs)
+            val animX = ObjectAnimator.ofFloat(view, "translationX", view.x, view.x + Random.nextInt(-200, 200), view.x)
+            val animY = ObjectAnimator.ofFloat(view, "translationY", view.y, view.y + Random.nextInt(-200, 200), view.y)
+
+            animX.repeatCount = ObjectAnimator.INFINITE
+            animY.repeatCount = ObjectAnimator.INFINITE
+            animX.duration = 2000L
+            animY.duration = 2000L
+
+            animX.start()
+            animY.start()
+        }
+    }
+
+    private fun startFPSCounter() {
+        startTime = System.nanoTime()
+        frameCount = 0
+
+        val frameCallback =
+            object : Choreographer.FrameCallback {
+                override fun doFrame(frameTimeNanos: Long) {
+                    frameCount++
+                    val elapsedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0
+                    if (elapsedSeconds >= 5.0) {
+                        val fps = (frameCount / elapsedSeconds).roundToInt()
+                        Log.d("BenchmarkActivity", "🔧 Średni FPS: $fps")
+                    } else {
+                        Choreographer.getInstance().postFrameCallback(this)
                     }
-                setResult(Activity.RESULT_OK, resultIntent)
-                textView.text = "Benchmark Status: Done\n" +
-                    "CPU avg: ${"%.2f".format(cpuAvg)} ms\n" +
-                    "RAM avg: ${"%.2f".format(ramAvg)} ms, Used: ${"%.2f".format(ramBeforeAvg)} -> ${"%.2f".format(ramAfterAvg)} MB\n" +
-                    "UI Latency avg: ${"%.2f".format(uiAvg)} ms\n" +
-                    "Runs: $runs\n\nZamknij okno, aby wrócić."
-                // Zamknij aktywność po krótkim czasie
-                textView.postDelayed({ finish() }, 2000)
-                return
+                }
             }
-            runSingleBenchmark(current) {
-                runBenchmarks(current + 1)
-            }
-        }
 
-        runBenchmarks()
-    }
-
-    private fun countPrimes(limit: Int): Int {
-        var count = 0
-        for (i in 2..limit) {
-            if (isPrime(i)) count++
-        }
-        return count
-    }
-
-    private fun isPrime(n: Int): Boolean {
-        if (n < 2) return false
-        for (i in 2..Math.sqrt(n.toDouble()).toInt()) {
-            if (n % i == 0) return false
-        }
-        return true
-    }
-
-    private fun getUsedMemoryMB(): Long {
-        val runtime = Runtime.getRuntime()
-        return (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)
+        Choreographer.getInstance().postFrameCallback(frameCallback)
     }
 }
