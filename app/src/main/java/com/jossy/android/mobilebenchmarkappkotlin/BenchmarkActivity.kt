@@ -51,6 +51,11 @@ class BenchmarkActivity : AppCompatActivity() {
                 )
             }
             val cpuStart = System.currentTimeMillis()
+            repeat(7) {
+                launch(Dispatchers.IO) {
+                    CPUTest.runBenchmark()
+                }
+            }
             CPUTest.runBenchmark()
             val cpuElapsed = System.currentTimeMillis() - cpuStart
             Log.i("BenchmarkActivity", "CPU test time: ${cpuElapsed}ms")
