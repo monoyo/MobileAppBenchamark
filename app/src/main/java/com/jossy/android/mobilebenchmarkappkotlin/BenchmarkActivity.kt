@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
@@ -20,22 +21,22 @@ class BenchmarkActivity : AppCompatActivity() {
     private lateinit var container: FrameLayout
     private var frameCount = 0
     private var startTime = 0L
+    private var lastFps: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startFPSCounter()
         setContentView(R.layout.activity_benchmark)
         container = findViewById(R.id.container)
-        startUITest()
         lifecycleScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) { startUITest() }
             delay(10000)
-            launch(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
                 container.removeAllViews()
                 container.setBackgroundColor(Color.WHITE)
-                // Notify that the benchmark is complete
                 container.addView(
                     TextView(this@BenchmarkActivity).apply {
-                        text = "Benchmark UI zakończony."
+                        text = "Test UI ended. AVG FPS: $lastFps"
                         setTextColor(Color.BLACK)
                         textSize = 20f
                         layoutParams =
@@ -49,11 +50,14 @@ class BenchmarkActivity : AppCompatActivity() {
                     },
                 )
             }
+            val cpuStart = System.currentTimeMillis()
             CPUTest.runBenchmark()
-            launch(Dispatchers.Main) {
+            val cpuElapsed = System.currentTimeMillis() - cpuStart
+            Log.i("BenchmarkActivity", "CPU test time: ${cpuElapsed}ms")
+            withContext(Dispatchers.Main) {
                 container.addView(
                     TextView(this@BenchmarkActivity).apply {
-                        text = "Test CPU zakończony."
+                        text = "Test CPU ended. Time: $cpuElapsed ms"
                         setTextColor(Color.BLACK)
                         textSize = 20f
                         layoutParams =
@@ -68,11 +72,14 @@ class BenchmarkActivity : AppCompatActivity() {
                     },
                 )
             }
+            val ramStart = System.currentTimeMillis()
             RAMTest.runBenchmark()
-            launch(Dispatchers.Main) {
+            val ramElapsed = System.currentTimeMillis() - ramStart
+            Log.i("BenchmarkActivity", "RAM test time: ${ramElapsed}ms")
+            withContext(Dispatchers.Main) {
                 container.addView(
                     TextView(this@BenchmarkActivity).apply {
-                        text = "Test RAM zakończony."
+                        text = "Test RAM ended. Time: $ramElapsed ms"
                         setTextColor(Color.BLACK)
                         textSize = 20f
                         layoutParams =
@@ -95,7 +102,7 @@ class BenchmarkActivity : AppCompatActivity() {
         val screenWidth = resources.displayMetrics.widthPixels
         val screenHeight = resources.displayMetrics.heightPixels
 
-        repeat(900) {
+        repeat(1500) {
             val view =
                 View(this).apply {
                     setBackgroundColor(Color.rgb(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)))
@@ -129,7 +136,8 @@ class BenchmarkActivity : AppCompatActivity() {
                     val elapsedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0
                     if (elapsedSeconds >= 5.0) {
                         val fps = (frameCount / elapsedSeconds).roundToInt()
-                        Log.d("BenchmarkActivity", "🔧 Średni FPS: $fps")
+                        lastFps = fps
+                        Log.d("BenchmarkActivity", "🔧 AVG FPS: $fps")
                     } else {
                         Choreographer.getInstance().postFrameCallback(this)
                     }

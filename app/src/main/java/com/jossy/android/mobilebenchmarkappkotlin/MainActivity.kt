@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         val benchmarkLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (result.resultCode == RESULT_OK) {
-                    benchmarkStatus.text = "Benchmark zakończony."
+                    benchmarkStatus.text = "Benchmark ended."
                     Log.i("BENCHMARK_RESULT", "Benchmark zakończony.")
                 }
             }

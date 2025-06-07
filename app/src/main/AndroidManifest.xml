@@ -23,9 +23,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CPUChartsActivity"
-            android:exported="true" />
-        <activity
             android:name=".BenchmarkActivity"
             android:exported="true" />
     </application>
