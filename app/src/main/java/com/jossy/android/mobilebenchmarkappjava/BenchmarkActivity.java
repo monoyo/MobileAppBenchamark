@@ -1,141 +1,122 @@
 package com.jossy.android.mobilebenchmarkappjava;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.animation.ObjectAnimator;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.widget.LinearLayout;
+import android.util.Log;
+import android.view.Choreographer;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
-import java.util.ArrayList;
+
+import java.util.Random;
 
 public class BenchmarkActivity extends AppCompatActivity {
-    private final ArrayList<Long> cpuTimes = new ArrayList<>();
-    private final ArrayList<Long> ramTimes = new ArrayList<>();
-    private final ArrayList<Long[]> ramUsages = new ArrayList<>();
-    private final ArrayList<Long> uiLatencies = new ArrayList<>();
-    private final ArrayList<Integer> cpuResults = new ArrayList<>();
-    private int runs;
-    private TextView textView;
+    private FrameLayout container;
+    private int frameCount = 0;
+    private long startTime = 0L;
+    private int lastFps = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        textView = new TextView(this);
-        setContentView(textView);
-        textView.setText("Benchmark Status: Running...");
-        runs = getIntent().getIntExtra("runs", 50);
-        runBenchmarks(0);
-    }
-
-    private void runSingleBenchmark(final int runIdx, final Runnable onFinish) {
-        long cpuStart = System.nanoTime();
-        int cpuResult = countPrimes(100_000);
-        long cpuTime = (System.nanoTime() - cpuStart) / 1_000_000;
-        cpuTimes.add(cpuTime);
-        cpuResults.add(cpuResult);
-
-        long ramStart = System.nanoTime();
-        long ramUsageBefore = getUsedMemoryMB();
-        int[] bigArray = new int[500_000];
-        for (int i = 0; i < bigArray.length; i++) bigArray[i] = i;
-        long ramUsageAfter = getUsedMemoryMB();
-        long ramTime = (System.nanoTime() - ramStart) / 1_000_000;
-        ramTimes.add(ramTime);
-        ramUsages.add(new Long[]{ramUsageBefore, ramUsageAfter});
-        for (int i = 0; i < bigArray.length; i++) bigArray[i] = 0;
-        System.gc();
-
-        final long uiStart = System.nanoTime();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                LinearLayout tempLayout = new LinearLayout(BenchmarkActivity.this);
-                tempLayout.setOrientation(LinearLayout.VERTICAL);
-                for (int i = 1; i <= 200; i++) {
-                    TextView tv = new TextView(BenchmarkActivity.this);
-                    tv.setText("Test " + i);
-                    tempLayout.addView(tv);
-                }
-                long uiEnd = System.nanoTime();
-                long uiLatency = (uiEnd - uiStart) / 1_000_000;
-                uiLatencies.add(uiLatency);
-                onFinish.run();
+        startFPSCounter();
+        setContentView(R.layout.activity_benchmark);
+        container = findViewById(R.id.container);
+        new Thread(() -> {
+            runOnUiThread(this::startUITest);
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
-    }
-
-    private void runBenchmarks(final int current) {
-        if (current >= runs) {
-            double cpuAvg = average(cpuTimes);
-            double ramAvg = average(ramTimes);
-            double uiAvg = average(uiLatencies);
-            double ramBeforeAvg = average(ramUsages, 0);
-            double ramAfterAvg = average(ramUsages, 1);
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("cpuAvg", cpuAvg);
-            resultIntent.putExtra("ramAvg", ramAvg);
-            resultIntent.putExtra("uiAvg", uiAvg);
-            resultIntent.putExtra("ramBeforeAvg", ramBeforeAvg);
-            resultIntent.putExtra("ramAfterAvg", ramAfterAvg);
-            resultIntent.putExtra("runs", runs);
-            setResult(Activity.RESULT_OK, resultIntent);
-            textView.setText(
-                    "Benchmark Status: Done\n" +
-                            String.format("CPU avg: %.2f ms\n", cpuAvg) +
-                            String.format("RAM avg: %.2f ms, Used: %.2f -> %.2f MB\n", ramAvg, ramBeforeAvg, ramAfterAvg) +
-                            String.format("UI Latency avg: %.2f ms\n", uiAvg) +
-                            "Runs: " + runs + "\n\nZamknij okno, aby wrócić."
-            );
-            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    finish();
-                }
-            }, 2000);
-            return;
-        }
-        runSingleBenchmark(current, new Runnable() {
-            @Override
-            public void run() {
-                runBenchmarks(current + 1);
+            runOnUiThread(() -> {
+                container.removeAllViews();
+                container.setBackgroundColor(Color.WHITE);
+                TextView textView = new TextView(BenchmarkActivity.this);
+                textView.setText("Test UI ended. AVG FPS: " + lastFps);
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(20f);
+                container.addView(textView);
+            });
+            long cpuStart = System.currentTimeMillis();
+            for (int i = 0; i < 7; i++) {
+                new Thread(CPUTest::runBenchmark).start();
             }
-        });
+            CPUTest.runBenchmark();
+            long cpuElapsed = System.currentTimeMillis() - cpuStart;
+            Log.i("BenchmarkActivity", "CPU test time: " + cpuElapsed + "ms");
+            runOnUiThread(() -> {
+                TextView textView = new TextView(BenchmarkActivity.this);
+                textView.setText("Test CPU ended. Time: " + cpuElapsed + " ms");
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(20f);
+                container.addView(textView);
+            });
+            long ramStart = System.currentTimeMillis();
+            RAMTest.runBenchmark();
+            long ramElapsed = System.currentTimeMillis() - ramStart;
+            Log.i("BenchmarkActivity", "RAM test time: " + ramElapsed + "ms");
+            runOnUiThread(() -> {
+                TextView textView = new TextView(BenchmarkActivity.this);
+                textView.setText("Test RAM ended. Time: " + ramElapsed + " ms");
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(20f);
+                container.addView(textView);
+            });
+        }).start();
     }
 
-    private int countPrimes(int limit) {
-        int count = 0;
-        for (int i = 2; i <= limit; i++) {
-            if (isPrime(i)) count++;
+    private void startUITest() {
+        int size = 50;
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+        Random random = new Random();
+
+        for (int i = 0; i < 1500; i++) {
+            View view = new View(this);
+            view.setBackgroundColor(Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256)));
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(size, size);
+            view.setLayoutParams(layoutParams);
+            view.setX(random.nextInt(screenWidth - size));
+            view.setY(random.nextInt(screenHeight - size));
+
+            container.addView(view);
+
+            ObjectAnimator animX = ObjectAnimator.ofFloat(view, "translationX", view.getX(), view.getX() + random.nextInt(400) - 200, view.getX());
+            ObjectAnimator animY = ObjectAnimator.ofFloat(view, "translationY", view.getY(), view.getY() + random.nextInt(400) - 200, view.getY());
+
+            animX.setRepeatCount(ObjectAnimator.INFINITE);
+            animY.setRepeatCount(ObjectAnimator.INFINITE);
+            animX.setDuration(2000L);
+            animY.setDuration(2000L);
+
+            animX.start();
+            animY.start();
         }
-        return count;
     }
 
-    private boolean isPrime(int n) {
-        if (n < 2) return false;
-        for (int i = 2; i <= Math.sqrt(n); i++) {
-            if (n % i == 0) return false;
-        }
-        return true;
-    }
+    private void startFPSCounter() {
+        startTime = System.nanoTime();
+        frameCount = 0;
 
-    private long getUsedMemoryMB() {
-        Runtime runtime = Runtime.getRuntime();
-        return (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
-    }
+        Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
+            @Override
+            public void doFrame(long frameTimeNanos) {
+                frameCount++;
+                double elapsedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
+                if (elapsedSeconds >= 5.0) {
+                    int fps = (int) (frameCount / elapsedSeconds);
+                    lastFps = fps;
+                    Log.d("BenchmarkActivity", "🔧 AVG FPS: " + fps);
+                } else {
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            }
+        };
 
-    private double average(ArrayList<Long> list) {
-        if (list.isEmpty()) return 0.0;
-        long sum = 0;
-        for (Long l : list) sum += l;
-        return sum / (double) list.size();
-    }
-
-    private double average(ArrayList<Long[]> list, int idx) {
-        if (list.isEmpty()) return 0.0;
-        long sum = 0;
-        for (Long[] arr : list) sum += arr[idx];
-        return sum / (double) list.size();
+        Choreographer.getInstance().postFrameCallback(frameCallback);
     }
 }
