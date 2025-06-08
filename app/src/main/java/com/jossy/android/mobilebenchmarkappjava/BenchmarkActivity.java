@@ -40,6 +40,14 @@ public class BenchmarkActivity extends AppCompatActivity {
                 textView.setTextColor(Color.BLACK);
                 textView.setTextSize(20f);
                 container.addView(textView);
+                FrameLayout.LayoutParams layout = new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT
+                );
+                layout.setMargins(16, 16, 16, 16);
+                textView.setLayoutParams(
+                        layout
+                );
             });
             long cpuStart = System.currentTimeMillis();
             for (int i = 0; i < 7; i++) {
@@ -54,6 +62,15 @@ public class BenchmarkActivity extends AppCompatActivity {
                 textView.setTextColor(Color.BLACK);
                 textView.setTextSize(20f);
                 container.addView(textView);
+                FrameLayout.LayoutParams layout = new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT
+                );
+                layout.setMargins(16, 16, 16, 16);
+                textView.setPadding(0, 80, 0, 0);
+                textView.setLayoutParams(
+                        layout
+                );
             });
             long ramStart = System.currentTimeMillis();
             RAMTest.runBenchmark();
@@ -65,6 +82,15 @@ public class BenchmarkActivity extends AppCompatActivity {
                 textView.setTextColor(Color.BLACK);
                 textView.setTextSize(20f);
                 container.addView(textView);
+                FrameLayout.LayoutParams layout = new FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT
+                );
+                layout.setMargins(16, 16, 16, 16);
+                textView.setPadding(0, 160, 0, 0);
+                textView.setLayoutParams(
+                        layout
+                );
             });
         }).start();
     }
