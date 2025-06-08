@@ -40,18 +40,6 @@ object CPUTest {
         return result
     }
 
-    private fun fibonacci(n: Int): Long {
-        if (n <= 1) return n.toLong()
-        var a = 0L
-        var b = 1L
-        for (i in 2..n) {
-            val temp = a + b
-            a = b
-            b = temp
-        }
-        return b
-    }
-
     private fun fibonacciBig(n: Int): BigInteger {
         if (n <= 1) return BigInteger.valueOf(n.toLong())
         var a = BigInteger.ZERO

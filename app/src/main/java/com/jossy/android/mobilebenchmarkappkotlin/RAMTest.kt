@@ -1,13 +1,7 @@
 package com.jossy.android.mobilebenchmarkappkotlin
 
+import com.google.gson.reflect.TypeToken
 import java.io.File
-
-data class User(
-    val id: Int,
-    val name: String,
-    val age: Int,
-    val active: Boolean,
-)
 
 object RAMTest {
     private val file = File("users.json")
@@ -22,7 +16,7 @@ object RAMTest {
         for (i in 0 until RUNS) {
             if (file.exists()) {
                 val json = file.readText()
-                val userListType = object : com.google.gson.reflect.TypeToken<List<User>>() {}.type
+                val userListType = object : TypeToken<List<User>>() {}.type
                 val users: List<User> =
                     com.google.gson
                         .Gson()
@@ -43,7 +37,6 @@ object RAMTest {
                     val randomUser = deserialized[(deserialized.indices).random()]
                     randomUser.name
                 }
-                // Liczenie imion i nazwisk
                 for (user in users) {
                     val parts = user.name.split(" ")
                     if (parts.isNotEmpty()) {
@@ -60,3 +53,10 @@ object RAMTest {
         bigList.clear()
     }
 }
+
+data class User(
+    val id: Int,
+    val name: String,
+    val age: Int,
+    val active: Boolean,
+)

@@ -2,10 +2,8 @@ package com.jossy.android.mobilebenchmarkappkotlin
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -16,18 +14,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val benchmarkStatus = findViewById<TextView>(R.id.benchmarkStatus)
-        val benchmarkLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == RESULT_OK) {
-                    benchmarkStatus.text = "Benchmark ended."
-                    Log.i("BENCHMARK_RESULT", "Benchmark zakończony.")
-                }
-            }
-
         findViewById<Button>(R.id.btnStartBenchmark).setOnClickListener {
             val intent = Intent(this, BenchmarkActivity::class.java)
-            benchmarkLauncher.launch(intent)
+            startActivity(intent)
         }
     }
 
