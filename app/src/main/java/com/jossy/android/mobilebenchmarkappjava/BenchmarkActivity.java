@@ -22,17 +22,20 @@ public class BenchmarkActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("BenchmarkActivity", "onCreate called");
         startFPSCounter();
         setContentView(R.layout.activity_benchmark);
         container = findViewById(R.id.container);
         new Thread(() -> {
+            Log.d("BenchmarkActivity", "Starting UI test");
             runOnUiThread(this::startUITest);
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e("BenchmarkActivity", "Error during sleep", e);
             }
             runOnUiThread(() -> {
+                Log.d("BenchmarkActivity", "UI test ended");
                 container.removeAllViews();
                 container.setBackgroundColor(Color.WHITE);
                 TextView textView = new TextView(BenchmarkActivity.this);
@@ -50,6 +53,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 );
             });
             long cpuStart = System.currentTimeMillis();
+            Log.d("BenchmarkActivity", "Starting CPU test");
             for (int i = 0; i < 7; i++) {
                 new Thread(CPUTest::runBenchmark).start();
             }
@@ -73,6 +77,7 @@ public class BenchmarkActivity extends AppCompatActivity {
                 );
             });
             long ramStart = System.currentTimeMillis();
+            Log.d("BenchmarkActivity", "Starting RAM test");
             RAMTest.runBenchmark();
             long ramElapsed = System.currentTimeMillis() - ramStart;
             Log.i("BenchmarkActivity", "RAM test time: " + ramElapsed + "ms");
@@ -92,6 +97,10 @@ public class BenchmarkActivity extends AppCompatActivity {
                         layout
                 );
             });
+
+            // Notify BenchmarkSuiteActivity that the test is complete
+            setResult(RESULT_OK);
+            finish();
         }).start();
     }
 

@@ -36,6 +36,13 @@ dependencies {
     implementation libs.libMPAndroidChart
     implementation libs.constraintlayout
     implementation libs.gson
+    implementation libs.glide
+    implementation libs.recyclerView
+    implementation libs.retrofit
+    implementation libs.retrofit.gson
+    implementation libs.okhttp
+    implementation libs.okhttp.logging
+    implementation "com.google.android.gms:play-services-location:${libs.versions.playServicesLocation.get()}"
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
