@@ -1,6 +1,7 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -17,6 +18,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 
 public class LocationTestActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 123;
@@ -26,7 +30,6 @@ public class LocationTestActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-    private TextView locationStatus, accuracyView, timeToFirstFix, coordinates;
     private long startTime;
     private boolean firstFix = true;
 
@@ -35,11 +38,6 @@ public class LocationTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d("LocationTestActivity", "onCreate called");
         setContentView(R.layout.activity_location_test);
-
-        locationStatus = findViewById(R.id.locationStatus);
-        accuracyView = findViewById(R.id.accuracyView);
-        timeToFirstFix = findViewById(R.id.timeToFirstFix);
-        coordinates = findViewById(R.id.coordinates);
         Log.d("LocationTestActivity", "Views initialized");
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -58,29 +56,14 @@ public class LocationTestActivity extends AppCompatActivity {
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 Location location = locationResult.getLastLocation();
                 if (location != null) {
-                    updateLocationInfo(location);
+                    TestResult result = new TestResult("Location Test", location.getTime() - startTime, "Location result", true);
+                    Intent intent = new Intent();
+                    intent.putExtra(BenchmarkApplication.RESULT, result);
+                    setResult(RESULT_OK, intent);
+                    finish();
                 }
             }
         };
-    }
-
-    private void updateLocationInfo(Location location) {
-        float accuracy = location.getAccuracy();
-        accuracyView.setText("Accuracy: " + accuracy + " meters");
-        coordinates.setText(String.format("Location: %.6f, %.6f", 
-                location.getLatitude(), location.getLongitude()));
-
-        if (firstFix) {
-            long ttff = System.currentTimeMillis() - startTime;
-            timeToFirstFix.setText("Time to first fix: " + ttff + "ms");
-            firstFix = false;
-            locationStatus.setText("Location acquired!");
-
-            if (accuracy <= ACCURACY_THRESHOLD) {
-                stopLocationUpdates();
-                locationStatus.setText("Test completed - Good accuracy achieved");
-            }
-        }
     }
 
     private boolean checkPermissions() {
@@ -106,7 +89,6 @@ public class LocationTestActivity extends AppCompatActivity {
                 .build();
 
         startTime = System.currentTimeMillis();
-        locationStatus.setText("Requesting location updates...");
 
         fusedLocationClient.requestLocationUpdates(locationRequest,
                 locationCallback, Looper.getMainLooper());
@@ -123,8 +105,6 @@ public class LocationTestActivity extends AppCompatActivity {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             startLocationUpdates();
-        } else {
-            locationStatus.setText("Location permission denied");
         }
     }
 

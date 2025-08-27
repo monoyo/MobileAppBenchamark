@@ -27,7 +27,7 @@
         android:extractNativeLibs="true"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize"
@@ -43,21 +43,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BenchmarkActivity"
+            android:name=".activity.ImageLoadingActivity"
             android:exported="true" />
         <activity
-            android:name=".ImageLoadingActivity"
+            android:name=".activity.ApiTestActivity"
             android:exported="true" />
         <activity
-            android:name=".ApiTestActivity"
+            android:name=".activity.LocationTestActivity"
             android:exported="true" />
         <activity
-            android:name=".LocationTestActivity"
-            android:exported="true" />
-        <activity
-            android:name=".BenchmarkSuiteActivity"
+            android:name=".activity.BenchmarkSuiteActivity"
             android:exported="true"
             android:label="Benchmark Suite" />
+        <activity android:name=".RAMTestActivity" android:exported="true" />
+        <activity android:name=".activity.UITestActivity" android:exported="true" />
+        <activity android:name=".activity.CPUTestActivity" android:exported="true" />
     </application>
 
 </manifest>

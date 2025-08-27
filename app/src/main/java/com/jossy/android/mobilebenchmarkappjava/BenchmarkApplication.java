@@ -6,7 +6,9 @@ import android.os.StrictMode;
 import com.github.mikephil.charting.BuildConfig;
 
 public class BenchmarkApplication extends Application {
-    
+
+    public static final String RESULT = "result";
+
     @Override
     public void onCreate() {
         super.onCreate();

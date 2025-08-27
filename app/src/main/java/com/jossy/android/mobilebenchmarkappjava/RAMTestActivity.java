@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 
 public class RAMTestActivity extends AppCompatActivity {
 
@@ -26,7 +28,10 @@ public class RAMTestActivity extends AppCompatActivity {
         textView.setText("Test RAM ended. Time: " + ramElapsed + " ms");
         setContentView(textView);
 
-        setResult(RESULT_OK);
+        TestResult result = new TestResult("RAM Test", ramElapsed, "Memory allocation test completed", true);
+        Intent intent = new Intent();
+        intent.putExtra(BenchmarkApplication.RESULT, result);
+        setResult(RESULT_OK, intent);
         finish();
     }
 }

@@ -1,4 +1,4 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.data;
 
 public class Post {
     private int userId;

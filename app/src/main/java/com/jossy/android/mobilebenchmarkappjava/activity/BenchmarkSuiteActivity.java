@@ -1,4 +1,4 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.Manifest;
 import android.content.Intent;
@@ -12,10 +12,17 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.RAMTestActivity;
+import com.jossy.android.mobilebenchmarkappjava.TestCallback;
+import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -86,7 +93,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
 
     private void runNextTest() {
         if (currentIteration < TEST_ITERATIONS) {
-            if (currentTestIndex < 4) { // 4 tests total
+            if (currentTestIndex < 6) { // 6 tests total
                 String testName = getTestName(currentTestIndex);
                 onTestStarted(testName);
                 startSpecificTest(currentTestIndex);
@@ -130,6 +137,12 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
             case 3:
                 intent = new Intent(this, ApiTestActivity.class);
                 break;
+            case 4:
+                intent = new Intent(this, LocationTestActivity.class);
+                break;
+             case 5:
+                intent = new Intent(this, ImageLoadingActivity.class);
+                break;
             default:
                 Log.w("BenchmarkSuiteActivity", "Invalid test index: " + index);
                 return;
@@ -140,13 +153,11 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
         startActivityForResult(intent, TEST_ACTIVITY_REQUEST_CODE);
     }
 
-    @Override
     public void onTestCompleted(TestResult result) {
         Log.d("BenchmarkSuiteActivity", "Test completed: " + result);
         allResults.add(result);
         updateProgress();
         appendResult(result);
-        currentTestIndex++;
         Log.d("BenchmarkSuiteActivity", "Scheduling next test with delay");
         handler.postDelayed(this::runNextTest, 1000); // Small delay between tests
     }
@@ -164,15 +175,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
     public void onTestStarted(String testName) {
         currentTestInfo.setText(String.format("Running: %s (Iteration %d/%d)",
                 testName, currentIteration + 1, TEST_ITERATIONS));
-    }
-
-    @Override
-    public void onError(String testName, String error) {
-        String errorMsg = String.format("Error in %s: %s\n", testName, error);
-        resultBuilder.append(errorMsg);
-        testResults.setText(resultBuilder.toString());
-        currentTestIndex++;
-        runNextTest();
     }
 
     private void updateProgress() {
@@ -275,7 +277,13 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
             }
         } else if (requestCode == TEST_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
             Log.d("BenchmarkSuiteActivity", "Test completed, launching next test");
-            handler.postDelayed(this::runNextTest, 1000); // Small delay before starting the next test
+            TestResult result = (TestResult) data.getSerializableExtra(BenchmarkApplication.RESULT);
+            if (result != null) {
+                onTestCompleted(result);
+            } else {
+                Log.e("BenchmarkSuiteActivity", "No TestResult received from test activity");
+            }
+
         }
     }
 }

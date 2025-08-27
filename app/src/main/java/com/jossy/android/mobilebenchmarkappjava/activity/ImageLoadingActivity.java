@@ -1,6 +1,8 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -10,6 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,12 +64,6 @@ public class ImageLoadingActivity extends AppCompatActivity {
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 recyclerView.smoothScrollToPosition(adapter.getItemCount() - 1);
 
-                // Check if all images are loaded and transition to the next test
-                if (adapter.getItemCount() == IMAGE_URLS.size()) {
-                    Log.d("ImageLoadingActivity", "All images loaded, transitioning to the next test");
-                    setResult(RESULT_OK);
-                    finish();
-                }
             }
         });
     }
@@ -94,9 +94,11 @@ public class ImageLoadingActivity extends AppCompatActivity {
                          Log.d("ImageLoadingActivity", "Image loaded: " + loadedImages + "/" + IMAGE_URLS.size());
                          if (loadedImages == IMAGE_URLS.size()) {
                              long totalTime = System.currentTimeMillis() - startTime;
-                             loadingStatus.setText("All images loaded in " + totalTime + "ms");
                              Log.d("ImageLoadingActivity", "All images loaded, transitioning to the next test");
-                             setResult(RESULT_OK);
+                             TestResult result = new TestResult("Image Loading Test", totalTime, "Image Loading Test Completed", true);
+                             Intent intent = new Intent();
+                             intent.putExtra(BenchmarkApplication.RESULT, result);
+                             setResult(RESULT_OK, intent);
                              finish();
                          }
                          recyclerView.smoothScrollToPosition(loadedImages - 1);

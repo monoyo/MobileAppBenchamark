@@ -1,5 +1,6 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.data.Post;
+import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
+import com.jossy.android.mobilebenchmarkappjava.service.ApiService;
+
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
@@ -20,7 +28,6 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class ApiTestActivity extends AppCompatActivity {
     private TextView statusTextView;
-    private PostAdapter adapter;
     private long startTime;
 
     @Override
@@ -57,8 +64,12 @@ public class ApiTestActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     long totalTime = System.currentTimeMillis() - startTime;
-                    statusTextView.setText("Data fetched and parsed in " + totalTime + "ms");
                     Log.d("ApiTestActivity", "API test completed in " + totalTime + "ms");
+                    TestResult result = new TestResult("API Test", totalTime, "API request completed successfully", true);
+                    Intent intent = new Intent();
+                    intent.putExtra(BenchmarkApplication.RESULT, result);
+                    setResult(RESULT_OK, intent);
+                    finish();
                 } else {
                     statusTextView.setText("Error: " + response.code());
                 }
@@ -69,39 +80,5 @@ public class ApiTestActivity extends AppCompatActivity {
                 statusTextView.setText("Error: " + t.getMessage());
             }
         });
-    }
-
-    private static class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
-        private final List<Post> posts = new ArrayList<>();
-
-        @NonNull
-        @Override
-        public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new PostViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_post, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
-            Post post = posts.get(position);
-            holder.titleView.setText(post.getTitle());
-            holder.bodyView.setText(post.getBody());
-        }
-
-        @Override
-        public int getItemCount() {
-            return posts.size();
-        }
-    }
-
-    private static class PostViewHolder extends RecyclerView.ViewHolder {
-        final TextView titleView;
-        final TextView bodyView;
-
-        PostViewHolder(@NonNull android.view.View itemView) {
-            super(itemView);
-            titleView = itemView.findViewById(R.id.postTitle);
-            bodyView = itemView.findViewById(R.id.postBody);
-        }
     }
 }

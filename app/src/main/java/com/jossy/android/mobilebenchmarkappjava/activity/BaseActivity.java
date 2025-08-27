@@ -1,4 +1,4 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.content.Intent;
 import android.os.Bundle;

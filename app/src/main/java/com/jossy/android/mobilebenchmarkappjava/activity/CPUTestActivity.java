@@ -1,9 +1,15 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.jossy.android.mobilebenchmarkappjava.CPUTest;
+import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
+import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import android.content.Intent;
 
 public class CPUTestActivity extends AppCompatActivity {
 
@@ -29,7 +35,10 @@ public class CPUTestActivity extends AppCompatActivity {
         textView.setText("Test CPU ended. Time: " + cpuElapsed + " ms");
         setContentView(textView);
 
-        setResult(RESULT_OK);
+        TestResult result = new TestResult("CPU Test", cpuElapsed, "CPU intensive operations completed", true);
+        Intent intent = new Intent();
+        intent.putExtra(BenchmarkApplication.RESULT, result);
+        setResult(RESULT_OK, intent);
         finish();
     }
 }

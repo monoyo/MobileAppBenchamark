@@ -1,4 +1,6 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.service;
+
+import com.jossy.android.mobilebenchmarkappjava.data.Post;
 
 import java.util.List;
 import retrofit2.Call;

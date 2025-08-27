@@ -1,8 +1,7 @@
 package com.jossy.android.mobilebenchmarkappjava;
 
+import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
+
 public interface TestCallback {
-    void onTestCompleted(TestResult result);
     void onAllTestsCompleted();
-    void onTestStarted(String testName);
-    void onError(String testName, String error);
-}
+    void onTestStarted(String testName);}

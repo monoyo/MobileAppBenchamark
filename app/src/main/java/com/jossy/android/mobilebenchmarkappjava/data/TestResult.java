@@ -1,6 +1,8 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.data;
 
-public class TestResult {
+import java.io.Serializable;
+
+public class TestResult implements Serializable {
     private String testName;
     private long executionTime;
     private String details;
