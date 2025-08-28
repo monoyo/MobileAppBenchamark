@@ -1,10 +1,13 @@
-package com.jossy.android.mobilebenchmarkappkotlin
+package com.jossy.android.mobilebenchmarkappkotlin.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
+import com.jossy.android.mobilebenchmarkappkotlin.R
 
 class MainActivity : AppCompatActivity() {
     private val startTime = System.currentTimeMillis()
@@ -12,10 +15,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("MainActivity", "onCreate called")
         setContentView(R.layout.activity_main)
 
-        findViewById<Button>(R.id.btnStartBenchmark).setOnClickListener {
-            val intent = Intent(this, BenchmarkActivity::class.java)
+    val startSuiteButton: Button = findViewById(R.id.btnStartBenchmark)
+        startSuiteButton.setOnClickListener {
+            val intent = Intent(this@MainActivity, BenchmarkSuiteActivity::class.java)
             startActivity(intent)
         }
     }
@@ -24,10 +29,9 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         if (!hasAppLaunched) {
             hasAppLaunched = true
-            reportFullyDrawn()
             val elapsedTime = System.currentTimeMillis() - startTime
-            findViewById<TextView>(R.id.appLaunchTime)
-                .text = "App Launch Time: ${elapsedTime}ms"
+            val launchTime: TextView = findViewById(R.id.appLaunchTime)
+            launchTime.text = "App Launch Time: ${elapsedTime}ms"
         }
     }
 }
