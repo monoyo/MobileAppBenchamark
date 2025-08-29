@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "onCreate called")
         setContentView(R.layout.activity_main)
 
-    val startSuiteButton: Button = findViewById(R.id.btnStartBenchmark)
+        val startSuiteButton: Button = findViewById(R.id.btnStartSuite)
         startSuiteButton.setOnClickListener {
             val intent = Intent(this@MainActivity, BenchmarkSuiteActivity::class.java)
             startActivity(intent)

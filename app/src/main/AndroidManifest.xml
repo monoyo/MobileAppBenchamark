@@ -31,7 +31,7 @@
     <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.ImageLoadingActivity" android:exported="false" />
     <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.ApiTestActivity" android:exported="false" />
     <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.UITestActivity" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.LocationTestActivity" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.LocationTestActivity" android:exported="false" />
 
     </application>
 

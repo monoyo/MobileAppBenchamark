@@ -58,7 +58,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
         exportResultsButton.setOnClickListener { exportResults() }
 
-    testProgress.max = TEST_ITERATIONS * 4
+        testProgress.max = TEST_ITERATIONS * 4
         Log.d("BenchmarkSuiteActivity", "onCreate completed, UI initialized")
     }
 
@@ -95,27 +95,28 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         }
     }
 
-    private fun getTestName(index: Int): String {
-        return when (index) {
+    private fun getTestName(index: Int): String =
+        when (index) {
             0 -> "UI Test"
             1 -> "CPU Test"
             2 -> "RAM Test"
             3 -> "Image Loading Test"
             4 -> "API Test"
+            5 -> "Location Test"
             else -> "Unknown Test"
         }
-    }
 
     private fun startSpecificTest(index: Int) {
-        val intent = when (index) {
-            0 -> Intent(this, UITestActivity::class.java)
-            1 -> Intent(this, CPUTestActivity::class.java)
-            2 -> Intent(this, RAMTestActivity::class.java)
-            3 -> Intent(this, ImageLoadingActivity::class.java)
-            4 -> Intent(this, ApiTestActivity::class.java)
-            5 -> Intent(this, com.jossy.android.mobilebenchmarkappkotlin.LocationTestActivity::class.java)
-            else -> return
-        }
+        val intent =
+            when (index) {
+                0 -> Intent(this, UITestActivity::class.java)
+                1 -> Intent(this, CPUTestActivity::class.java)
+                2 -> Intent(this, RAMTestActivity::class.java)
+                3 -> Intent(this, ImageLoadingActivity::class.java)
+                4 -> Intent(this, ApiTestActivity::class.java)
+                5 -> Intent(this, LocationTestActivity::class.java)
+                else -> return
+            }
         intent.putExtra("auto_mode", true)
         intent.putExtra("callback_activity", BenchmarkSuiteActivity::class.java.name)
         startActivityForResult(intent, TEST_ACTIVITY_REQUEST_CODE)
@@ -185,21 +186,31 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkPermissions(): Boolean {
-    // We only need fine location at runtime. Writing to getExternalFilesDir does not require MANAGE_EXTERNAL_STORAGE.
-    return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    }
+    private fun checkPermissions(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
     private fun requestPermissions() {
-    // Request location permission at runtime
-    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_REQUEST_CODE)
+        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_REQUEST_CODE)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) startTestSuite() else Toast.makeText(this, "Permissions required to run tests", Toast.LENGTH_SHORT).show()
+                if (Environment.isExternalStorageManager()) {
+                    startTestSuite()
+                } else {
+                    Toast
+                        .makeText(
+                            this,
+                            "Permissions required to run tests",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                }
             }
         } else if (requestCode == TEST_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
             val result = data?.getSerializableExtra(BenchmarkApplication.RESULT) as? TestResult

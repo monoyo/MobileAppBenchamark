@@ -4,7 +4,10 @@
     android:id="@+id/container"
     android:padding="16dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layerType="hardware"
+    android:animateLayoutChanges="false"
+    android:hardwareAccelerated="true">
     <TextView
         android:id="@+id/welcomeText"
         android:layout_width="wrap_content"
@@ -43,19 +46,20 @@
         android:textColor="#666666"/>
 
     <Button
-        android:id="@+id/btnStartBenchmark"
+        android:id="@+id/btnStartSuite"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Start Benchmark"
+        android:text="Run All Tests"
         app:layout_constraintTop_toBottomOf="@id/nextInfo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:backgroundTint="#1976D2"
+        android:backgroundTint="#4CAF50"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:elevation="4dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
