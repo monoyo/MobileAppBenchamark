@@ -9,23 +9,19 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Disable activity transitions
         overridePendingTransition(0, 0);
         if (getWindow() != null) {
             getWindow().setWindowAnimations(0);
-            // Hardware acceleration
             getWindow().setFlags(
                 android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
             );
-            // Disable unnecessary features
             getWindow().setFlags(
                 android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             );
         }
         
-        // Set render thread priority
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_DISPLAY);
     }
 

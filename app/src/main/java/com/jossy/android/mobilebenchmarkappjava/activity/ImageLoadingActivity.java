@@ -2,7 +2,6 @@ package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -51,21 +50,6 @@ public class ImageLoadingActivity extends AppCompatActivity {
         Log.d("ImageLoadingActivity", "RecyclerView initialized");
         loadingStatus.setText("Loading images...");
         startTime = System.currentTimeMillis();
-
-        // Automatically scroll to the last loaded image at the start
-        recyclerView.post(() -> {
-            if (adapter.getItemCount() > 0) {
-                recyclerView.smoothScrollToPosition(adapter.getItemCount() - 1);
-            }
-        });
-
-        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                recyclerView.smoothScrollToPosition(adapter.getItemCount() - 1);
-
-            }
-        });
     }
 
     private class ImageAdapter extends RecyclerView.Adapter<ImageViewHolder> {
@@ -101,7 +85,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
                              setResult(RESULT_OK, intent);
                              finish();
                          }
-                         recyclerView.smoothScrollToPosition(loadedImages - 1);
+                         recyclerView.smoothScrollToPosition(loadedImages);
                          return false;
                      }
                  })

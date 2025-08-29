@@ -1,6 +1,6 @@
 package com.jossy.android.mobilebenchmarkappjava;
 
-import java.io.File;
+import  java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Random;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.jossy.android.mobilebenchmarkappjava.data.User;
 
 public class RAMTest {
     private static final File file = new File("users.json");
@@ -68,16 +69,3 @@ public class RAMTest {
     }
 }
 
-class User {
-    String name;
-    String surname;
-    int age;
-    boolean active;
-
-    public User(User user) {
-        this.name = user.name;
-        this.surname = user.surname;
-        this.age = user.age;
-        this.active = user.active;
-    }
-}

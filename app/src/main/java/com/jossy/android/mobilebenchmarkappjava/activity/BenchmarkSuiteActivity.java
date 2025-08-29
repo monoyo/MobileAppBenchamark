@@ -112,13 +112,15 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
 
     private String getTestName(int index) {
         Log.d("BenchmarkSuiteActivity", "Getting test name for index: " + index);
-        switch (index) {
-            case 0: return "CPU Test";
-            case 1: return "RAM Test";
-            case 2: return "Image Loading Test";
-            case 3: return "API Test";
-            default: return "Unknown Test";
-        }
+        return switch (index) {
+            case 0 -> "UI Test";
+            case 1 -> "CPU Test";
+            case 2 -> "RAM Test";
+            case 3 -> "Image Loading Test";
+            case 4 -> "API Test";
+            case 5 -> "Location Test";
+            default -> "Unknown Test";
+        };
     }
 
     private void startSpecificTest(int index) {
@@ -135,14 +137,14 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
                 intent = new Intent(this, RAMTestActivity.class);
                 break;
             case 3:
-                intent = new Intent(this, ApiTestActivity.class);
-                break;
-            case 4:
-                intent = new Intent(this, LocationTestActivity.class);
-                break;
-             case 5:
                 intent = new Intent(this, ImageLoadingActivity.class);
                 break;
+            case 4:
+                intent = new Intent(this, ApiTestActivity.class);
+                break;
+             case 5:
+                 intent = new Intent(this, LocationTestActivity.class);
+                 break;
             default:
                 Log.w("BenchmarkSuiteActivity", "Invalid test index: " + index);
                 return;
@@ -234,12 +236,10 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
 
     private boolean checkPermissions() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            // For Android 11 and above
             return ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                     && Environment.isExternalStorageManager();
         } else {
-            // For Android 10 and below
             return ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                     && ContextCompat.checkSelfPermission(this,
@@ -249,7 +249,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
 
     private void requestPermissions() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ (API 33+)
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.READ_MEDIA_IMAGES,
@@ -257,7 +256,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
                     Manifest.permission.READ_MEDIA_AUDIO
             }, PERMISSION_REQUEST_CODE);
         } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            // Android 11-12 (API 30-32)
             if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(android.net.Uri.parse("package:" + getPackageName()));
@@ -268,7 +266,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
                 }, PERMISSION_REQUEST_CODE);
             }
         } else {
-            // Android 10 i niżej
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE

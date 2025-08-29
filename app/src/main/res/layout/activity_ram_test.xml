@@ -6,11 +6,11 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/locationStatus"
+        android:id="@+id/cpuStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Waiting for location..."
+        android:text="RAM processing ..."
         android:textSize="18sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

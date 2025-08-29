@@ -15,7 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="Welcome to the Mobile Benchmark App"
+        android:text="Welcome to the Mobile Benchmark App - Java Edition!"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#222222"
@@ -60,5 +60,6 @@
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         android:elevation="4dp"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
