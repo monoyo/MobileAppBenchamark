@@ -6,7 +6,6 @@ import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
 
 class MainActivity : AppCompatActivity() {

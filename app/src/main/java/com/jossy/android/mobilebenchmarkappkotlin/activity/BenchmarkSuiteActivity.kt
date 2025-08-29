@@ -1,6 +1,7 @@
 package com.jossy.android.mobilebenchmarkappkotlin.activity
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -18,16 +19,13 @@ import androidx.core.content.ContextCompat
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
 import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
 
 class BenchmarkSuiteActivity : AppCompatActivity() {
-    private val PERMISSION_REQUEST_CODE = 123
-    private val TEST_ITERATIONS = 3
-    private val TEST_ACTIVITY_REQUEST_CODE = 456
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 123
+        private const val TEST_ITERATIONS = 3
+        private const val TEST_ACTIVITY_REQUEST_CODE = 456
+    }
 
     private lateinit var currentTestInfo: TextView
     private lateinit var testResults: TextView
@@ -166,7 +164,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             }
             if (count > 0) {
                 val avg = sum.toDouble() / count
-                averages.append(String.format(Locale.US, "%s Average: %.2fms\n", testName, avg))
+                averages.append("$testName Average: ${"%.2f".format(avg).replace(',', '.')}ms\n")
             }
         }
         resultBuilder.append(averages)
@@ -175,13 +173,15 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
     private fun exportResults() {
         try {
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-            val file = File(getExternalFilesDir(null), "benchmark_results_$timestamp.txt")
-            val writer = FileWriter(file)
-            writer.write(resultBuilder.toString())
-            writer.close()
-            Toast.makeText(this, "Results exported to ${file.path}", Toast.LENGTH_LONG).show()
-        } catch (e: IOException) {
+            val timestamp = System.currentTimeMillis().toString()
+            val fileName = "benchmark_results_$timestamp.txt"
+
+            openFileOutput(fileName, Context.MODE_PRIVATE).use { output ->
+                output.write(resultBuilder.toString().encodeToByteArray())
+            }
+
+            Toast.makeText(this, "Results exported to $fileName", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
             Toast.makeText(this, "Error exporting results: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }

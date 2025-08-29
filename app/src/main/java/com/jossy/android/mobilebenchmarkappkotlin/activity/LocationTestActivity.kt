@@ -2,24 +2,15 @@ package com.jossy.android.mobilebenchmarkappkotlin.activity
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.LocationBenchmarkTest
 import com.jossy.android.mobilebenchmarkappkotlin.LocationTestResult
 import com.jossy.android.mobilebenchmarkappkotlin.R
 import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 class LocationTestActivity : ComponentActivity() {

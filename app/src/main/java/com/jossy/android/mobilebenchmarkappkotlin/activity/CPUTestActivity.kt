@@ -3,7 +3,6 @@ package com.jossy.android.mobilebenchmarkappkotlin.activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
@@ -26,8 +25,7 @@ class CPUTestActivity : AppCompatActivity() {
     private fun startCPUTest() {
         lifecycleScope.launch(Dispatchers.IO) {
             val cpuStart = System.currentTimeMillis()
-            for (i in 0 until 7) Thread { CPUTest.runBenchmark() }.start()
-            CPUTest.runBenchmark()
+            for (i in 0 until 7) CPUTest.runBenchmark()
             val cpuElapsed = System.currentTimeMillis() - cpuStart
 
             Log.i("CPUTestActivity", "CPU test time: ${cpuElapsed}ms")
