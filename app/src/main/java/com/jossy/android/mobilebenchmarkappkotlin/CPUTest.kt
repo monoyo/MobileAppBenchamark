@@ -9,7 +9,6 @@ import kotlin.random.Random
 object CPUTest {
     private const val RUNS = 1_000_000
 
-    // Liczenie liczb pierwszych
     private fun countPrimes(): Int {
         var count = 0
         for (i in 2..RUNS) {
@@ -47,7 +46,7 @@ object CPUTest {
 
     private fun fibonacciBig(n: Int): String {
         if (n <= 1) return n.toString()
-        val digits = mutableListOf(0, 1) // przechowujemy liczby w tablicy, indeks 0 = najmłodsza cyfra
+        val digits = mutableListOf(0, 1)
         for (i in 2..n) {
             var carry = 0
             for (j in digits.indices) {
@@ -79,7 +78,7 @@ object CPUTest {
         val math = heavyMathOps(500_000)
 
         val arr = DoubleArray(2_000_000) { Random.nextDouble() }
-        arr.sort() // Kotlin native sort
+        arr.sort()
 
         var logSum = 0.0
         for (i in 1..2_000_000) {

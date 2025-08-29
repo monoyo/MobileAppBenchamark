@@ -29,7 +29,10 @@ class LocationBenchmarkTest(
     private val context: Context,
 ) {
     private val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
-    private val TAG = "LocationBenchmark"
+
+    companion object {
+        private const val TAG = "LocationBenchmark"
+    }
 
     private fun hasLocationPermission(): Boolean {
         val fine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
