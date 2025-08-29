@@ -62,7 +62,6 @@ object CPUTest {
         return digits.reversed().joinToString("")
     }
 
-    // Ciężkie operacje matematyczne
     private fun heavyMathOps(iterations: Int): Double {
         var result = 0.0
         for (i in 1..iterations) {

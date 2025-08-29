@@ -98,7 +98,6 @@ class LocationBenchmarkTest(
                 bearing = if (location.hasBearing()) location.bearing else null,
             )
 
-        // Log wyników
         with(result) {
             Log.i(
                 TAG,
