@@ -248,15 +248,27 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
     }
 
     private void requestPermissions() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            // For Android 11 and above
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ (API 33+)
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO
+            }, PERMISSION_REQUEST_CODE);
+        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            // Android 11-12 (API 30-32)
             if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(android.net.Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, PERMISSION_REQUEST_CODE);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                }, PERMISSION_REQUEST_CODE);
             }
         } else {
-            // For Android 10 and below
+            // Android 10 i niżej
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE

@@ -16,18 +16,6 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("MainActivity", "onCreate called");
-
-        // Enable hardware acceleration
-        getWindow().setFlags(
-            android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-            android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-        );
-        
-        // Optimize window flags
-        getWindow().setFlags(
-            android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
-            android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-        );
         
         setContentView(R.layout.activity_main);
         Log.d("MainActivity", "Content view set");

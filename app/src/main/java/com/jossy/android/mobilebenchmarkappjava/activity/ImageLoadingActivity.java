@@ -25,16 +25,16 @@ public class ImageLoadingActivity extends AppCompatActivity {
     private long startTime;
     
     private static final List<String> IMAGE_URLS = Arrays.asList(
-        "https://picsum.photos/300/200?random=1",
-        "https://picsum.photos/300/200?random=2",
-        "https://picsum.photos/300/200?random=3",
-        "https://picsum.photos/300/200?random=4",
-        "https://picsum.photos/300/200?random=5",
-        "https://picsum.photos/300/200?random=6",
-        "https://picsum.photos/300/200?random=7",
-        "https://picsum.photos/300/200?random=8",
-        "https://picsum.photos/300/200?random=9",
-        "https://picsum.photos/300/200?random=10"
+        "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
+        "https://fastly.picsum.photos/id/687/300/200.jpg?hmac=4cY--ZSfxEMRzYtVmyvUBPrHqzAqJ3JmMSEmdYqdfMM",
+        "https://fastly.picsum.photos/id/408/300/200.jpg?hmac=WLBoOapFRUAh4eGfCSPD4htVThRV8LKEnheDBbmOYvY",
+        "https://fastly.picsum.photos/id/297/300/200.jpg?hmac=FHS6m7Ec_3-9rDv45kvf5XCQz0tWD5sY9yZY7GwSC6c",
+        "https://fastly.picsum.photos/id/723/300/200.jpg?hmac=r-Bu4Me1tZJW3ncPjx4Pj2nhJ2sV0XQhDEeM1kH9EyY",
+        "https://fastly.picsum.photos/id/507/300/200.jpg?hmac=H7vqiU7dtXTNLQraEHG25D7naP8nQy-uGlbyUCvE6Mo",
+        "https://fastly.picsum.photos/id/163/300/200.jpg?hmac=fHGMH6DT42ra3SOzs6JtojmYZ7jECNcq5xn1Ap9OPNA",
+        "https://fastly.picsum.photos/id/54/300/200.jpg?hmac=7Cm5bybfBDMHwUF7AvEbAKWA7l5WnE9MZvcZhPpULTc",
+        "https://fastly.picsum.photos/id/992/300/200.jpg?hmac=w137wSlXMe7QugWkdz2qvxFlif1dwEWqNnv4qFIyWps",
+        "https://fastly.picsum.photos/id/764/300/200.jpg?hmac=1sBuxBDUdVzEEnIKB5S4cXJ_sQ5Tp3ZSnjrHOWF_E20"
     );
 
     @Override
