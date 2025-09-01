@@ -4,15 +4,19 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -23,7 +27,8 @@ import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
 class BenchmarkSuiteActivity : AppCompatActivity() {
     companion object {
         private const val PERMISSION_REQUEST_CODE = 123
-        private const val TEST_ITERATIONS = 3
+        private const val TEST_ITERATIONS = 30
+        private const val ALL_TESTS = 6
         private const val TEST_ACTIVITY_REQUEST_CODE = 456
     }
 
@@ -77,16 +82,16 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun runNextTest() {
-        if (currentIteration < TEST_ITERATIONS) {
-            if (currentTestIndex < 6) {
+        if (currentTestIndex < ALL_TESTS) {
+            if (currentIteration < TEST_ITERATIONS) {
                 val testName = getTestName(currentTestIndex)
                 onTestStarted(testName)
                 startSpecificTest(currentTestIndex)
-                currentTestIndex++
-            } else {
-                currentTestIndex = 0
                 currentIteration++
-                if (currentIteration < TEST_ITERATIONS) runNextTest()
+            } else {
+                currentTestIndex++
+                currentIteration = 0
+                if (currentTestIndex < ALL_TESTS) runNextTest()
             }
         } else {
             onAllTestsCompleted()
@@ -172,6 +177,8 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun exportResults() {
+        checkAndRequestStoragePermissions()
+
         try {
             val timestamp = System.currentTimeMillis().toString()
             val fileName = "benchmark_results_$timestamp.txt"
@@ -217,4 +224,147 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             if (result != null) onTestCompleted(result) else Log.e("BenchmarkSuiteActivity", "No TestResult received from test activity")
         }
     }
+
+    // Launcher do obsługi wyniku zapytania o standardowe uprawnienia
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // Uprawnienie przyznane (dla Android < 11 lub dla READ_EXTERNAL_STORAGE w Android 11+)
+                showToast("Uprawnienie do odczytu pamięci przyznane.")
+                // Tutaj możesz wykonać operacje wymagające dostępu do pamięci
+                performStorageOperation()
+            } else {
+                // Uprawnienie odrzucone
+                showToast("Uprawnienie do odczytu pamięci odrzucone.")
+                // Możesz poinformować użytkownika o konsekwencjach lub pokazać dialog wyjaśniający
+            }
+        }
+
+    // Launcher do obsługi wyniku zapytania o zarządzanie wszystkimi plikami (Android 11+)
+    private val requestManageStorageLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    // Uprawnienie "Zarządzaj wszystkimi plikami" przyznane
+                    showToast("Uprawnienie 'Zarządzaj wszystkimi plikami' przyznane.")
+                    // Tutaj możesz wykonać operacje wymagające tego specjalnego dostępu
+                    performStorageOperationRequiringManageAccess()
+                } else {
+                    // Uprawnienie "Zarządzaj wszystkimi plikami" odrzucone
+                    showToast("Uprawnienie 'Zarządzaj wszystkimi plikami' odrzucone.")
+                    // Poinformuj użytkownika o konieczności tego uprawnienia
+                }
+            }
+        }
+
+    private fun checkAndRequestStoragePermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // Android 11 (API 30) i nowsze
+            if (Environment.isExternalStorageManager()) {
+                // Aplikacja ma już uprawnienie "Zarządzaj wszystkimi plikami"
+                showToast("Aplikacja ma już uprawnienie 'Zarządzaj wszystkimi plikami'.")
+                performStorageOperationRequiringManageAccess()
+            } else {
+                // Aplikacja nie ma uprawnienia "Zarządzaj wszystkimi plikami"
+                // Należy poprosić użytkownika o jego przyznanie przez specjalny ekran systemowy
+                showToast("Proszę o uprawnienie 'Zarządzaj wszystkimi plikami'.")
+                try {
+                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                    intent.addCategory("android.intent.category.DEFAULT")
+                    intent.data =
+                        Uri.parse(String.format("package:%s", applicationContext.packageName))
+                    requestManageStorageLauncher.launch(intent)
+                } catch (e: Exception) {
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+                    requestManageStorageLauncher.launch(intent)
+                    showToast("Nie można otworzyć ustawień, spróbuj ręcznie.")
+                }
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Android 6 (API 23) do Android 10 (API 29)
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                ) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE, // Zazwyczaj potrzebujesz obu
+                    ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Uprawnienia już przyznane
+                    showToast("Uprawnienia do pamięci już przyznane.")
+                    performStorageOperation()
+                }
+
+                shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                    shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
+                    // Wyjaśnij użytkownikowi, dlaczego potrzebujesz tych uprawnień
+                    // np. pokaż dialog
+                    showToast("Potrzebujemy dostępu do pamięci, aby zapisać/odczytać pliki.")
+                    // Następnie poproś o uprawnienia
+                    requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE) // Możesz też prosić o WRITE_EXTERNAL_STORAGE
+                    // Lub użyj requestMultiplePermissions jeśli potrzebujesz obu na raz:
+                    // requestMultiplePermissionsLauncher.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                }
+
+                else -> {
+                    // Bezpośrednio poproś o uprawnienie
+                    requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    // Lub użyj requestMultiplePermissions
+                }
+            }
+        } else { // Poniżej Android 6 (API 23)
+            // Uprawnienia są przyznawane podczas instalacji aplikacji
+            showToast("Uprawnienia do pamięci przyznane (starsza wersja Androida).")
+            performStorageOperation()
+        }
+    }
+
+    private fun performStorageOperation() {
+        // Tutaj umieść kod, który wykonuje operacje na pamięci
+        // np. odczyt/zapis plików w publicznych katalogach (Downloads, Documents, Pictures)
+        // lub w katalogu specyficznym dla aplikacji (getExternalFilesDir, getExternalCacheDir)
+        showToast("Wykonywanie operacji na pamięci...")
+        // Pamiętaj, że WRITE_EXTERNAL_STORAGE jest w dużej mierze przestarzałe dla Android 10+
+        // i dla Android 11+ nawet READ_EXTERNAL_STORAGE ma ograniczone działanie bez MANAGE_EXTERNAL_STORAGE
+    }
+
+    private fun performStorageOperationRequiringManageAccess() {
+        // Tutaj umieść kod, który wymaga pełnego dostępu do zarządzania plikami (Android 11+)
+        // np. dostęp do plików poza katalogami specyficznymi dla aplikacji i poza MediaStore
+        showToast("Wykonywanie operacji na pamięci z uprawnieniem 'Zarządzaj wszystkimi plikami'...")
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    // Opcjonalnie: Launcher do obsługi wyniku zapytania o wiele uprawnień na raz (przydatne dla READ i WRITE)
+    private val requestMultiplePermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val readGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
+            val writeGranted =
+                permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE]
+                    ?: false // Jeśli również o nie prosisz
+
+            if (readGranted && writeGranted) { // Sprawdź wszystkie potrzebne
+                showToast("Uprawnienia do odczytu i zapisu pamięci przyznane.")
+                performStorageOperation()
+            } else if (readGranted) {
+                showToast("Uprawnienie do odczytu pamięci przyznane, ale do zapisu nie.")
+                // Możesz obsłużyć ten przypadek osobno
+            } else {
+                showToast("Jedno lub więcej uprawnień do pamięci odrzucone.")
+                // Poinformuj użytkownika
+            }
+        }
+
+    // Dodaj to do swojego AndroidManifest.xml:
+    // Dla Androida 10 (API 29) i starszych, jeśli chcesz zapisywać do pamięci zewnętrznej (poza katalogiem aplikacji):
+    // <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
+    // Dla wszystkich wersji, jeśli chcesz odczytywać z pamięci zewnętrznej (poza katalogiem aplikacji):
+    // <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    // Dla Androida 11 (API 30) i nowszych, jeśli potrzebujesz szerokiego dostępu do zarządzania plikami:
+    // <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    // Pamiętaj, aby dodać android:requestLegacyExternalStorage="true" w tagu <application> w manifeście,
+    // jeśli chcesz tymczasowo korzystać ze starszego modelu pamięci na Androidzie 10, ale staraj się tego unikać.
 }
