@@ -38,8 +38,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCallback {
-    private static final int PERMISSION_REQUEST_CODE = 123;
-    private static final int TEST_ITERATIONS = 10;
+    private static final int TEST_ITERATIONS = 30;
     private static final int ALL_TESTS = 6;
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
 
@@ -304,45 +303,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
         boolean needsQuote = value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r");
         String escaped = value.replace("\"", "\"\"");
         return needsQuote ? ("\"" + escaped + "\"") : escaped;
-    }
-
-    private boolean checkPermissions() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            return ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    && Environment.isExternalStorageManager();
-        } else {
-            return ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        }
-    }
-
-    private void requestPermissions() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    Manifest.permission.READ_MEDIA_VIDEO,
-                    Manifest.permission.READ_MEDIA_AUDIO
-            }, PERMISSION_REQUEST_CODE);
-        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
-                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                intent.setData(android.net.Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, PERMISSION_REQUEST_CODE);
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                }, PERMISSION_REQUEST_CODE);
-            }
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            }, PERMISSION_REQUEST_CODE);
-        }
     }
 
     @Override
