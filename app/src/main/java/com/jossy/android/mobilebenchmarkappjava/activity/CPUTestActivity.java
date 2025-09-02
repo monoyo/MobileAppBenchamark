@@ -26,19 +26,15 @@ public class CPUTestActivity extends AppCompatActivity {
     private void startCPUTest() {
         Executors.newSingleThreadExecutor().execute(() -> {
             long cpuStart = System.currentTimeMillis();
-
-            for (int i = 0; i < 7; i++) {
-                CPUTest.runBenchmark();
-            }
-
+            CPUTest.CpuResult r = CPUTest.runBenchmarkParallel(3000L, null);
             long cpuElapsed = System.currentTimeMillis() - cpuStart;
-            Log.i("CPUTestActivity", "CPU test time: " + cpuElapsed + "ms");
+            Log.i("CPUTestActivity", "CPU test time: " + cpuElapsed + "ms, threads=" + r.threads + ", iters=" + r.iterations);
 
             runOnUiThread(() -> {
                 TestResult result = new TestResult(
                         "CPU Test",
                         cpuElapsed,
-                        "CPU intensive operations completed",
+                        "threads=" + r.threads + ", iterations=" + r.iterations,
                         true
                 );
 

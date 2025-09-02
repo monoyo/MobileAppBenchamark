@@ -1,90 +1,62 @@
 package com.jossy.android.mobilebenchmarkappjava;
 
-import android.util.Log;
-import java.math.BigInteger;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CPUTest {
-    private static final int RUNS = 1_000_000;
-
-    private static int countPrimes() {
-        int count = 0;
-        for (int i = 2; i <= RUNS; i++) {
-            if (isPrime(i)) count++;
+    public static class CpuResult {
+        public final int threads;
+        public final long durationMs;
+        public final long iterations;
+        public final double checksum;
+        public CpuResult(int threads, long durationMs, long iterations, double checksum) {
+            this.threads = threads;
+            this.durationMs = durationMs;
+            this.iterations = iterations;
+            this.checksum = checksum;
         }
-        return count;
     }
 
-    private static boolean isPrime(int n) {
-        if (n < 2) return false;
-        int sqrt = (int) Math.sqrt(n);
-        for (int i = 2; i <= sqrt; i++) {
-            if (n % i == 0) return false;
-        }
-        return true;
-    }
+    public static CpuResult runBenchmarkParallel(long durationMs, Integer threadsOpt) {
+        final int threads = (threadsOpt != null && threadsOpt > 0) ? threadsOpt :
+                Math.max(1, Runtime.getRuntime().availableProcessors());
+        final long deadline = System.nanoTime() + durationMs * 1_000_000L;
 
-    private static double[][] matrixMultiplication(int size) {
-        Random random = new Random();
-        double[][] a = new double[size][size];
-        double[][] b = new double[size][size];
-        double[][] result = new double[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                a[i][j] = random.nextDouble();
-                b[i][j] = random.nextDouble();
-            }
-        }
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                for (int k = 0; k < size; k++) {
-                    result[i][j] += a[i][k] * b[k][j];
+        final long[] counters = new long[threads];
+        final double[] sums = new double[threads];
+        List<Thread> ts = new ArrayList<>(threads);
+
+        for (int idx = 0; idx < threads; idx++) {
+            final int threadIndex = idx;
+            Thread t = new Thread(() -> {
+                long iter = 0L;
+                double acc = 0.0;
+                double x = (threadIndex + 1);
+                while (System.nanoTime() < deadline) {
+                    // Ciasna pętla z operacjami zmiennoprzecinkowymi
+                    x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
+                    acc += x;
+                    iter++;
                 }
-            }
+                counters[threadIndex] = iter;
+                sums[threadIndex] = acc;
+            }, "cpu-burn-" + idx);
+            t.setPriority(Thread.NORM_PRIORITY);
+            ts.add(t);
+            t.start();
         }
-        return result;
-    }
 
-    private static BigInteger fibonacciBig(int n) {
-        if (n <= 1) return BigInteger.valueOf(n);
-        BigInteger a = BigInteger.ZERO;
-        BigInteger b = BigInteger.ONE;
-        for (int i = 2; i <= n; i++) {
-            BigInteger temp = a.add(b);
-            a = b;
-            b = temp;
+        for (Thread t : ts) {
+            try { t.join(); } catch (InterruptedException ignored) { }
         }
-        return b;
-    }
 
-    private static double heavyMathOps(int iterations) {
-        Random random = new Random();
-        double result = 0.0;
-        for (int i = 1; i <= iterations; i++) {
-            result += Math.sqrt(i) * Math.pow(i, 1.5) / (random.nextDouble() + 1);
+        long totalIterations = 0L;
+        double checksum = 0.0;
+        for (int i = 0; i < threads; i++) {
+            totalIterations += counters[i];
+            checksum += sums[i];
         }
-        return result;
-    }
 
-    public static void runBenchmark() {
-        int primes = countPrimes();
-        double[][] matrix = matrixMultiplication(150);
-        BigInteger fib = fibonacciBig(200);
-        double math = heavyMathOps(500_000);
-        double[] arr = new double[2_000_000];
-        Random random = new Random();
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = random.nextDouble();
-        }
-        java.util.Arrays.sort(arr);
-        double logSum = 0.0;
-        for (int i = 1; i <= 2_000_000; i++) {
-            logSum += Math.log(i) * Math.pow(i, 1.2);
-        }
-        Log.i(
-            "CPUTest",
-            "Benchmark completed: " + RUNS + " runs, counted " + primes + " primes, fib(200)=" + fib +
-            ", mathOps=" + math + ", matrix[0][0]=" + matrix[0][0] + ", logSum=" + logSum + ", arr[0]=" + arr[0]
-        );
+        return new CpuResult(threads, durationMs, totalIterations, checksum);
     }
 }
