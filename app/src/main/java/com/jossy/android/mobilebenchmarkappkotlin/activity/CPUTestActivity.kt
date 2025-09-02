@@ -23,21 +23,20 @@ class CPUTestActivity : AppCompatActivity() {
     }
 
     private fun startCPUTest() {
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Default) {
             val cpuStart = System.currentTimeMillis()
-            for (i in 0 until 7) CPUTest.runBenchmark()
+            val r = CPUTest.runBenchmarkParallel(durationMs = 3000L)
             val cpuElapsed = System.currentTimeMillis() - cpuStart
 
-            Log.i("CPUTestActivity", "CPU test time: ${cpuElapsed}ms")
+            Log.i("CPUTestActivity", "CPU test time: ${cpuElapsed}ms, threads=${r.threads}, iters=${r.iterations}")
 
             withContext(Dispatchers.Main) {
-                val result =
-                    TestResult(
-                        "CPU Test",
-                        cpuElapsed,
-                        "CPU intensive operations completed",
-                        true,
-                    )
+                val result = TestResult(
+                    "CPU Test",
+                    cpuElapsed,
+                    "threads=${r.threads}, iterations=${r.iterations}",
+                    true,
+                )
                 val intent = Intent()
                 intent.putExtra(BenchmarkApplication.RESULT, result)
                 setResult(RESULT_OK, intent)

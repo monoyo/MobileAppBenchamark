@@ -23,11 +23,14 @@ import androidx.core.content.ContextCompat
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
 import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class BenchmarkSuiteActivity : AppCompatActivity() {
     companion object {
         private const val PERMISSION_REQUEST_CODE = 123
-        private const val TEST_ITERATIONS = 30
+        private const val TEST_ITERATIONS = 10
         private const val ALL_TESTS = 6
         private const val TEST_ACTIVITY_REQUEST_CODE = 456
     }
@@ -39,6 +42,8 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     private lateinit var exportResultsButton: Button
 
     private val allResults = mutableListOf<TestResult>()
+    private data class TestEntry(val iteration: Int, val result: TestResult)
+    private val perTestResults = linkedMapOf<String, MutableList<TestEntry>>()
     private var currentIteration = 0
     private var currentTestIndex = 0
     private var isRunning = false
@@ -61,7 +66,8 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
         exportResultsButton.setOnClickListener { exportResults() }
 
-        testProgress.max = TEST_ITERATIONS * 4
+    // Progress across all tests and iterations
+    testProgress.max = TEST_ITERATIONS * ALL_TESTS
         Log.d("BenchmarkSuiteActivity", "onCreate completed, UI initialized")
     }
 
@@ -127,8 +133,12 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
     fun onTestCompleted(result: TestResult) {
         allResults.add(result)
+    val iterationNum = currentIteration
+    val entry = TestEntry(iteration = iterationNum, result = result)
+    val list = perTestResults.getOrPut(result.testName) { mutableListOf() }
+    list.add(entry)
         updateProgress()
-        appendResult(result)
+    updateCsvDisplay()
         handler.postDelayed({ runNextTest() }, 1000)
     }
 
@@ -145,31 +155,35 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun updateProgress() {
-        val progress = (currentIteration * 4) + currentTestIndex
+        val progress = (currentTestIndex * TEST_ITERATIONS) + currentIteration
         testProgress.progress = progress
     }
 
-    private fun appendResult(result: TestResult) {
-        val resultText = "[Iteration ${currentIteration + 1}] ${result.testName}: ${result.executionTime}ms - ${result.details}\n"
-        resultBuilder.append(resultText)
-        testResults.text = resultBuilder.toString()
+    private fun updateCsvDisplay() {
+        val sb = StringBuilder()
+        perTestResults.forEach { (testName, entries) ->
+            sb.appendLine("# ${testName}")
+            sb.appendLine("iteration,executionTimeMs,details,success")
+            entries.sortedBy { it.iteration }.forEach { e ->
+                sb.appendLine(listOf(
+                    e.iteration.toString(),
+                    e.result.executionTime.toString(),
+                    csv(e.result.details),
+                    e.result.isSuccessful.toString()
+                ).joinToString(","))
+            }
+            sb.appendLine()
+        }
+        testResults.text = sb.toString()
+        resultBuilder = sb
     }
 
     private fun calculateAndDisplayAverages() {
-        val averages = StringBuilder("\nAverage Results:\n")
-        for (i in 0..3) {
-            val testName = getTestName(i)
-            var sum: Long = 0
-            var count = 0
-            for (result in allResults) {
-                if (result.testName == testName) {
-                    sum += result.executionTime
-                    count++
-                }
-            }
-            if (count > 0) {
-                val avg = sum.toDouble() / count
-                averages.append("$testName Average: ${"%.2f".format(avg).replace(',', '.')}ms\n")
+        val averages = StringBuilder("\nAverages:\n")
+        perTestResults.forEach { (testName, entries) ->
+            if (entries.isNotEmpty()) {
+                val avg = entries.map { it.result.executionTime }.average()
+                averages.append("$testName: ${"%.2f".format(Locale.US, avg)}ms\n")
             }
         }
         resultBuilder.append(averages)
@@ -177,20 +191,55 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun exportResults() {
-        checkAndRequestStoragePermissions()
-
         try {
-            val timestamp = System.currentTimeMillis().toString()
-            val fileName = "benchmark_results_$timestamp.txt"
+            val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(java.util.Date())
+            val baseDir: File? = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            val outDir = File(baseDir, "benchmarks").apply { mkdirs() }
 
-            openFileOutput(fileName, Context.MODE_PRIVATE).use { output ->
-                output.write(resultBuilder.toString().encodeToByteArray())
+            if (!outDir.exists()) {
+                Toast.makeText(this, "Cannot access output directory", Toast.LENGTH_SHORT).show()
+                return
             }
 
-            Toast.makeText(this, "Results exported to $fileName", Toast.LENGTH_LONG).show()
+            var filesCount = 0
+            perTestResults.forEach { (testName, entries) ->
+                if (entries.isEmpty()) return@forEach
+
+                val safeName = testName.lowercase(Locale.US).replace(" ", "_")
+                val file = File(outDir, "${safeName}_${time}.csv")
+                val content = buildCsv(entries)
+                file.writeText(content)
+                filesCount++
+            }
+
+            if (filesCount > 0) {
+                Toast.makeText(this, "Saved $filesCount CSV files to ${outDir.absolutePath}", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "No results to export yet", Toast.LENGTH_SHORT).show()
+            }
         } catch (e: Exception) {
-            Toast.makeText(this, "Error exporting results: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Export error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun buildCsv(entries: List<TestEntry>): String {
+        val sb = StringBuilder()
+        sb.appendLine("iteration,executionTimeMs,details,success")
+        entries.sortedBy { it.iteration }.forEach { e ->
+            sb.appendLine(listOf(
+                e.iteration.toString(),
+                e.result.executionTime.toString(),
+                csv(e.result.details),
+                e.result.isSuccessful.toString()
+            ).joinToString(","))
+        }
+        return sb.toString()
+    }
+
+    private fun csv(value: String): String {
+        val needsQuote = value.contains(',') || value.contains('"') || value.contains('\n') || value.contains('\r')
+        val escaped = value.replace("\"", "\"\"")
+        return if (needsQuote) "\"$escaped\"" else escaped
     }
 
     private fun checkPermissions(): Boolean =
@@ -207,7 +256,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     ) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (Environment.isExternalStorageManager()) {
                     startTestSuite()
                 } else {
@@ -225,146 +274,4 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         }
     }
 
-    // Launcher do obsługi wyniku zapytania o standardowe uprawnienia
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            if (isGranted) {
-                // Uprawnienie przyznane (dla Android < 11 lub dla READ_EXTERNAL_STORAGE w Android 11+)
-                showToast("Uprawnienie do odczytu pamięci przyznane.")
-                // Tutaj możesz wykonać operacje wymagające dostępu do pamięci
-                performStorageOperation()
-            } else {
-                // Uprawnienie odrzucone
-                showToast("Uprawnienie do odczytu pamięci odrzucone.")
-                // Możesz poinformować użytkownika o konsekwencjach lub pokazać dialog wyjaśniający
-            }
-        }
-
-    // Launcher do obsługi wyniku zapytania o zarządzanie wszystkimi plikami (Android 11+)
-    private val requestManageStorageLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) {
-                    // Uprawnienie "Zarządzaj wszystkimi plikami" przyznane
-                    showToast("Uprawnienie 'Zarządzaj wszystkimi plikami' przyznane.")
-                    // Tutaj możesz wykonać operacje wymagające tego specjalnego dostępu
-                    performStorageOperationRequiringManageAccess()
-                } else {
-                    // Uprawnienie "Zarządzaj wszystkimi plikami" odrzucone
-                    showToast("Uprawnienie 'Zarządzaj wszystkimi plikami' odrzucone.")
-                    // Poinformuj użytkownika o konieczności tego uprawnienia
-                }
-            }
-        }
-
-    private fun checkAndRequestStoragePermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { // Android 11 (API 30) i nowsze
-            if (Environment.isExternalStorageManager()) {
-                // Aplikacja ma już uprawnienie "Zarządzaj wszystkimi plikami"
-                showToast("Aplikacja ma już uprawnienie 'Zarządzaj wszystkimi plikami'.")
-                performStorageOperationRequiringManageAccess()
-            } else {
-                // Aplikacja nie ma uprawnienia "Zarządzaj wszystkimi plikami"
-                // Należy poprosić użytkownika o jego przyznanie przez specjalny ekran systemowy
-                showToast("Proszę o uprawnienie 'Zarządzaj wszystkimi plikami'.")
-                try {
-                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                    intent.addCategory("android.intent.category.DEFAULT")
-                    intent.data =
-                        Uri.parse(String.format("package:%s", applicationContext.packageName))
-                    requestManageStorageLauncher.launch(intent)
-                } catch (e: Exception) {
-                    val intent = Intent()
-                    intent.action = Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-                    requestManageStorageLauncher.launch(intent)
-                    showToast("Nie można otworzyć ustawień, spróbuj ręcznie.")
-                }
-            }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Android 6 (API 23) do Android 10 (API 29)
-            when {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                ) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE, // Zazwyczaj potrzebujesz obu
-                    ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Uprawnienia już przyznane
-                    showToast("Uprawnienia do pamięci już przyznane.")
-                    performStorageOperation()
-                }
-
-                shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) ||
-                    shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) -> {
-                    // Wyjaśnij użytkownikowi, dlaczego potrzebujesz tych uprawnień
-                    // np. pokaż dialog
-                    showToast("Potrzebujemy dostępu do pamięci, aby zapisać/odczytać pliki.")
-                    // Następnie poproś o uprawnienia
-                    requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE) // Możesz też prosić o WRITE_EXTERNAL_STORAGE
-                    // Lub użyj requestMultiplePermissions jeśli potrzebujesz obu na raz:
-                    // requestMultiplePermissionsLauncher.launch(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE))
-                }
-
-                else -> {
-                    // Bezpośrednio poproś o uprawnienie
-                    requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    // Lub użyj requestMultiplePermissions
-                }
-            }
-        } else { // Poniżej Android 6 (API 23)
-            // Uprawnienia są przyznawane podczas instalacji aplikacji
-            showToast("Uprawnienia do pamięci przyznane (starsza wersja Androida).")
-            performStorageOperation()
-        }
-    }
-
-    private fun performStorageOperation() {
-        // Tutaj umieść kod, który wykonuje operacje na pamięci
-        // np. odczyt/zapis plików w publicznych katalogach (Downloads, Documents, Pictures)
-        // lub w katalogu specyficznym dla aplikacji (getExternalFilesDir, getExternalCacheDir)
-        showToast("Wykonywanie operacji na pamięci...")
-        // Pamiętaj, że WRITE_EXTERNAL_STORAGE jest w dużej mierze przestarzałe dla Android 10+
-        // i dla Android 11+ nawet READ_EXTERNAL_STORAGE ma ograniczone działanie bez MANAGE_EXTERNAL_STORAGE
-    }
-
-    private fun performStorageOperationRequiringManageAccess() {
-        // Tutaj umieść kod, który wymaga pełnego dostępu do zarządzania plikami (Android 11+)
-        // np. dostęp do plików poza katalogami specyficznymi dla aplikacji i poza MediaStore
-        showToast("Wykonywanie operacji na pamięci z uprawnieniem 'Zarządzaj wszystkimi plikami'...")
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-    }
-
-    // Opcjonalnie: Launcher do obsługi wyniku zapytania o wiele uprawnień na raz (przydatne dla READ i WRITE)
-    private val requestMultiplePermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val readGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
-            val writeGranted =
-                permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE]
-                    ?: false // Jeśli również o nie prosisz
-
-            if (readGranted && writeGranted) { // Sprawdź wszystkie potrzebne
-                showToast("Uprawnienia do odczytu i zapisu pamięci przyznane.")
-                performStorageOperation()
-            } else if (readGranted) {
-                showToast("Uprawnienie do odczytu pamięci przyznane, ale do zapisu nie.")
-                // Możesz obsłużyć ten przypadek osobno
-            } else {
-                showToast("Jedno lub więcej uprawnień do pamięci odrzucone.")
-                // Poinformuj użytkownika
-            }
-        }
-
-    // Dodaj to do swojego AndroidManifest.xml:
-    // Dla Androida 10 (API 29) i starszych, jeśli chcesz zapisywać do pamięci zewnętrznej (poza katalogiem aplikacji):
-    // <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
-    // Dla wszystkich wersji, jeśli chcesz odczytywać z pamięci zewnętrznej (poza katalogiem aplikacji):
-    // <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    // Dla Androida 11 (API 30) i nowszych, jeśli potrzebujesz szerokiego dostępu do zarządzania plikami:
-    // <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-    // Pamiętaj, aby dodać android:requestLegacyExternalStorage="true" w tagu <application> w manifeście,
-    // jeśli chcesz tymczasowo korzystać ze starszego modelu pamięci na Androidzie 10, ale staraj się tego unikać.
 }
