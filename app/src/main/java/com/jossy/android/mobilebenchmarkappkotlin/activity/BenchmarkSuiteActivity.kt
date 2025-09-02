@@ -30,7 +30,7 @@ import java.util.Locale
 class BenchmarkSuiteActivity : AppCompatActivity() {
     companion object {
         private const val PERMISSION_REQUEST_CODE = 123
-        private const val TEST_ITERATIONS = 10
+        private const val TEST_ITERATIONS = 30
         private const val ALL_TESTS = 6
         private const val TEST_ACTIVITY_REQUEST_CODE = 456
     }
@@ -131,7 +131,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         startActivityForResult(intent, TEST_ACTIVITY_REQUEST_CODE)
     }
 
-    fun onTestCompleted(result: TestResult) {
+    private fun onTestCompleted(result: TestResult) {
         allResults.add(result)
     val iterationNum = currentIteration
     val entry = TestEntry(iteration = iterationNum, result = result)
