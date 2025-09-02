@@ -179,7 +179,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         final rows = [...entry.value]..sort((a, b) => a.iteration.compareTo(b.iteration));
         if (rows.isEmpty) continue;
         final safe = name.toLowerCase().replaceAll(' ', '_');
-        final file = File('${dir.path}/$safe_$stamp.csv');
+        final file = File('${dir.path}/$safe.$stamp.csv');
         final sb = StringBuffer()..writeln('iteration,executionTimeMs,details,success');
         for (final r in rows) {
           sb.writeln('${r.iteration},${r.result.executionTimeMs},${_csv(r.result.details)},${r.result.success}');

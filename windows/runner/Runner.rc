@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "flutter_benchmark" "\0"
+            VALUE "CompanyName", "com.jossy.android" "\0"
+            VALUE "FileDescription", "mobilebenchmarkappflutter" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_benchmark" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutter_benchmark.exe" "\0"
-            VALUE "ProductName", "flutter_benchmark" "\0"
+            VALUE "InternalName", "mobilebenchmarkappflutter" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.jossy.android.mobilebenchmarkappfluter. All rights reserved." "\0"
+            VALUE "OriginalFilename", "mobilebenchmarkappflutter.exe" "\0"
+            VALUE "ProductName", "mobilebenchmarkappflutter" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

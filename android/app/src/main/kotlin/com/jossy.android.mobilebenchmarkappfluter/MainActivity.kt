@@ -1,4 +1,4 @@
-package com.example.flutter_benchmark
+package com.jossy.android.mobilebenchmarkappflutter
 
 import io.flutter.embedding.android.FlutterActivity
 
