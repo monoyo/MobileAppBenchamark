@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
@@ -17,98 +18,19 @@ class _CPUTestPageState extends State<CPUTestPage> {
   }
 
   Future<void> _runBenchmark() async {
-    final sw = Stopwatch()..start();
-
-    int countPrimes(int max) {
-      int count = 0;
-      for (int i = 2; i <= max; i++) {
-        bool prime = true;
-        int sqrtI = math.sqrt(i).floor();
-        for (int j = 2; j <= sqrtI; j++) {
-          if (i % j == 0) {
-            prime = false;
-            break;
-          }
-        }
-        if (prime) count++;
-      }
-      return count;
-    }
-
-    final primes = countPrimes(1_000_000);
-
-    final size = 150;
-    final a = List.generate(
-      size,
-      (_) => List.generate(size, (_) => math.Random().nextDouble()),
+    final start = DateTime.now().millisecondsSinceEpoch;
+    final r = await _runCpuBenchmarkParallel(durationMs: 3000);
+    final elapsed = DateTime.now().millisecondsSinceEpoch - start;
+    if (!mounted) return;
+    Navigator.pop(
+      context,
+      TestResult(
+        'CPU Test',
+        elapsed,
+        'threads=${r.threads}, iterations=${r.iterations}',
+        true,
+      ),
     );
-    final b = List.generate(
-      size,
-      (_) => List.generate(size, (_) => math.Random().nextDouble()),
-    );
-    final result = List.generate(size, (_) => List.filled(size, 0.0));
-    for (int i = 0; i < size; i++) {
-      for (int j = 0; j < size; j++) {
-        double sum = 0.0;
-        for (int k = 0; k < size; k++) {
-          sum += a[i][k] * b[k][j];
-        }
-        result[i][j] = sum;
-      }
-    }
-
-    String fibonacciBig(int n) {
-      if (n <= 1) return n.toString();
-      List<int> digits = [0, 1]; // reprezentacja liczby w odwrotnej kolejności
-      for (int i = 2; i <= n; i++) {
-        int carry = 0;
-        for (int j = 0; j < digits.length; j++) {
-          int prod = digits[j] + carry;
-          digits[j] = prod % 10;
-          carry = prod ~/ 10;
-        }
-        while (carry > 0) {
-          digits.add(carry % 10);
-          carry ~/= 10;
-        }
-      }
-      return digits.reversed.join();
-    }
-
-    final fib = fibonacciBig(200);
-
-    double heavyMathOps(int iterations) {
-      double res = 0.0;
-      final rand = math.Random();
-      for (int i = 1; i <= iterations; i++) {
-        res += math.sqrt(i.toDouble()) * math.pow(i.toDouble(), 1.5) / (rand.nextDouble() + 1);
-      }
-      return res;
-    }
-
-    final mathOps = heavyMathOps(500_000);
-
-    final arr = List.generate(2_000_000, (_) => math.Random().nextDouble());
-    arr.sort();
-
-    double logSum = 0.0;
-    for (int i = 1; i <= 2_000_000; i++) {
-      logSum += math.log(i.toDouble()) * math.pow(i.toDouble(), 1.2);
-    }
-
-    sw.stop();
-    final elapsed = sw.elapsedMilliseconds;
-
-    final resultObj = TestResult(
-      'CPU Test',
-      elapsed,
-      "",
-      true,
-    );
-
-    if (mounted) {
-      Navigator.pop(context, resultObj);
-    }
   }
 
   @override
@@ -122,4 +44,59 @@ class _CPUTestPageState extends State<CPUTestPage> {
       ),
     );
   }
+}
+
+class _CpuResult {
+  final int threads;
+  final int durationMs;
+  final int iterations;
+  final double checksum;
+  _CpuResult(this.threads, this.durationMs, this.iterations, this.checksum);
+}
+
+Future<_CpuResult> _runCpuBenchmarkParallel({int durationMs = 3000, int? threads}) async {
+  final t = (threads != null && threads > 0) ? threads : _availableProcessors();
+  final deadline = DateTime.now().millisecondsSinceEpoch + durationMs;
+  final results = <List<dynamic>>[];
+  final futures = <Future<List<dynamic>>>[];
+  for (var i = 0; i < t; i++) {
+    futures.add(_spawnCpuIsolate(i + 1, deadline));
+  }
+  results.addAll(await Future.wait(futures));
+  final totalIters = results.fold<int>(0, (s, r) => s + (r[0] as int));
+  final checksum = results.fold<double>(0.0, (s, r) => s + (r[1] as double));
+  return _CpuResult(t, durationMs, totalIters, checksum);
+}
+
+Future<List<dynamic>> _spawnCpuIsolate(int seed, int deadlineMs) async {
+  final rp = ReceivePort();
+  await Isolate.spawn<_IsolateMsg>(_cpuBurn, _IsolateMsg(seed, deadlineMs, rp.sendPort),
+      debugName: 'cpu-burn-$seed');
+  final msg = await rp.first as List;
+  return msg;
+}
+
+class _IsolateMsg {
+  final int seed;
+  final int deadlineMs;
+  final SendPort replyTo;
+  _IsolateMsg(this.seed, this.deadlineMs, this.replyTo);
+}
+
+void _cpuBurn(_IsolateMsg m) {
+  var iter = 0;
+  var acc = 0.0;
+  var x = m.seed.toDouble();
+  final rand = math.Random(m.seed);
+  while (DateTime.now().millisecondsSinceEpoch < m.deadlineMs) {
+    x = math.sin(x) * math.cos(x) + math.sqrt(x * x + 1.234567 + rand.nextDouble());
+    acc += x;
+    iter++;
+  }
+  m.replyTo.send([iter, acc]);
+}
+
+int _availableProcessors() {
+  // Brak oficjalnego API w Flutterze; przyjmujemy 4 jako sensowny default.
+  return 4;
 }
