@@ -26,33 +26,48 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   ];
 
   int loaded = 0;
+  int failed = 0;
+  late List<bool> _done;
+  bool _completed = false;
   late int start;
 
   @override
   void initState() {
     super.initState();
     start = DateTime.now().millisecondsSinceEpoch;
+    _done = List<bool>.filled(urls.length, false);
   }
 
-  void _onLoaded(int index) {
-    loaded++;
+  void _markDone(int index, {required bool success}) {
+    if (_completed || !mounted) return;
+    if (index < 0 || index >= urls.length) return;
+    if (_done[index]) return; // licz tylko raz na obrazek
+    _done[index] = true;
+    if (success) {
+      loaded++;
+    } else {
+      failed++;
+    }
 
-    if (loaded >= urls.length) {
+    if ((loaded + failed) >= urls.length) {
+      if (_completed) return;
+      _completed = true;
       final elapsed = DateTime.now().millisecondsSinceEpoch - start;
       final res = TestResult(
         'Image Loading Test',
         elapsed,
-        'All images loaded',
+        'loaded=$loaded, failed=$failed',
         true,
       );
       Navigator.pop(context, res);
     } else {
-      // przewiń do dopiero co załadowanego elementu
+      // przewiń do ostatnio przetworzonego indeksu
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
-            index * 200.0, // wysokość kafelka * indeks
-            duration: const Duration(milliseconds: 400),
+            index * 200.0,
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
         }
@@ -73,17 +88,29 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
               imageUrl: urls[i],
               placeholder: (c, u) =>
                   const Center(child: CircularProgressIndicator()),
-              errorWidget: (c, u, e) => Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text('Error loading image: $e',
-                      style: const TextStyle(color: Colors.red)),
-                  const Icon(Icons.error)
-                ],
-              ),
+              errorWidget: (c, u, e) {
+                // Zlicz błąd tylko raz dla danego indeksu
+                WidgetsBinding.instance.addPostFrameCallback((_) => _markDone(i, success: false));
+                return Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    const Icon(Icons.error, color: Colors.red),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Error loading image',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                );
+              },
               imageBuilder: (ctx, imageProvider) {
+                // Zlicz sukces tylko raz dla danego indeksu
                 WidgetsBinding.instance
-                    .addPostFrameCallback((_) => _onLoaded(i));
+                    .addPostFrameCallback((_) => _markDone(i, success: true));
                 return Image(image: imageProvider, fit: BoxFit.cover);
               },
             ),
