@@ -16,7 +16,7 @@ class ImageLoadingTestPage extends StatefulWidget {
 
 class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   final ScrollController _scrollController = ScrollController();
-  final int _itemCount = 20;
+  int get _itemCount => linkList.length;
 
   late final List<String> _runUrls;
   late final List<ImageProvider?> _providers;
@@ -46,11 +46,11 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   @override
   void initState() {
     super.initState();
-    _cacheManager = DefaultCacheManager();
-    _runUrls = List<String>.generate(_itemCount, (i) => _urlForIndex(i, 0));
-    _providers = List<ImageProvider?>.filled(_itemCount, null);
-    _successList = List<bool>.filled(_itemCount, false);
-    _done = List<bool>.filled(_itemCount, false);
+  _cacheManager = DefaultCacheManager();
+  _runUrls = List<String>.from(linkList);
+  _providers = List<ImageProvider?>.filled(_itemCount, null);
+  _successList = List<bool>.filled(_itemCount, false);
+  _done = List<bool>.filled(_itemCount, false);
   _retries = List<int>.filled(_itemCount, 0);
   _resolving = List<bool>.filled(_itemCount, false);
 
@@ -107,11 +107,10 @@ List<String> linkList = [
     "https://fastly.picsum.photos/id/54/300/200.jpg?hmac=7Cm5bybfBDMHwUF7AvEbAKWA7l5WnE9MZvcZhPpULTc",
     "https://fastly.picsum.photos/id/992/300/200.jpg?hmac=w137wSlXMe7QugWkdz2qvxFlif1dwEWqNnv4qFIyWps",
     "https://fastly.picsum.photos/id/764/300/200.jpg?hmac=1sBuxBDUdVzEEnIKB5S4cXJ_sQ5Tp3ZSnjrHOWF_E20",
-  ]
+  ];
 
   String _urlForIndex(int index, int retry) {
-    final int run = widget.runId;
-    // seed zapewnia deterministyczny obraz, retry param wymusza ponowny fetch gdy potrzebny
+    // Use hardcoded URL; cache headers/manager enforce re-fetch
     return linkList[index];
   }
 
@@ -226,8 +225,8 @@ List<String> linkList = [
         final int delayMs = 250 * (1 << (_retries[index] - 1));
         Future.delayed(Duration(milliseconds: delayMs), () {
           if (!mounted || _completed || _done[index]) return;
-          // re-generate the URL to bypass caches when retrying
-          _runUrls[index] = _urlForIndex(index, _retries[index]);
+          // keep same URL; CachedNetworkImage + headers will re-fetch
+          _runUrls[index] = linkList[index];
           setState(() {});
         });
       } else {
