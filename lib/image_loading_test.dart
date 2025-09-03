@@ -142,20 +142,23 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
               errorWidget: (c, u, e) {
                 // Zlicz błąd tylko raz dla danego indeksu
                 WidgetsBinding.instance.addPostFrameCallback((_) => _markDone(i, success: false));
-                return Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    const Icon(Icons.error, color: Colors.red),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Error loading image',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.red),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error, color: Colors.red),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Error loading image',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
               imageBuilder: (ctx, imageProvider) {
