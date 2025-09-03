@@ -28,12 +28,19 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   late List<int> _retries; // retry count per index
   final Set<int> _retryQueued = <int>{};
   static const int _maxRetries = 2;
+  bool _reachedEnd = false;
+  // Watchdog timers to ensure completion
+  Timer? _watchdogTimer;
+  late int _lastProgressMs;
+  static const int _maxRunMs = 20000; // hard cap per run (20s)
+  static const int _stallMs = 4000; // consider stalled if no progress for 4s
   CacheManager? _cacheManager;
 
   @override
   void initState() {
     super.initState();
     start = DateTime.now().millisecondsSinceEpoch;
+  _lastProgressMs = start;
     _done = List<bool>.filled(_itemCount, false);
   // Przygotuj listy i URL-e na start
   _retries = List<int>.filled(_itemCount, 0);
@@ -66,16 +73,52 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
       }
       if (_scrollController.hasClients) {
         final double max = _scrollController.position.maxScrollExtent;
-        _autoOffset = (_autoOffset + 220.0).clamp(0.0, max);
-        _scrollController.animateTo(
-          _autoOffset,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
-        if (_autoOffset >= max) {
-          // if we reached the end, bounce back a bit to trigger potential rebuilds
-          _autoOffset = (max - 10.0).clamp(0.0, max);
+        final double next = _autoOffset + 220.0;
+        if (next >= max) {
+          _autoOffset = max;
+          _scrollController.animateTo(
+            _autoOffset,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          );
+          _reachedEnd = true;
+          t.cancel();
+          _tryFinish();
+        } else {
+          _autoOffset = next;
+          _scrollController.animateTo(
+            _autoOffset,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          );
         }
+      }
+    });
+
+    // Also mark reached end via listener in case of manual scroll
+    _scrollController.addListener(() {
+      if (!mounted || _completed) return;
+      if (_scrollController.hasClients) {
+        final position = _scrollController.position;
+        if (position.pixels >= position.maxScrollExtent - 1.0) {
+          if (!_reachedEnd) {
+            _reachedEnd = true;
+            _tryFinish();
+          }
+        }
+      }
+    });
+
+    // Watchdog to avoid getting stuck or running too long
+    _watchdogTimer = Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
+      if (!mounted || _completed) {
+        t.cancel();
+        return;
+      }
+      final int now = DateTime.now().millisecondsSinceEpoch;
+      if (now - start > _maxRunMs || now - _lastProgressMs > _stallMs) {
+        _completeWithFailures();
+        t.cancel();
       }
     });
   }
@@ -98,6 +141,7 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
     _retryQueued.add(index);
     _retries[index] = _retries[index] + 1;
     _runUrls[index] = _urlForIndex(index, _retries[index]);
+  _lastProgressMs = DateTime.now().millisecondsSinceEpoch;
     setState(() {
       // trigger rebuild dla danego elementu
     });
@@ -108,7 +152,8 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   void dispose() {
     _autoScrollTimer?.cancel();
     _scrollController.dispose();
-  _cacheManager?.dispose();
+    _watchdogTimer?.cancel();
+    _cacheManager?.dispose();
     super.dispose();
   }
 
@@ -122,18 +167,10 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
     } else {
       failed++;
     }
+  _lastProgressMs = DateTime.now().millisecondsSinceEpoch;
 
-  if ((loaded + failed) >= _itemCount) {
-      if (_completed) return;
-      _completed = true;
-      final elapsed = DateTime.now().millisecondsSinceEpoch - start;
-      final res = TestResult(
-        'Image Loading Test',
-        elapsed,
-        'loaded=$loaded, failed=$failed',
-        true,
-      );
-      Navigator.pop(context, res);
+    if ((loaded + failed) >= _itemCount) {
+      _tryFinish();
     } else {
       // przewiń do ostatnio przetworzonego indeksu
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -149,11 +186,51 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
     }
   }
 
+  void _tryFinish() {
+    if (_completed || !mounted) return;
+    if ((loaded + failed) >= _itemCount && _reachedEnd) {
+      _completed = true;
+      final int elapsed = DateTime.now().millisecondsSinceEpoch - start;
+      final TestResult res = TestResult(
+        'Image Loading Test',
+        elapsed,
+        'loaded=$loaded, failed=$failed',
+        true,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.pop(context, res);
+      });
+    }
+  }
+
+  void _completeWithFailures() {
+    if (_completed || !mounted) return;
+    for (int i = 0; i < _itemCount; i++) {
+      if (!_done[i]) {
+        _done[i] = true;
+        failed++;
+      }
+    }
+    _completed = true;
+    final int elapsed = DateTime.now().millisecondsSinceEpoch - start;
+    final TestResult res = TestResult(
+      'Image Loading Test',
+      elapsed,
+      'loaded=$loaded, failed=$failed (watchdog)',
+      true,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) Navigator.pop(context, res);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
         controller: _scrollController,
+  itemExtent: 200,
+  cacheExtent: 2000,
   itemCount: _itemCount,
         itemBuilder: (c, i) {
           return SizedBox(
