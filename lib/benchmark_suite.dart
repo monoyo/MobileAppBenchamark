@@ -175,10 +175,48 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     }
   }
 
+  Future<Directory?> _getInternalBenchmarksDir() async {
+    try {
+      final Directory base = await getApplicationDocumentsDirectory();
+      final Directory out = Directory('${base.path}/benchmarks');
+      if (!(await out.exists())) {
+        await out.create(recursive: true);
+      }
+      return out;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<String>> _writeCsvFilesToDir(Directory dir, String stamp) async {
+    final List<String> written = <String>[];
+    for (final entry in _perTestResults.entries) {
+      final name = entry.key;
+      final rows = [...entry.value]..sort((a, b) => a.iteration.compareTo(b.iteration));
+      if (rows.isEmpty) continue;
+      final safe = name.toLowerCase().replaceAll(' ', '_');
+      final file = File('${dir.path}/$safe.$stamp.csv');
+      final sb = StringBuffer()..writeln('iteration,executionTimeMs,details,success');
+      for (final r in rows) {
+        sb.writeln('${r.iteration},${r.result.executionTimeMs},${_csv(r.result.details)},${r.result.success}');
+      }
+      try {
+        await file.writeAsString(sb.toString(), flush: true);
+        final st = await file.stat();
+        if (st.size > 0) {
+          written.add(file.path);
+        }
+      } catch (_) {
+        // ignore individual file errors for this directory
+      }
+    }
+    return written;
+  }
+
   void _exportResults() async {
     try {
-      final dir = await _getBenchmarksDir();
-      if (dir == null) {
+  final primaryDir = await _getBenchmarksDir();
+  if (primaryDir == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cannot access output directory')),
         );
@@ -187,32 +225,30 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       final ts = DateTime.now();
       final stamp = '${ts.year.toString().padLeft(4, '0')}${ts.month.toString().padLeft(2, '0')}${ts.day.toString().padLeft(2, '0')}_${ts.hour.toString().padLeft(2, '0')}${ts.minute.toString().padLeft(2, '0')}${ts.second.toString().padLeft(2, '0')}';
 
-      var count = 0;
-      final List<String> written = <String>[];
-      for (final entry in _perTestResults.entries) {
-        final name = entry.key;
-        final rows = [...entry.value]..sort((a, b) => a.iteration.compareTo(b.iteration));
-        if (rows.isEmpty) continue;
-        final safe = name.toLowerCase().replaceAll(' ', '_');
-        final file = File('${dir.path}/$safe.$stamp.csv');
-        final sb = StringBuffer()..writeln('iteration,executionTimeMs,details,success');
-        for (final r in rows) {
-          sb.writeln('${r.iteration},${r.result.executionTimeMs},${_csv(r.result.details)},${r.result.success}');
+      // Write to primary (Android: external app dir; iOS: documents)
+      List<String> writtenPrimary = await _writeCsvFilesToDir(primaryDir, stamp);
+      // Additionally write to internal documents as a fallback on Android
+      List<String> writtenInternal = <String>[];
+      if (Platform.isAndroid) {
+        final internalDir = await _getInternalBenchmarksDir();
+        if (internalDir != null) {
+          writtenInternal = await _writeCsvFilesToDir(internalDir, stamp);
         }
-        await file.writeAsString(sb.toString(), flush: true);
-        written.add(file.path);
-        count++;
       }
-      if (count > 0) {
-        final first = written.first;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Zapisano $count plików CSV do: $first')),
-        );
-      } else {
+
+      final int total = writtenPrimary.length + writtenInternal.length;
+      if (total == 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Brak wyników do eksportu')),
         );
+        return;
       }
+
+      final String where1 = writtenPrimary.isNotEmpty ? '1) ${writtenPrimary.first}' : '';
+      final String where2 = writtenInternal.isNotEmpty ? '\n2) ${writtenInternal.first}' : '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Zapisano $total CSV:\n$where1$where2')),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Export error: $e')),
