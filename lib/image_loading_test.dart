@@ -107,11 +107,9 @@ List<String> linkList = [
     "https://fastly.picsum.photos/id/54/300/200.jpg?hmac=7Cm5bybfBDMHwUF7AvEbAKWA7l5WnE9MZvcZhPpULTc",
     "https://fastly.picsum.photos/id/992/300/200.jpg?hmac=w137wSlXMe7QugWkdz2qvxFlif1dwEWqNnv4qFIyWps",
     "https://fastly.picsum.photos/id/764/300/200.jpg?hmac=1sBuxBDUdVzEEnIKB5S4cXJ_sQ5Tp3ZSnjrHOWF_E20",
-  ]
+  ];
 
   String _urlForIndex(int index, int retry) {
-    final int run = widget.runId;
-    // seed zapewnia deterministyczny obraz, retry param wymusza ponowny fetch gdy potrzebny
     return linkList[index];
   }
 
