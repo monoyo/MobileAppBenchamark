@@ -188,6 +188,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       final stamp = '${ts.year.toString().padLeft(4, '0')}${ts.month.toString().padLeft(2, '0')}${ts.day.toString().padLeft(2, '0')}_${ts.hour.toString().padLeft(2, '0')}${ts.minute.toString().padLeft(2, '0')}${ts.second.toString().padLeft(2, '0')}';
 
       var count = 0;
+      final List<String> written = <String>[];
       for (final entry in _perTestResults.entries) {
         final name = entry.key;
         final rows = [...entry.value]..sort((a, b) => a.iteration.compareTo(b.iteration));
@@ -198,12 +199,20 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         for (final r in rows) {
           sb.writeln('${r.iteration},${r.result.executionTimeMs},${_csv(r.result.details)},${r.result.success}');
         }
-        await file.writeAsString(sb.toString());
+        await file.writeAsString(sb.toString(), flush: true);
+        written.add(file.path);
         count++;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(count > 0 ? 'Saved $count CSV files to ${dir.path}' : 'No results to export yet')),
-      );
+      if (count > 0) {
+        final first = written.first;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Zapisano $count plików CSV do: $first')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Brak wyników do eksportu')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Export error: $e')),
