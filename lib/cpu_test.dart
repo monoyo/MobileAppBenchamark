@@ -1,4 +1,4 @@
- wyimport 'dart:isolate';
+import 'dart:isolate';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
@@ -55,24 +55,24 @@ class _CpuResult {
 }
 
 Future<_CpuResult> _runCpuBenchmarkParallel({int durationMs = 3000, int? threads}) async {
-  final t = (threads != null && threads > 0) ? threads : _availableProcessors();
-  final deadline = DateTime.now().millisecondsSinceEpoch + durationMs;
-  final results = <List<dynamic>>[];
-  final futures = <Future<List<dynamic>>>[];
-  for (var i = 0; i < t; i++) {
+  final int t = (threads != null && threads > 0) ? threads : _availableProcessors();
+  final int deadline = DateTime.now().millisecondsSinceEpoch + durationMs;
+  final List<List<dynamic>> results = <List<dynamic>>[];
+  final List<Future<List<dynamic>>> futures = <Future<List<dynamic>>>[];
+  for (int i = 0; i < t; i++) {
     futures.add(_spawnCpuIsolate(i + 1, deadline));
   }
   results.addAll(await Future.wait(futures));
-  final totalIters = results.fold<int>(0, (s, r) => s + (r[0] as int));
-  final checksum = results.fold<double>(0.0, (s, r) => s + (r[1] as double));
+  final int totalIters = results.fold<int>(0, (int s, List<dynamic> r) => s + (r[0] as int));
+  final double checksum = results.fold<double>(0.0, (double s, List<dynamic> r) => s + (r[1] as double));
   return _CpuResult(t, durationMs, totalIters, checksum);
 }
 
 Future<List<dynamic>> _spawnCpuIsolate(int seed, int deadlineMs) async {
-  final rp = ReceivePort();
+  final ReceivePort rp = ReceivePort();
   await Isolate.spawn<_IsolateMsg>(_cpuBurn, _IsolateMsg(seed, deadlineMs, rp.sendPort),
       debugName: 'cpu-burn-$seed');
-  final msg = await rp.first as List;
+  final List<dynamic> msg = await rp.first as List<dynamic>;
   return msg;
 }
 
@@ -84,10 +84,10 @@ class _IsolateMsg {
 }
 
 void _cpuBurn(_IsolateMsg m) {
-  var iter = 0;
-  var acc = 0.0;
-  var x = m.seed.toDouble();
-  final rand = math.Random(m.seed);
+  int iter = 0;
+  double acc = 0.0;
+  double x = m.seed.toDouble();
+  final math.Random rand = math.Random(m.seed);
   while (DateTime.now().millisecondsSinceEpoch < m.deadlineMs) {
     x = math.sin(x) * math.cos(x) + math.sqrt(x * x + 1.234567 + rand.nextDouble());
     acc += x;
