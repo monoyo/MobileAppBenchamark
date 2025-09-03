@@ -35,6 +35,7 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   static const int _maxRunMs = 20000; // hard cap per run (20s)
   static const int _stallMs = 4000; // consider stalled if no progress for 4s
   CacheManager? _cacheManager;
+  int _currentIndex = 0; // sequential loading index
 
   @override
   void initState() {
@@ -65,35 +66,7 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
       }
     });
 
-    // Start periodic auto-scroll so all items get built even if images are cached
-    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 300), (Timer t) {
-      if (!mounted || _completed) {
-        t.cancel();
-        return;
-      }
-      if (_scrollController.hasClients) {
-        final double max = _scrollController.position.maxScrollExtent;
-        final double next = _autoOffset + 220.0;
-        if (next >= max) {
-          _autoOffset = max;
-          _scrollController.animateTo(
-            _autoOffset,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOut,
-          );
-          _reachedEnd = true;
-          t.cancel();
-          _tryFinish();
-        } else {
-          _autoOffset = next;
-          _scrollController.animateTo(
-            _autoOffset,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOut,
-          );
-        }
-      }
-    });
+  // Sequential mode: no periodic auto-scroll; we scroll step-by-step after each item
 
     // Also mark reached end via listener in case of manual scroll
     _scrollController.addListener(() {
@@ -132,7 +105,8 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   void _retryIndex(int index) {
     if (!mounted || _completed) return;
     if (index < 0 || index >= _itemCount) return;
-    if (_done[index]) return;
+  if (_done[index]) return;
+  if (index != _currentIndex) return; // only retry current item
     if (_retries[index] >= _maxRetries) {
       _markDone(index, success: false);
       return;
@@ -170,14 +144,29 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   _lastProgressMs = DateTime.now().millisecondsSinceEpoch;
 
     if ((loaded + failed) >= _itemCount) {
-      _tryFinish();
-    } else {
-      // przewiń do ostatnio przetworzonego indeksu
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      // scroll to end and finish
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
         if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            index * 200.0,
+          final double max = _scrollController.position.maxScrollExtent;
+          await _scrollController.animateTo(
+            max,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOut,
+          );
+          _reachedEnd = true;
+        }
+        _tryFinish();
+      });
+    } else {
+      // advance to the next index and scroll exactly to its position
+      _currentIndex = _currentIndex + 1;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        setState(() {}); // rebuild to render the next network image only
+        if (_scrollController.hasClients) {
+          await _scrollController.animateTo(
+            _currentIndex * 200.0,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
@@ -233,47 +222,48 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   cacheExtent: 2000,
   itemCount: _itemCount,
         itemBuilder: (c, i) {
-          return SizedBox(
+          if (i == _currentIndex) {
+            return SizedBox(
+              height: 200,
+              child: CachedNetworkImage(
+                imageUrl: _runUrls[i],
+                cacheManager: _cacheManager,
+                httpHeaders: const <String, String>{
+                  'Cache-Control': 'no-cache, no-store, must-revalidate',
+                  'Pragma': 'no-cache',
+                  'Expires': '0',
+                },
+                placeholder: (c, u) => const Center(child: CircularProgressIndicator()),
+                errorWidget: (c, u, e) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) => _retryIndex(i));
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.error, color: Colors.red),
+                        SizedBox(width: 6),
+                        Text('Error loading image',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  );
+                },
+                imageBuilder: (ctx, imageProvider) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) => _markDone(i, success: true));
+                  return Image(image: imageProvider, fit: BoxFit.cover);
+                },
+              ),
+            );
+          }
+          return Container(
             height: 200,
-            child: CachedNetworkImage(
-      imageUrl: _runUrls[i],
-              cacheManager: _cacheManager,
-              httpHeaders: const <String, String>{
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0',
-              },
-              placeholder: (c, u) =>
-                  const Center(child: CircularProgressIndicator()),
-              errorWidget: (c, u, e) {
-                // Spróbuj ponowić pobranie do _maxRetries razy zanim policzymy błąd
-                WidgetsBinding.instance.addPostFrameCallback((_) => _retryIndex(i));
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error, color: Colors.red),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Error loading image',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              imageBuilder: (ctx, imageProvider) {
-                // Zlicz sukces tylko raz dla danego indeksu
-                WidgetsBinding.instance
-                    .addPostFrameCallback((_) => _markDone(i, success: true));
-                return Image(image: imageProvider, fit: BoxFit.cover);
-              },
-            ),
+            alignment: Alignment.center,
+            child: i < _currentIndex
+                ? const Icon(Icons.check_circle, color: Colors.green)
+                : const Text('Waiting...'),
           );
         },
       ),
