@@ -95,8 +95,10 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
           );
           break;
         case 3:
+          // Provide a unique runId to the image test to avoid hitting cache across iterations
+          final int runId = DateTime.now().millisecondsSinceEpoch ^ _currentIteration ^ _currentTestIndex;
           res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ImageLoadingTestPage()),
+            MaterialPageRoute(builder: (_) => ImageLoadingTestPage(runId: runId)),
           );
           break;
         case 4:

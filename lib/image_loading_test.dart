@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'models/test_result.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ImageLoadingTestPage extends StatefulWidget {
-  const ImageLoadingTestPage({super.key});
+  final int runId; // unique per iteration to avoid cache hits
+  const ImageLoadingTestPage({super.key, required this.runId});
 
   @override
   State<ImageLoadingTestPage> createState() => _ImageLoadingTestPageState();
@@ -30,12 +32,61 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   late List<bool> _done;
   bool _completed = false;
   late int start;
+  late List<String> _runUrls; // urls augmented with runId to prevent cache reuse
+  Timer? _autoScrollTimer;
+  double _autoOffset = 0.0;
 
   @override
   void initState() {
     super.initState();
     start = DateTime.now().millisecondsSinceEpoch;
     _done = List<bool>.filled(urls.length, false);
+    // Bust caches between iterations by appending a unique query param per run
+    final int run = widget.runId;
+    _runUrls = List<String>.generate(
+      urls.length,
+      (int i) => '${urls[i]}&r=$run&idx=$i',
+      growable: false,
+    );
+    // Nudge an initial small scroll to ensure list attaches and scroll physics engage
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          50.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+
+    // Start periodic auto-scroll so all items get built even if images are cached
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 300), (Timer t) {
+      if (!mounted || _completed) {
+        t.cancel();
+        return;
+      }
+      if (_scrollController.hasClients) {
+        final double max = _scrollController.position.maxScrollExtent;
+        _autoOffset = (_autoOffset + 220.0).clamp(0.0, max);
+        _scrollController.animateTo(
+          _autoOffset,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+        if (_autoOffset >= max) {
+          // if we reached the end, bounce back a bit to trigger potential rebuilds
+          _autoOffset = (max - 10.0).clamp(0.0, max);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _markDone(int index, {required bool success}) {
@@ -80,12 +131,12 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
     return Scaffold(
       body: ListView.builder(
         controller: _scrollController,
-        itemCount: urls.length,
+    itemCount: urls.length,
         itemBuilder: (c, i) {
           return SizedBox(
             height: 200,
             child: CachedNetworkImage(
-              imageUrl: urls[i],
+      imageUrl: _runUrls[i],
               placeholder: (c, u) =>
                   const Center(child: CircularProgressIndicator()),
               errorWidget: (c, u, e) {
