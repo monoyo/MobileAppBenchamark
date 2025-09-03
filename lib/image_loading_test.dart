@@ -110,7 +110,6 @@ List<String> linkList = [
   ];
 
   String _urlForIndex(int index, int retry) {
-    // Use hardcoded URL; cache headers/manager enforce re-fetch
     return linkList[index];
   }
 
