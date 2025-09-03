@@ -148,16 +148,28 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
 
   Future<Directory?> _getBenchmarksDir() async {
     try {
-      Directory base;
       if (Platform.isAndroid) {
-        final dirs = await getExternalStorageDirectories(type: StorageDirectory.documents);
-        base = (dirs != null && dirs.isNotEmpty) ? dirs.first : (await getApplicationDocumentsDirectory());
+        // Prefer app-specific external directory (Android/data/<package>/files)
+        final Directory? ext = await getExternalStorageDirectory();
+        final Directory base = ext ?? await getApplicationDocumentsDirectory();
+        // Ensure Documents/benchmarks exists inside the app-specific directory
+        final Directory docs = Directory('${base.path}/Documents');
+        if (!(await docs.exists())) {
+          await docs.create(recursive: true);
+        }
+        final Directory out = Directory('${docs.path}/benchmarks');
+        if (!(await out.exists())) {
+          await out.create(recursive: true);
+        }
+        return out;
       } else {
-        base = await getApplicationDocumentsDirectory();
+        final Directory base = await getApplicationDocumentsDirectory();
+        final Directory out = Directory('${base.path}/benchmarks');
+        if (!(await out.exists())) {
+          await out.create(recursive: true);
+        }
+        return out;
       }
-      final out = Directory('${base.path}/benchmarks');
-      if (!(await out.exists())) await out.create(recursive: true);
-      return out;
     } catch (_) {
       return null;
     }
