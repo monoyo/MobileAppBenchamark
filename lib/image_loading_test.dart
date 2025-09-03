@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import 'models/test_result.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
+import 'models/test_result.dart';
 
 class ImageLoadingTestPage extends StatefulWidget {
   final int runId; // unique per iteration to avoid cache hits
@@ -14,34 +16,48 @@ class ImageLoadingTestPage extends StatefulWidget {
 
 class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   final ScrollController _scrollController = ScrollController();
-  // Liczba obrazów do przetworzenia w jednej iteracji
   final int _itemCount = 20;
 
-          // Completed or pending items
-          if (i < _currentIndex) {
-            final prov = _providers[i];
-            final status = _successList[i];
-            if (status == true && prov != null) {
-              return SizedBox(height: 200, child: Image(image: prov, fit: BoxFit.cover));
-            } else {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.error, color: Colors.red),
-                    SizedBox(width: 6),
-                    Text('Error loading image',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              );
-            }
-          }
-          return const Center(child: Text('Waiting...'));
-    // Nudge an initial small scroll to ensure list attaches and scroll physics engage
+  late final List<String> _runUrls;
+  late final List<ImageProvider?> _providers;
+  late final List<bool> _successList;
+  late final List<bool> _done;
+  late final List<int> _retries;
+  late final List<bool> _resolving; // true when waiting for ImageStream
+  final Set<int> _retryQueued = <int>{};
+
+  int _currentIndex = 0;
+  int _loaded = 0;
+  int _failed = 0;
+  bool _completed = false;
+  bool _reachedEnd = false;
+
+  Timer? _autoScrollTimer;
+  Timer? _watchdogTimer;
+  BaseCacheManager? _cacheManager;
+
+  // timing and limits
+  late final int _startMs;
+  int _lastProgressMs = 0;
+  final int _maxRunMs = 60 * 1000; // 60s
+  final int _stallMs = 10 * 1000; // 10s
+  final int _maxRetries = 2;
+
+  @override
+  void initState() {
+    super.initState();
+    _cacheManager = DefaultCacheManager();
+    _runUrls = List<String>.generate(_itemCount, (i) => _urlForIndex(i, 0));
+    _providers = List<ImageProvider?>.filled(_itemCount, null);
+    _successList = List<bool>.filled(_itemCount, false);
+    _done = List<bool>.filled(_itemCount, false);
+  _retries = List<int>.filled(_itemCount, 0);
+  _resolving = List<bool>.filled(_itemCount, false);
+
+    _startMs = DateTime.now().millisecondsSinceEpoch;
+    _lastProgressMs = _startMs;
+
+    // small nudge so ListView attaches
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (_scrollController.hasClients) {
@@ -53,9 +69,6 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
       }
     });
 
-  // Sequential mode: no periodic auto-scroll; we scroll step-by-step after each item
-
-    // Also mark reached end via listener in case of manual scroll
     _scrollController.addListener(() {
       if (!mounted || _completed) return;
       if (_scrollController.hasClients) {
@@ -69,14 +82,14 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
       }
     });
 
-    // Watchdog to avoid getting stuck or running too long
-    _watchdogTimer = Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
+    // watchdog
+    _watchdogTimer = Timer.periodic(const Duration(milliseconds: 500), (t) {
       if (!mounted || _completed) {
         t.cancel();
         return;
       }
       final int now = DateTime.now().millisecondsSinceEpoch;
-      if (now - start > _maxRunMs || now - _lastProgressMs > _stallMs) {
+      if (now - _startMs > _maxRunMs || now - _lastProgressMs > _stallMs) {
         _completeWithFailures();
         t.cancel();
       }
@@ -85,55 +98,34 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
 
   String _urlForIndex(int index, int retry) {
     final int run = widget.runId;
-    // seed zapewnia deterministyczny obraz, retry param wymusza ponowny fetch gdy potrzebny
     return 'https://picsum.photos/seed/${run}_$index/300/200?rt=$retry';
   }
 
-  void _retryIndex(int index) {
-    if (!mounted || _completed) return;
-    if (index < 0 || index >= _itemCount) return;
-  if (_done[index]) return;
-  if (index != _currentIndex) return; // only retry current item
-    if (_retries[index] >= _maxRetries) {
-      _markDone(index, success: false);
-      return;
-    }
-    if (_retryQueued.contains(index)) return; // już w kolejce
-    _retryQueued.add(index);
-    _retries[index] = _retries[index] + 1;
-    _runUrls[index] = _urlForIndex(index, _retries[index]);
-  _lastProgressMs = DateTime.now().millisecondsSinceEpoch;
-    setState(() {
-      // trigger rebuild dla danego elementu
-    });
-    _retryQueued.remove(index);
-  }
+  // Retry logic kept inline where needed; helper removed to avoid unused warning
 
   @override
   void dispose() {
     _autoScrollTimer?.cancel();
-    _scrollController.dispose();
     _watchdogTimer?.cancel();
-    _cacheManager?.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _markDone(int index, {required bool success}) {
     if (_completed || !mounted) return;
-  if (index < 0 || index >= _itemCount) return;
-    if (_done[index]) return; // licz tylko raz na obrazek
+    if (index < 0 || index >= _itemCount) return;
+    if (_done[index]) return;
     _done[index] = true;
     if (success) {
-      loaded++;
-  _successList[index] = true;
+      _loaded++;
+      _successList[index] = true;
     } else {
-      failed++;
-  _successList[index] = false;
+      _failed++;
+      _successList[index] = false;
     }
-  _lastProgressMs = DateTime.now().millisecondsSinceEpoch;
+    _lastProgressMs = DateTime.now().millisecondsSinceEpoch;
 
-    if ((loaded + failed) >= _itemCount) {
-      // scroll to end and finish
+    if ((_loaded + _failed) >= _itemCount) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
         if (_scrollController.hasClients) {
@@ -148,11 +140,10 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
         _tryFinish();
       });
     } else {
-      // advance to the next index and scroll exactly to its position
-      _currentIndex = _currentIndex + 1;
+      _currentIndex++;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        setState(() {}); // rebuild to render the next network image only
+        setState(() {});
         if (_scrollController.hasClients) {
           await _scrollController.animateTo(
             _currentIndex * 200.0,
@@ -166,15 +157,10 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
 
   void _tryFinish() {
     if (_completed || !mounted) return;
-    if ((loaded + failed) >= _itemCount && _reachedEnd) {
+    if ((_loaded + _failed) >= _itemCount && _reachedEnd) {
       _completed = true;
-      final int elapsed = DateTime.now().millisecondsSinceEpoch - start;
-      final TestResult res = TestResult(
-        'Image Loading Test',
-        elapsed,
-        'loaded=$loaded, failed=$failed',
-        true,
-      );
+      final int elapsed = DateTime.now().millisecondsSinceEpoch - _startMs;
+      final TestResult res = TestResult('Image Loading Test', elapsed, 'loaded=$_loaded, failed=$_failed', true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) Navigator.pop(context, res);
       });
@@ -186,30 +172,67 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
     for (int i = 0; i < _itemCount; i++) {
       if (!_done[i]) {
         _done[i] = true;
-        failed++;
+        _failed++;
       }
     }
     _completed = true;
-    final int elapsed = DateTime.now().millisecondsSinceEpoch - start;
-    final TestResult res = TestResult(
-      'Image Loading Test',
-      elapsed,
-      'loaded=$loaded, failed=$failed (watchdog)',
-      true,
-    );
+    final int elapsed = DateTime.now().millisecondsSinceEpoch - _startMs;
+    final TestResult res = TestResult('Image Loading Test', elapsed, 'loaded=$_loaded, failed=$_failed (watchdog)', true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) Navigator.pop(context, res);
     });
   }
 
+  // Resolve an ImageProvider to ensure the image is decoded. If decoding
+  // succeeds, mark the item done; otherwise retry with backoff up to limit.
+  void _resolveProviderAndMark(int index, ImageProvider provider) {
+    if (!mounted || _completed) return;
+    if (index < 0 || index >= _itemCount) return;
+    if (_done[index]) return;
+    if (_resolving[index]) return; // already resolving
+
+    _resolving[index] = true;
+
+    final ImageStream stream = provider.resolve(const ImageConfiguration());
+    ImageStreamListener? listener;
+    listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+      // success: image decoded
+      try {
+        _resolving[index] = false;
+        _markDone(index, success: true);
+      } finally {
+        stream.removeListener(listener!);
+      }
+    }, onError: (dynamic error, StackTrace? stackTrace) {
+      stream.removeListener(listener!);
+      _resolving[index] = false;
+      // schedule retry with simple backoff
+      if (_retries[index] < _maxRetries && !_done[index]) {
+        _retries[index]++;
+        final int delayMs = 250 * (1 << (_retries[index] - 1));
+        Future.delayed(Duration(milliseconds: delayMs), () {
+          if (!mounted || _completed || _done[index]) return;
+          // re-generate the URL to bypass caches when retrying
+          _runUrls[index] = _urlForIndex(index, _retries[index]);
+          setState(() {});
+        });
+      } else {
+        _markDone(index, success: false);
+      }
+    });
+
+    stream.addListener(listener);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Image Loading Test')),
       body: ListView.builder(
         controller: _scrollController,
-  itemExtent: 200,
-  cacheExtent: 2000,
-  itemCount: _itemCount,
+        itemExtent: 200,
+        cacheExtent: 2000,
+        itemCount: _itemCount,
         itemBuilder: (c, i) {
           if (i == _currentIndex) {
             return SizedBox(
@@ -224,7 +247,7 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
                 },
                 placeholder: (c, u) => const Center(child: CircularProgressIndicator()),
                 errorWidget: (c, u, e) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) => _retryIndex(i));
+                  WidgetsBinding.instance.addPostFrameCallback((_) => _markDone(i, success: false));
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Row(
@@ -232,28 +255,45 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
                       children: const [
                         Icon(Icons.error, color: Colors.red),
                         SizedBox(width: 6),
-                        Text('Error loading image',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.red)),
+                        Text('Error loading image', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.red)),
                       ],
                     ),
                   );
                 },
-                  imageBuilder: (ctx, imageProvider) {
-                    _providers[i] = imageProvider;
-                    WidgetsBinding.instance.addPostFrameCallback((_) => _markDone(i, success: true));
-                    return Image(image: imageProvider, fit: BoxFit.cover);
+                imageBuilder: (ctx, imageProvider) {
+                  // store provider for later reuse
+                  _providers[i] = imageProvider;
+                  // resolve provider and ensure the image was decoded successfully
+                  _resolveProviderAndMark(i, imageProvider);
+                  return Image(image: imageProvider, fit: BoxFit.cover);
                 },
               ),
             );
           }
+
+          if (i < _currentIndex) {
+            final prov = _providers[i];
+            final status = _successList[i];
+            if (status == true && prov != null) {
+              return SizedBox(height: 200, child: Image(image: prov, fit: BoxFit.cover));
+            }
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.error, color: Colors.red),
+                  SizedBox(width: 6),
+                  Text('Error loading image', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.red)),
+                ],
+              ),
+            );
+          }
+
           return Container(
             height: 200,
             alignment: Alignment.center,
-            child: i < _currentIndex
-                ? const Icon(Icons.check_circle, color: Colors.green)
-                : const Text('Waiting...'),
+            child: const Text('Waiting...'),
           );
         },
       ),

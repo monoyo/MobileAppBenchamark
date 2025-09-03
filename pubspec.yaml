@@ -38,7 +38,7 @@ dependencies:
   http: ^0.13.5
   json_annotation: ^4.7.0
   cached_network_image: ^3.2.3
-  flutter_cache_manager: ^3.3.2
+  flutter_cache_manager: ^3.3.1
   path_provider: ^2.0.15
 
 dev_dependencies:
