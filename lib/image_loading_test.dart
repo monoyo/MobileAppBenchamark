@@ -17,43 +17,30 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   // Liczba obrazów do przetworzenia w jednej iteracji
   final int _itemCount = 20;
 
-  int loaded = 0;
-  int failed = 0;
-  late List<bool> _done;
-  bool _completed = false;
-  late int start;
-  late List<String> _runUrls; // urls augmented with runId to prevent cache reuse
-  Timer? _autoScrollTimer;
-  double _autoOffset = 0.0;
-  late List<int> _retries; // retry count per index
-  final Set<int> _retryQueued = <int>{};
-  static const int _maxRetries = 2;
-  bool _reachedEnd = false;
-  // Watchdog timers to ensure completion
-  Timer? _watchdogTimer;
-  late int _lastProgressMs;
-  static const int _maxRunMs = 20000; // hard cap per run (20s)
-  static const int _stallMs = 4000; // consider stalled if no progress for 4s
-  CacheManager? _cacheManager;
-  int _currentIndex = 0; // sequential loading index
-
-  @override
-  void initState() {
-    super.initState();
-    start = DateTime.now().millisecondsSinceEpoch;
-  _lastProgressMs = start;
-    _done = List<bool>.filled(_itemCount, false);
-  // Przygotuj listy i URL-e na start
-  _retries = List<int>.filled(_itemCount, 0);
-  _runUrls = List<String>.generate(_itemCount, (int i) => _urlForIndex(i, 0), growable: true);
-    // Per-iteration CacheManager with zero staleness to avoid cache reuse
-    _cacheManager = CacheManager(
-      Config(
-        'run_${widget.runId}',
-        stalePeriod: Duration.zero,
-        maxNrOfCacheObjects: 50,
-      ),
-    );
+          // Completed or pending items
+          if (i < _currentIndex) {
+            final prov = _providers[i];
+            final status = _successList[i];
+            if (status == true && prov != null) {
+              return SizedBox(height: 200, child: Image(image: prov, fit: BoxFit.cover));
+            } else {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.error, color: Colors.red),
+                    SizedBox(width: 6),
+                    Text('Error loading image',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              );
+            }
+          }
+          return const Center(child: Text('Waiting...'));
     // Nudge an initial small scroll to ensure list attaches and scroll physics engage
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -138,8 +125,10 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
     _done[index] = true;
     if (success) {
       loaded++;
+  _successList[index] = true;
     } else {
       failed++;
+  _successList[index] = false;
     }
   _lastProgressMs = DateTime.now().millisecondsSinceEpoch;
 
@@ -251,9 +240,10 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
                     ),
                   );
                 },
-                imageBuilder: (ctx, imageProvider) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) => _markDone(i, success: true));
-                  return Image(image: imageProvider, fit: BoxFit.cover);
+                  imageBuilder: (ctx, imageProvider) {
+                    _providers[i] = imageProvider;
+                    WidgetsBinding.instance.addPostFrameCallback((_) => _markDone(i, success: true));
+                    return Image(image: imageProvider, fit: BoxFit.cover);
                 },
               ),
             );
