@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "RN Benchmark",
+    "slug": "rn-benchmark",
+    "version": "1.0.0",
+    "scheme": "rn-benchmark",
+  "sdkVersion": "53.0.0",
+  "platforms": ["android"],
+    "orientation": "portrait",
+    "jsEngine": "hermes",
+    "android": {
+      "package": "com.jossy.android.mobilebenchmarkapprn",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+  }
+  }
+}
