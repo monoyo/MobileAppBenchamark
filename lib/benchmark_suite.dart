@@ -18,7 +18,7 @@ class BenchmarkSuitePage extends StatefulWidget {
 }
 
 class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
-  static const int _iterationsPerTest = 2;
+  static const int _iterationsPerTest = 30;
   late final int _allTests;
   int _currentIteration = 0;
   int _currentTestIndex = 0;
@@ -96,7 +96,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
           );
           break;
         case 3:
-          // Provide a unique runId to the image test to avoid hitting cache across iterations
           final int runId = DateTime.now().millisecondsSinceEpoch ^ _currentIteration ^ _currentTestIndex;
           res = await Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => ImageLoadingTestPage(runId: runId)),
@@ -130,7 +129,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       await Future.delayed(const Duration(milliseconds: 500));
       await _runNext();
     } else {
-      // move to next test
       setState(() {
         _currentTestIndex++;
         _currentIteration = 0;

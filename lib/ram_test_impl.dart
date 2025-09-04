@@ -5,7 +5,7 @@ import 'models/test_result.dart';
 import 'models/user.dart';
 
 class RAMTest {
-  static const int RUNS = 95000;
+  static const int RUNS = 1800;
   static final Map<String, int> nameCounter = {};
   static final Map<String, int> surnameCounter = {};
 
