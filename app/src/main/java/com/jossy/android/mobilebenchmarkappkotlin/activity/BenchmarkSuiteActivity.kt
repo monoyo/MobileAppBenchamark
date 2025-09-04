@@ -97,7 +97,11 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             } else {
                 currentTestIndex++
                 currentIteration = 0
-                if (currentTestIndex < ALL_TESTS) runNextTest()
+                if (currentTestIndex < ALL_TESTS) {
+                    runNextTest()
+                } else {
+                    onAllTestsCompleted()
+                }
             }
         } else {
             onAllTestsCompleted()
@@ -162,15 +166,16 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     private fun updateCsvDisplay() {
         val sb = StringBuilder()
         perTestResults.forEach { (testName, entries) ->
-            sb.appendLine("# ${testName}")
-            sb.appendLine("iteration,executionTimeMs,details,success")
+            sb.appendLine("# $testName")
+            sb.appendLine("iteration,executionTimeMs,details")
             entries.sortedBy { it.iteration }.forEach { e ->
-                sb.appendLine(listOf(
-                    e.iteration.toString(),
-                    e.result.executionTime.toString(),
-                    csv(e.result.details),
-                    e.result.isSuccessful.toString()
-                ).joinToString(","))
+                sb.appendLine(
+                    listOf(
+                        e.iteration.toString(),
+                        e.result.executionTime.toString(),
+                        csv(e.result.details),
+                    ).joinToString(","),
+                )
             }
             sb.appendLine()
         }
@@ -204,9 +209,8 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             var filesCount = 0
             perTestResults.forEach { (testName, entries) ->
                 if (entries.isEmpty()) return@forEach
-
                 val safeName = testName.lowercase(Locale.US).replace(" ", "_")
-                val file = File(outDir, "${safeName}_${time}.csv")
+                val file = File(outDir, "${safeName}_$time.csv")
                 val content = buildCsv(entries)
                 file.writeText(content)
                 filesCount++
@@ -224,14 +228,15 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
     private fun buildCsv(entries: List<TestEntry>): String {
         val sb = StringBuilder()
-        sb.appendLine("iteration,executionTimeMs,details,success")
+        sb.appendLine("iteration,executionTimeMs,details")
         entries.sortedBy { it.iteration }.forEach { e ->
-            sb.appendLine(listOf(
-                e.iteration.toString(),
-                e.result.executionTime.toString(),
-                csv(e.result.details),
-                e.result.isSuccessful.toString()
-            ).joinToString(","))
+            sb.appendLine(
+                listOf(
+                    e.iteration.toString(),
+                    e.result.executionTime.toString(),
+                    csv(e.result.details),
+                ).joinToString(","),
+            )
         }
         return sb.toString()
     }

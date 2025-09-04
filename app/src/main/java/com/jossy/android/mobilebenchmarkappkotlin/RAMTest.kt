@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import kotlin.random.Random
 
 object RAMTest {
-    private const val RUNS = 95000
+    private const val RUNS = 1800
     private val nameCounter: MutableMap<String, Int> = mutableMapOf()
     private val surnameCounter: MutableMap<String, Int> = mutableMapOf()
 

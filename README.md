@@ -70,7 +70,7 @@ Pakiet `com.jossy.android.mobilebenchmarkappkotlin`
 - Wynik: liczba korutyn, czas, suma iteracji, checksum.
 
 ### 6.2 RAM Test
-- RUNS = 95_000.
+- RUNS = 1800.
 - Intensywne operacje na kolekcjach + serializacja / deserializacja JSON (kotlinx.serialization) → wysoka presja alokacyjna i GC.
 - Kopiowanie, shuffle, sort, filtr, mapowanie, serializacja, deserializacja, agregacje.
 
