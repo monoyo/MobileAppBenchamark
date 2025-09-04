@@ -2,7 +2,7 @@ package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -19,8 +19,7 @@ import androidx.core.content.ContextCompat;
 
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
-import com.jossy.android.mobilebenchmarkappjava.RAMTestActivity;
-import com.jossy.android.mobilebenchmarkappjava.TestCallback;
+import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 
 import java.io.File;
@@ -34,10 +33,11 @@ import java.util.Locale;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Collections;
 import java.util.Comparator;
 
-public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCallback {
+public class BenchmarkSuiteActivity extends AppCompatActivity {
+
+    private static final int PERMISSION_REQUEST_CODE = 123;
     private static final int TEST_ITERATIONS = 30;
     private static final int ALL_TESTS = 6;
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
@@ -49,11 +49,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
     private Button exportResultsButton;
     
     private final List<TestResult> allResults = new ArrayList<>();
-    private static class TestEntry {
-        final int iteration;
-        final TestResult result;
-        TestEntry(int iteration, TestResult result) { this.iteration = iteration; this.result = result; }
-    }
     private final Map<String, List<TestEntry>> perTestResults = new LinkedHashMap<>();
     private int currentIteration = 0;
     private int currentTestIndex = 0;
@@ -80,22 +75,25 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
 
         exportResultsButton.setOnClickListener(v -> exportResults());
 
-    // 6 tests total
-    testProgress.setMax(TEST_ITERATIONS * ALL_TESTS);
+        testProgress.setMax(TEST_ITERATIONS * ALL_TESTS);
         Log.d("BenchmarkSuiteActivity", "onCreate completed, UI initialized");
     }
 
     private void startTestSuite() {
-    Log.d("BenchmarkSuiteActivity", "Starting test suite");
-    isRunning = true;
-    currentIteration = 0;
-    currentTestIndex = 0;
-    allResults.clear();
-    resultBuilder = new StringBuilder();
-    testResults.setText("");
-    startTestsButton.setText("Running...");
-    startTestsButton.setEnabled(false);
-    runNextTest();
+        if (checkPermissions()) {
+            isRunning = true;
+            currentIteration = 0;
+            currentTestIndex = 0;
+            allResults.clear();
+            resultBuilder = new StringBuilder();
+            testResults.setText("");
+            startTestsButton.setText("Running...");
+            startTestsButton.setEnabled(false);
+            runNextTest();
+        }
+        else {
+            requestPermissions();
+        }
     }
 
     private void runNextTest() {
@@ -104,10 +102,8 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
                 String testName = getTestName(currentTestIndex);
                 onTestStarted(testName);
                 startSpecificTest(currentTestIndex);
-                // Increment iteration for this specific test after dispatch
                 currentIteration++;
             } else {
-                // Move to next test and reset iteration counter
                 currentTestIndex++;
                 currentIteration = 0;
                 if (currentTestIndex < ALL_TESTS) {
@@ -122,7 +118,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
     }
 
     private String getTestName(int index) {
-        Log.d("BenchmarkSuiteActivity", "Getting test name for index: " + index);
         return switch (index) {
             case 0 -> "UI Test";
             case 1 -> "CPU Test";
@@ -135,7 +130,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
     }
 
     private void startSpecificTest(int index) {
-        Log.d("BenchmarkSuiteActivity", "Starting specific test for index: " + index);
         Intent intent;
         switch (index) {
             case 0:
@@ -162,28 +156,20 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
         }
         intent.putExtra("auto_mode", true);
         intent.putExtra("callback_activity", BenchmarkSuiteActivity.class.getName());
-        Log.d("BenchmarkSuiteActivity", "Starting activity: " + intent.getComponent());
         startActivityForResult(intent, TEST_ACTIVITY_REQUEST_CODE);
     }
 
     public void onTestCompleted(TestResult result) {
-        Log.d("BenchmarkSuiteActivity", "Test completed: " + result);
         allResults.add(result);
-    // Track per-test results (currentIteration was incremented after dispatch)
-    int iterationNum = currentIteration; // already 1-based for the finished run
-        List<TestEntry> list = perTestResults.get(result.getTestName());
-        if (list == null) {
-            list = new ArrayList<>();
-            perTestResults.put(result.getTestName(), list);
-        }
-        list.add(new TestEntry(iterationNum, result));
+        int iterationNum = currentIteration;
+        TestEntry entry = new TestEntry(iterationNum, result);
+        List<TestEntry> list = perTestResults.computeIfAbsent(result.getTestName(), k -> new ArrayList<>());
+        list.add(entry);
         updateProgress();
         updateCsvDisplay();
-        Log.d("BenchmarkSuiteActivity", "Scheduling next test with delay");
-        handler.postDelayed(this::runNextTest, 1000); // Small delay between tests
+        handler.postDelayed(this::runNextTest, 1000);
     }
 
-    @Override
     public void onAllTestsCompleted() {
         isRunning = false;
         startTestsButton.setText("Start Tests");
@@ -192,7 +178,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
         calculateAndDisplayAverages();
     }
 
-    @Override
     public void onTestStarted(String testName) {
         currentTestInfo.setText(String.format("Running: %s (Iteration %d/%d)",
                 testName, currentIteration + 1, TEST_ITERATIONS));
@@ -211,12 +196,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
             sb.append("# ").append(testName).append('\n');
             sb.append("iteration,executionTimeMs,details,success\n");
             List<TestEntry> sorted = new ArrayList<>(entries);
-            Collections.sort(sorted, new Comparator<TestEntry>() {
-                @Override
-                public int compare(TestEntry a, TestEntry b) {
-                    return Integer.compare(a.iteration, b.iteration);
-                }
-            });
+            sorted.sort(Comparator.comparingInt(a -> a.iteration));
             for (TestEntry te : sorted) {
                 sb.append(te.iteration).append(',')
                   .append(te.result.getExecutionTime()).append(',')
@@ -226,7 +206,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
             sb.append('\n');
         }
         testResults.setText(sb.toString());
-        resultBuilder = sb; // keep for legacy export
+        resultBuilder = sb;
     }
 
     private void calculateAndDisplayAverages() {
@@ -283,12 +263,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
         StringBuilder sb = new StringBuilder();
         sb.append("iteration,executionTimeMs,details,success\n");
         List<TestEntry> sorted = new ArrayList<>(entries);
-        Collections.sort(sorted, new Comparator<TestEntry>() {
-            @Override
-            public int compare(TestEntry a, TestEntry b) {
-                return Integer.compare(a.iteration, b.iteration);
-            }
-        });
+        sorted.sort(Comparator.comparingInt(a -> a.iteration));
         for (TestEntry te : sorted) {
             sb.append(te.iteration).append(',')
               .append(te.result.getExecutionTime()).append(',')
@@ -305,18 +280,37 @@ public class BenchmarkSuiteActivity extends AppCompatActivity implements TestCal
         return needsQuote ? ("\"" + escaped + "\"") : escaped;
     }
 
+    private Boolean checkPermissions() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+    }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-    if (requestCode == TEST_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            Log.d("BenchmarkSuiteActivity", "Test completed, launching next test");
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    startTestSuite();
+                } else {
+                    Toast.makeText(
+                            this,
+                            "Permissions requires to run tests",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            }
+        } else if (requestCode == TEST_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
             TestResult result = (TestResult) data.getSerializableExtra(BenchmarkApplication.RESULT);
             if (result != null) {
                 onTestCompleted(result);
             } else {
                 Log.e("BenchmarkSuiteActivity", "No TestResult received from test activity");
             }
-
         }
     }
 }

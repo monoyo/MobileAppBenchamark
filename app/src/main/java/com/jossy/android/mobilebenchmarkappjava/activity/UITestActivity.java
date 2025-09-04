@@ -60,7 +60,6 @@ public class UITestActivity extends AppCompatActivity {
             animY.start();
         }
 
-        // Give time for animations to be visible
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             Log.d("UITestActivity", "UI test completed");
             long executionTime = System.currentTimeMillis() - startTime;
@@ -69,6 +68,6 @@ public class UITestActivity extends AppCompatActivity {
             intent.putExtra(BenchmarkApplication.RESULT, result);
             setResult(RESULT_OK, intent);
             finish();
-        }, 5000); // Wait 5 seconds to show animations
+        }, 5000);
     }
 }

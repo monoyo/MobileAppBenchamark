@@ -3,12 +3,9 @@ package com.jossy.android.mobilebenchmarkappjava.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.data.Post;
@@ -16,7 +13,6 @@ import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.service.ApiService;
 
-import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;

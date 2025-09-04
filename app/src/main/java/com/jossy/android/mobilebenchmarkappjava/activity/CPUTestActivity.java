@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.jossy.android.mobilebenchmarkappjava.CPUTest;
 import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.data.CpuResult;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import android.content.Intent;
@@ -26,7 +27,7 @@ public class CPUTestActivity extends AppCompatActivity {
     private void startCPUTest() {
         Executors.newSingleThreadExecutor().execute(() -> {
             long cpuStart = System.currentTimeMillis();
-            CPUTest.CpuResult r = CPUTest.runBenchmarkParallel(3000L, null);
+            CpuResult r = CPUTest.runBenchmarkParallel(3000L, null);
             long cpuElapsed = System.currentTimeMillis() - cpuStart;
             Log.i("CPUTestActivity", "CPU test time: " + cpuElapsed + "ms, threads=" + r.threads + ", iters=" + r.iterations);
 

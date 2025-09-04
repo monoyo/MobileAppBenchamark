@@ -1,3 +1,7 @@
+package com.jossy.android.mobilebenchmarkappjava;
+
+class Users {
+    public String list = """
 [
   {
     "name": "John",
@@ -318,3 +322,5 @@
     "active": true
   }
 ]
+""".trim();
+}

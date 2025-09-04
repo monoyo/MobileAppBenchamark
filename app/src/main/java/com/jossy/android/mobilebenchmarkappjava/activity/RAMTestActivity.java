@@ -1,13 +1,15 @@
-package com.jossy.android.mobilebenchmarkappjava;
+package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 
+import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.RAMTest;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 
 import java.util.concurrent.Executors;

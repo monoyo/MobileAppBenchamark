@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestListener;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
@@ -66,9 +67,14 @@ public class ImageLoadingActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
             Glide.with(ImageLoadingActivity.this)
                  .load(IMAGE_URLS.get(position))
-                 .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                 .listener(new RequestListener<>() {
                      @Override
                      public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                         loadedImages++;
+                         Log.w("ImageLoadingActivity",
+                                 "Image failed to load: ${IMAGE_URLS[position]} (processed $loadedImages/${IMAGE_URLS.size})");
+                         checkCompletion(loadedImages);
+                         recyclerView.smoothScrollToPosition(loadedImages - 1);
                          return false;
                      }
 
@@ -76,16 +82,10 @@ public class ImageLoadingActivity extends AppCompatActivity {
                      public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
                          loadedImages++;
                          Log.d("ImageLoadingActivity", "Image loaded: " + loadedImages + "/" + IMAGE_URLS.size());
-                         if (loadedImages == IMAGE_URLS.size()) {
-                             long totalTime = System.currentTimeMillis() - startTime;
-                             Log.d("ImageLoadingActivity", "All images loaded, transitioning to the next test");
-                             TestResult result = new TestResult("Image Loading Test", totalTime, "Image Loading Test Completed", true);
-                             Intent intent = new Intent();
-                             intent.putExtra(BenchmarkApplication.RESULT, result);
-                             setResult(RESULT_OK, intent);
-                             finish();
+                         checkCompletion(loadedImages);
+                         if (loadedImages < IMAGE_URLS.size()) {
+                             recyclerView.smoothScrollToPosition(loadedImages);
                          }
-                         recyclerView.smoothScrollToPosition(loadedImages);
                          return false;
                      }
                  })
@@ -95,6 +95,20 @@ public class ImageLoadingActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return IMAGE_URLS.size();
+        }
+    }
+
+    private void checkCompletion(int loadedImages) {
+        if (((LinearLayoutManager) recyclerView.getLayoutManager()).findLastCompletelyVisibleItemPosition() == IMAGE_URLS.size() - 1) {
+            if (loadedImages == IMAGE_URLS.size()) {
+                long totalTime = System.currentTimeMillis() - startTime;
+                Log.d("ImageLoadingActivity", "All images loaded, transitioning to the next test");
+                TestResult result = new TestResult("Image Loading Test", totalTime, "Image Loading Test Completed", true);
+                Intent intent = new Intent();
+                intent.putExtra(BenchmarkApplication.RESULT, result);
+                setResult(RESULT_OK, intent);
+                finish();
+            }
         }
     }
 

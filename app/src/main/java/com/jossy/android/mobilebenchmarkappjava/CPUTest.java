@@ -1,21 +1,11 @@
 package com.jossy.android.mobilebenchmarkappjava;
 
+import com.jossy.android.mobilebenchmarkappjava.data.CpuResult;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class CPUTest {
-    public static class CpuResult {
-        public final int threads;
-        public final long durationMs;
-        public final long iterations;
-        public final double checksum;
-        public CpuResult(int threads, long durationMs, long iterations, double checksum) {
-            this.threads = threads;
-            this.durationMs = durationMs;
-            this.iterations = iterations;
-            this.checksum = checksum;
-        }
-    }
 
     public static CpuResult runBenchmarkParallel(long durationMs, Integer threadsOpt) {
         final int threads = (threadsOpt != null && threadsOpt > 0) ? threadsOpt :
@@ -33,7 +23,6 @@ public class CPUTest {
                 double acc = 0.0;
                 double x = (threadIndex + 1);
                 while (System.nanoTime() < deadline) {
-                    // Ciasna pętla z operacjami zmiennoprzecinkowymi
                     x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
                     acc += x;
                     iter++;
