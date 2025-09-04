@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 public class RAMTest {
-    private static final int RUNS = 95000;
+    private static final int RUNS = 1800;
     private static final Map<String, Integer> nameCounter = new HashMap<>();
     private static final Map<String, Integer> surnameCounter = new HashMap<>();
     private static final Gson GSON = new Gson();

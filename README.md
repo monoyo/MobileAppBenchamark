@@ -61,7 +61,7 @@ Pakiet `com.jossy.android.mobilebenchmarkappjava`
 - Wynik: `threads, durationMs, iterations (suma), checksum`.
 
 ### 6.2 RAM Test
-- RUNS = 95_000.
+- RUNS = 1800.
 - Wczytanie listy `User` z wbudowanego JSON (Users.list) przy użyciu Gson.
 - Iteracja: kopiowanie + shuffle + sort (Comparator) + filtr (active && age>18) + uppercase imion + serializacja → deserializacja + zliczenia map imion/nazwisk.
 - Wysoka presja alokacyjna i GC.
