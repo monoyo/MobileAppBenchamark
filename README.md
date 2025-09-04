@@ -1,179 +1,143 @@
-# Mobile Benchmark App (Kotlin)
+# Mobile Benchmark App (Java)
 
-Kompleksowa aplikacja Android do wykonywania powtarzalnych testów wydajności urządzenia: CPU, RAM, UI (rendering/animacje), ładowanie obrazów, API (sieć), lokalizacja (GPS / Network) oraz orkiestracja wielu iteracji i eksport wyników do CSV.
+Aplikacja Android (Java) do syntetycznych testów wydajności: CPU, RAM, UI, ładowanie obrazów, API, lokalizacja, + orkiestracja wielu iteracji i eksport wyników do CSV.
 
 ## Spis treści
-1. Cel projektu
-2. Wymagania środowiskowe
-3. Konfiguracja / Budowanie
-4. Struktura pakietów i modułów
-5. Użyte biblioteki (wersje i rola)
-6. Opis testów i przepływ działania (flow)
-7. Analiza złożoności i charakterystyka obciążeń
-8. Format wyników i eksport CSV
-9. Modele danych
-10. Strategia testowania / możliwe rozszerzenia testów
-11. Dobre praktyki i ograniczeniax
-12. Pomysły na dalszy rozwój
+- [1. Cel](#1-cel)
+- [2. Wymagania](#2-wymagania)
+- [3. Technologie / Biblioteki (Java wariant)](#3-technologie--biblioteki-java-wariant)
+- [4. Struktura pakietów (Java)](#4-struktura-pakietów-java)
+- [5. Orkiestracja (BenchmarkSuiteActivity)](#5-orkiestracja-benchmarksuiteactivity)
+- [6. Testy](#6-testy)
+  - [6.1 CPU Test](#61-cpu-test)
+  - [6.2 RAM Test](#62-ram-test)
+  - [6.3 UI Test](#63-ui-test)
+  - [6.4 Image Loading Test](#64-image-loading-test)
+  - [6.5 API Test](#65-api-test)
+  - [6.6 Location Test](#66-location-test)
+  - [6.7 Application (BenchmarkApplication)](#67-application-benchmarkapplication)
+- [7. Złożoność (dominujące czynniki)](#7-złożoność-dominujące-czynniki)
+- [8. Format wyniku](#8-format-wyniku)
+- [9. Eksport](#9-eksport)
+- [10. Ograniczenia](#10-ograniczenia)
+- [11. Rozszerzenia (propozycje)](#11-rozszerzenia-propozycje)
+- [12. Szybki start](#12-szybki-start)
+- [13. Różnice vs potencjalny wariant Kotlin](#13-różnice-vs-potencjalny-wariant-kotlin)
+- [14. Licencja / Autor](#14-licencja--autor)
 
----
-## 1. Cel projektu
-Aplikacja ma umożliwić szybkie uzyskanie wielu metryk obserwowalnych (czas wykonania) dla podstawowych klas obciążeń na urządzeniu mobilnym Android. Wyniki mogą służyć do:
-- Porównań między urządzeniami
-- Rejestrowania regresji wydajności build-to-build
-- Walidacji wpływu zmian w konfiguracji (np. wersji bibliotek)
+## 1. Cel
+Porównywanie urządzeń, wychwytywanie regresji wydajności, obserwacja wpływu zmian konfiguracji i bibliotek. Metryka podstawowa: czas wykonania (ms).
 
-## 2. Wymagania środowiskowe
-- Android Studio Giraffe/Koala+ (dowolna wersja wspierająca AGP dla compileSdk 35)
-- JDK 17 (ustawione w projekcie: `sourceCompatibility = JavaVersion.VERSION_17`)
-- Gradle Wrapper (zakładany w repo – wersje pluginów utrzymywane przez Version Catalog `libs.*`)
-- minSdk = 24, targetSdk = 35, compileSdk = 35
-- Dostęp do Internetu (test API + ładowanie obrazów + Glide)
-- Uprawnienia lokalizacji (Location Test)
+## 2. Wymagania
+- JDK 17
+- Android Studio (compileSdk 35, minSdk 24, targetSdk 35)
+- Dostęp do Internetu (API + obrazy)
+- Uprawnienia lokalizacji (ACCESS_FINE_LOCATION)
 
-## 3. Konfiguracja / Budowanie
-1. Sklonuj repozytorium.
-2. Otwórz w Android Studio (import projektu Gradle).
-3. Zbuduj: (Gradle: `assembleDebug`).
-4. Uruchom na urządzeniu fizycznym (zalecane) lub emulatorze z działającymi usługami Google (dla FusedLocationProviderClient).
+## 3. Technologie / Biblioteki (Java wariant)
+- AndroidX AppCompat / ConstraintLayout / RecyclerView / Material
+- Glide – ładowanie i cache obrazów
+- Retrofit 2 + OkHttp 4 + Logging Interceptor – test API
+- Gson – serializacja / deserializacja (RAMTest, API)
+- Play Services Location – lokalizacja
+- Własne wątki (Thread) dla CPU testu (brak korutyn)
 
-Uruchomienie: po instalacji otwórz aplikację → przycisk "Start Suite" uruchomi sekwencyjnie 6 testów x 30 iteracji.
+## 4. Struktura pakietów (Java)
+`com.jossy.android.mobilebenchmarkappjava`
+- activity/ (BenchmarkSuiteActivity, CPUTestActivity, RAMTestActivity, UITestActivity, ImageLoadingActivity, ApiTestActivity, LocationTestActivity)
+- data/ (TestResult, TestEntry, CpuResult, User, Post)
+- service/ (ApiService – Retrofit interface)
+- CPUTest.java / RAMTest.java / Users.java
+- BenchmarkApplication.java (pre-warm Glide, zarządzanie pamięcią)
 
-## 4. Struktura pakietów i modułów
-`com.jossy.android.mobilebenchmarkappkotlin`
-- `activity/` – ekran główny oraz osobne Activity dla każdego testu.
-- `data/` – modele danych + wynik testu.
-- `service/` – definicja interfejsu API (Retrofit).
-- Pliki testów syntetycznych (CPU / RAM / Location) w katalogu głównym pakietu.
+## 5. Orkiestracja (BenchmarkSuiteActivity)
+- TEST_ITERATIONS = 30, ALL_TESTS = 6 → 180 przebiegów.
+- Kolejno uruchamiane aktywności testowe (`startActivityForResult` legacy).
+- Zbieranie `TestResult` (Serializable) → agregacja → podgląd CSV → eksport per test do `/Android/data/<pkg>/files/Documents/benchmarks/`.
 
-Główna orkiestracja: `BenchmarkSuiteActivity`.
+## 6. Testy
+### 6.1 CPU Test
+- Liczba wątków = `max(1, availableProcessors())` (lub wartość podana).
+- Każdy wątek: pętla do upływu limitu czasu (`deadline = now + durationMs`) z: `Math.sin`, `Math.cos`, `Math.sqrt` + akumulacja.
+- Wynik: `threads, durationMs, iterations (suma), checksum`.
 
-## 5. Użyte biblioteki
-| Biblioteka | Rola |
-|-----------|------|
-| AndroidX Core/AppCompat/ConstraintLayout/RecyclerView | Standardowe komponenty UI i wsparcie kompatybilności |
-| Material Components | Elementy UI Material |
-| Kotlin Coroutines (`kotlinx-coroutines-android`, `play-services`) | Równoległość / wątki / zawieszalne operacje |
-| Kotlinx Serialization JSON (1.6.0) | Serializacja / deserializacja danych w RAMTest |
-| Retrofit 2.9.0 + Gson Converter | Klient HTTP API testu sieci |
-| OkHttp 4.12.0 + Logging Interceptor | Transport HTTP i logowanie |
-| Glide 4.16.0 | Ładowanie i dekodowanie obrazów z sieci |
-| Play Services Location 21.0.1 | Dostęp do aktualnej lokalizacji (Fused Provider) |
-| MPAndroidChart (zadeklarowany) | Możliwe wizualizacje (niewykorzystane w pokazanym kodzie UI) |
-| JUnit / Espresso / AndroidX Test | Podstawy testów jednostkowych i instrumentalnych |
+### 6.2 RAM Test
+- RUNS = 95_000.
+- Wczytanie listy `User` z wbudowanego JSON (Users.list) przy użyciu Gson.
+- Iteracja: kopiowanie + shuffle + sort (Comparator) + filtr (active && age>18) + uppercase imion + serializacja → deserializacja + zliczenia map imion/nazwisk.
+- Wysoka presja alokacyjna i GC.
 
-Wersje pluginów (AGP / Kotlin) – utrzymywane poprzez aliasy `libs.plugins.*` (plik `libs.versions.toml` znajduje się wyżej w strukturze projektu – nie pokazany w module). 
+### 6.3 UI Test
+- Generowanie wielu widoków + animacje property (ObjectAnimator) dla obciążenia pipeline renderowania.
 
-## 6. Opis testów i przepływ działania (flow)
-### 6.1 BenchmarkSuiteActivity
-- Ustawia liczbę iteracji: 30 na każdy z 6 testów (łącznie 180 przebiegów).
-- Dla każdej iteracji startuje dedykowane Activity testowe metodą `startActivityForResult`.
-- Po zakończeniu testu odbiera `TestResult` (Serializable) → kolekcjonuje → aktualizuje progres → generuje dynamiczny podgląd pseudo-CSV.
-- Po zakończeniu wszystkich testów wylicza średnie czasy per test.
-- Eksport: przycisk generuje osobne pliki CSV dla każdego typu testu w `.../Android/data/<pkg>/files/Documents/benchmarks/`.
+### 6.4 Image Loading Test
+- 10 URL (Picsum) ładowanych równolegle Glide.
+- Listener sukces/porażka → inkrementacja licznika → koniec po wszystkich.
 
-### 6.2 UI Test (UITestActivity)
-- Tworzy 1500 kwadratowych widoków (50x50 px) o losowym kolorze i pozycji.
-- Dla każdego dwóch animacji (X, Y) w pętli (ObjectAnimator, repeat = INFINITE, 2000 ms).
-- Czas testu = 5 sekund (opóźnione zakończenie). Zwraca czas renderowania i inicjalizacji animacji.
+### 6.5 API Test
+- Retrofit GET `https://jsonplaceholder.typicode.com/posts`.
+- Mierzy latency request→response (Callback asynchroniczny OkHttp).
 
-### 6.3 CPU Test (CPUTestActivity + CPUTest)
-- Wykorzystuje liczbę rdzeni = `availableProcessors()`.
-- Każdy wątek wykonuje ciasną pętlę do upływu czasu (domyślnie 3000 ms) z operacjami: `sin`, `cos`, `sqrt`, akumulacja.
-- Zwraca: łączna liczba iteracji, suma kontrolna (checksum), liczba wątków, czas.
+### 6.6 Location Test
+- Fused Location Provider (Play Services) – próba pozyskania bieżącej lokalizacji; pomiar czasu.
 
-### 6.4 RAM Test (RAMTestActivity + RAMTest)
-- Stała `RUNS = 95_000` powtórzeń.
-- Na wejściu wczytuje listę użytkowników z wbudowanego JSON (plik `users.kt` zawiera `jsonData`).
-- W każdej iteracji: shuffle → addAll do dużej listy → sort → filter/map → serializacja i deserializacja JSON → analiza imion/nazwisk.
-- Na końcu czyści dużą listę by ograniczyć zatrzymanie pamięci (GC friendly).
+### 6.7 Application (BenchmarkApplication)
+- Pre-warm Glide w wątku tła.
+- Oczyszczanie cache Glide przy `onTrimMemory` / `onLowMemory`.
 
-### 6.5 Image Loading Test (ImageLoadingActivity)
-- Lista 10 URL (picsum). 
-- Używa RecyclerView + Glide; każdy obraz ładowany asynchronicznie.
-- Mierzy czas od rozpoczęcia do załadowania (bądź błędu) wszystkich obrazów.
+## 7. Złożoność (dominujące czynniki)
+| Test | Czasowa | Pamięć | Uwagi |
+|------|---------|--------|-------|
+| CPU | O(T * I) | O(T) | I = liczba iteracji do deadlinu (zależne od CPU) |
+| RAM | O(R * n log n) | O(n + mapy) | sort + wielokrotne alokacje, JSON |
+| UI | O(n) inicjalizacja | O(n) | n = liczba View/animacji |
+| Image | ~O(k) | Bitmapy/cache | k=10 żądań HTTP |
+| API | O(1) | Niski | Pojedynczy request |
+| Location | O(1) | Minimalna | Zależne od sygnału / providerów |
 
-### 6.6 API Test (ApiTestActivity)
-- Retrofit GET `/posts` z `https://jsonplaceholder.typicode.com/`.
-- Czas = latency HTTP (request → response body). 
-- Prosty sukces/fail.
+Szczegóły CPU: pętla FP (sin/cos/sqrt) – operacje kosztowne, dobre do różnicowania urządzeń. 
+RAM: powtarzające sortowania, tworzenie kopii list, serializacja (Gson) – miks CPU + GC.
 
-### 6.7 Location Test (LocationTestActivity + LocationBenchmarkTest)
-- Żąda `ACCESS_FINE_LOCATION` i `ACCESS_COARSE_LOCATION`.
-- Używa `FusedLocationProviderClient.getCurrentLocation(Priority.HIGH_ACCURACY)`.
-- Fallback do `lastLocation` jeśli brak natychmiastowej lokalizacji.
-- Mierzy czas uzyskania (elapsedRealtime delta) i zwraca parametry: lat, lon, accuracy, provider, altitude (opcjonalnie), speed, bearing.
+## 8. Format wyniku
+`TestResult(testName: String, executionTime: Long, details: String, isSuccessful: Boolean)`
 
-### 6.8 Aplikacja (BenchmarkApplication)
-- W trybie debug włącza StrictMode (wykrywanie IO / zasobów) + pre-warm Glide na wątku tła.
-
-## 7. Analiza złożoności i charakterystyka obciążeń
-| Test | Dominujące operacje | Czasowa | Pamięciowa | Komentarz |
-|------|---------------------|---------|------------|-----------|
-| UI | Tworzenie 1500 View + animacje property | O(n) dla inicjalizacji; animacje zależne od czasu (5s) | O(n) (referencje do View) | Stres na GC + UI thread + render pipeline |
-| CPU | Pętla trygonometryczna per wątek do czasu deadlinu | O(T * I) (I zależne od wydajności CPU) | O(T) | I ~ liczba iteracji przed upływem czasu (pomiar intensywności) |
-| RAM | 95k * (shuffle + sort + filter + serializacja) | O(R * (n log n + n)) ~ O(R * n log n) | O(n + akumulacje map) | Wymusza alokacje, GC, przetwarzanie JSON |
-| Image | 10 requestów HTTP + dekodowanie obrazów | O(k) (k=liczba obrazów) sieć równoległa | Strumienie + dekodowane bitmapy (chwilowo) | Wpływ cache / CPU dekodowania | 
-| API | 1 request HTTP | O(1) | Minimalna | Czysty pomiar latency |
-| Location | Zapytanie o aktualną lokalizację | O(1) typowo (czas zależy od usług lokalizacyjnych) | Minimalna | Zależne od warunków sygnału / providerów |
-
-Szczegóły matematyczne CPU Test:
-- Każdy iteration: ~5 operacji zmiennoprzecinkowych (sin, cos, sqrt dominują – koszt >> add/multiply).
-- Ślad obliczeniowy ≈ iteracje * (koszt trygonometryczny). Różnice między urządzeniami dobrze odwzorowane w `iterations`.
-
-Szczegóły RAM Test:
-- `shuffle`: O(n)
-- `sortedBy`: O(n log n)
-- `filter + map`: O(n)
-- Serializacja/deserializacja: ≈ O(n)
-- Całość w pętli 95k (małe n bazowe – zależne od liczby użytkowników w JSON). Skumulowany efekt: wysokie ciśnienie alokacyjne + CPU mieszany.
-
-## 8. Format wyników i eksport CSV
-Każdy test generuje `TestResult`:
-```
-TestResult(
-  testName: String,
-  executionTime: Long,   // ms
-  details: String,       // meta / parametry
-  isSuccessful: Boolean
-)
-```
 CSV per test:
 ```
 iteration,executionTimeMs,details,success
 0,512,"threads=8, iterations=1234567",true
 ...
 ```
-Pliki nazwane: `<test_name_lowercase>_<timestamp>.csv`.
 
-Pliki średnich wartości pojawiają się w sekcji tekstowej UI (append na końcu). Średnia = arytmetyczna z `executionTime`.
+## 9. Eksport
+Plik per test: `<test_name>_<timestamp>.csv` w `.../files/Documents/benchmarks/`.
 
-## 9. Modele danych
-- `User` – używany w RAMTest (serializacja JSON). 
-- `Post` – odpowiedź API.
-- `TestResult` – kontrakt wymiany między Activity a orkiestratorem.
+## 10. Ograniczenia
+- Użycie `startActivityForResult` (legacy) – można zmodernizować do Activity Result API.
+- Brak percentyli/statystyki odchylenia – tylko średnie.
+- Sieć niestabilna wpływa na Image/API test.
+- Kolejność testów może wpływać (throttling, nagrzewanie CPU).
 
-## 10. Strategia testowania / możliwe rozszerzenia
-Aktualne testy: `ExampleUnitTest` + `ExampleInstrumentedTest` (szablony). 
+## 11. Rozszerzenia (propozycje)
+- Migracja na ActivityResultContracts.
+- Dodanie MockWebServer dla deterministycznego API testu.
+- Zbieranie P95/P99 czasów.
+- Pomiar PSS pamięci podczas RAMTest.
+- Dodatkowy test I/O (np. zapis/odczyt plików).
 
-## 11. Dobre praktyki i ograniczenia
-- Testy są syntetyczne – nie zastępują realnego profilowania aplikacji produkcyjnej.
-- Brak izolacji termicznej: throttling CPU wpłynie na późniejsze wyniki (kolejność testów ma znaczenie).
-- Brak warm-up osobno dla JIT/ART (pośrednio wykonywany w pierwszych iteracjach CPU/RAM).
-- Dane wyjściowe to tylko czas – brak standard deviation. (Można łatwo dodać.)
-- Image/ API test zależą od bieżącej jakości sieci (zalecane Wi-Fi stabilne). 
-
----
-## Szybki start (TL;DR)
+## 12. Szybki start
 1. Uruchom aplikację.
-2. Kliknij "Start Suite".
-3. Poczekaj ~ (czas sumaryczny ~ CPU 3s + UI 5s + reszta * 30 iteracji ≈ kilka minut w zależności od urządzenia).
-4. Po zakończeniu wybierz Export – otrzymasz osobne CSV per test.
+2. Naciśnij "Start Tests".
+3. Poczekaj na zakończenie wszystkich iteracji.
+4. Użyj "Export" aby zapisać CSV.
 
-## FAQ (skrócone)
-- Dlaczego iterations w CPU różnią się między urządzeniami? → Odbiją różnice IPC / taktowania / throttling.
-- Czemu RAM test długo trwa? → 95k powtórzeń intensywnej alokacji; to celowe by wywołać presję pamięci/GC.
-- Jeśli Location test zwraca błąd? → Sprawdź uprawnienia i czy usługi lokalizacji są aktywne.
+## 13. Różnice vs potencjalny wariant Kotlin
+| Obszar | Java | (Kotlin potencjalny) |
+|--------|------|---------------------|
+| Współbieżność CPU | Thread/join | Coroutines |
+| Serializacja RAM | Gson | kotlinx.serialization |
+| Obrazy | Glide | Coil |
+| API | Retrofit/OkHttp | Ktor Client |
+| Pre-warm | Glide | imageLoader (Coil) |
 
----
-© 2025 Mobile Benchmark App
+## 14. Licencja / Autor
+© 2025 Mobile Benchmark App (Java variant). Użycie zgodnie z licencjami bibliotek zewnętrznych.

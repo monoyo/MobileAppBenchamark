@@ -38,7 +38,7 @@ import java.util.Comparator;
 public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 123;
-    private static final int TEST_ITERATIONS = 1;
+    private static final int TEST_ITERATIONS = 30;
     private static final int ALL_TESTS = 6;
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
 
