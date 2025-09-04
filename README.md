@@ -152,23 +152,9 @@ Pliki średnich wartości pojawiają się w sekcji tekstowej UI (append na końc
 - `User` – używany w RAMTest (serializacja JSON). 
 - `Post` – odpowiedź API.
 - `TestResult` – kontrakt wymiany między Activity a orkiestratorem.
-- `LocationTestResult` (wewnętrzny) – bogatsza struktura przed translacją do `TestResult`.
 
 ## 10. Strategia testowania / możliwe rozszerzenia
 Aktualne testy: `ExampleUnitTest` + `ExampleInstrumentedTest` (szablony). 
-
-Proponowane rozszerzenia:
-- Test jednostkowy CPU: weryfikacja deterministyczna struktury wyniku (threads > 0, iterations > 0 przy krótkim deadlinie). 
-- Test integracyjny RAM: ograniczony RUNS (np. 10) → asercja że mapy zliczeń > 0.
-- Test UI (Espresso): sprawdzenie renderu kontenera widoków (liczność > 0) przed zakończeniem.
-- Test API: MockWebServer → pomiar deterministyczny i asercja `executionTime` < threshold.
-- Test eksportu: po symulacji wyników sprawdzić utworzenie plików w katalogu.
-
-Możliwe metryki do dodania:
-- FPS / Jank (FrameMetrics API lub Macrobenchmark)
-- Zużycie energii (BatteryManager szacunkowo)
-- Użycie pamięci w czasie (Debug.getPss())
-- Wariancja / percentyle (P50, P95) zamiast średniej.
 
 ## 11. Dobre praktyki i ograniczenia
 - Testy są syntetyczne – nie zastępują realnego profilowania aplikacji produkcyjnej.
