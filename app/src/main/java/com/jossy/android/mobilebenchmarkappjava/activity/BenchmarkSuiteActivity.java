@@ -55,10 +55,11 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     private boolean isRunning = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private StringBuilder resultBuilder = new StringBuilder();
+    private long testStartTime = System.currentTimeMillis();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        long testStartTime = System.currentTimeMillis();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_benchmark_suite);
 
