@@ -1,31 +1,52 @@
 [versions]
 agp = "8.10.0"
-gson = "2.11.0"
-kotlin = "2.0.21"
-coreKtx = "1.16.0"
-junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
 appcompat = "1.6.1"
 material = "1.10.0"
 activity = "1.10.1"
 constraintlayout = "2.1.4"
-androidChart = "v3.1.0"
+# glide removed (wersja pozostawiona jeśli potrzebne do historii)
+glide = "4.15.1"
+recyclerview = "1.3.2"
+kotlin = "2.0.21"
+coreKtx = "1.16.0"
+kotlinxserializationjson = "1.6.0"
+retrofit = "2.9.0"
+okhttp = "4.12.0"
+playlocation = "21.0.1"
+kotlixcoroutine = "1.7.3"
+coroutineplayservices = "1.7.3"
+kotlinxserialization = "1.9.0"
+coil = "2.6.0"
+ktor = "2.3.11"
+lifecycle = "2.8.4"
 
 [libraries]
-androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-libMPAndroidChart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "androidChart" }
+# glide (usunięta z użycia)
+# glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+recyclerView = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+# retrofit/okhttp (usunięte z użycia)
+# retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+# retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+# okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+# okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxserializationjson" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playlocation" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlixcoroutine" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutineplayservices" }
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.9.0" }
-
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinxserialization" }

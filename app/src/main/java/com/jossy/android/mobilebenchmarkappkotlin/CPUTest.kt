@@ -29,7 +29,6 @@ object CPUTest {
                 var iter = 0L
                 var acc = 0.0
                 var x = (idx + 1).toDouble()
-                // Obciążenie CPU: ciasna pętla z funkcjami trygonometrycznymi i pierwiastkiem
                 while (System.nanoTime() < deadline) {
                     x = sin(x) * cos(x) + sqrt(x * x + 1.234567)
                     acc += x

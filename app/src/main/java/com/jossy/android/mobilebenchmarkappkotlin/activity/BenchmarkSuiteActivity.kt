@@ -1,27 +1,24 @@
 package com.jossy.android.mobilebenchmarkappkotlin.activity
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
+import com.jossy.android.mobilebenchmarkappkotlin.data.TestEntry
 import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
 import java.io.File
 import java.text.SimpleDateFormat
@@ -42,13 +39,13 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     private lateinit var exportResultsButton: Button
 
     private val allResults = mutableListOf<TestResult>()
-    private data class TestEntry(val iteration: Int, val result: TestResult)
     private val perTestResults = linkedMapOf<String, MutableList<TestEntry>>()
     private var currentIteration = 0
     private var currentTestIndex = 0
     private var isRunning = false
     private val handler = Handler(Looper.getMainLooper())
     private var resultBuilder = StringBuilder()
+    private val testStartTime = System.currentTimeMillis()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,9 +63,12 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
         exportResultsButton.setOnClickListener { exportResults() }
 
-    // Progress across all tests and iterations
-    testProgress.max = TEST_ITERATIONS * ALL_TESTS
+        testProgress.max = TEST_ITERATIONS * ALL_TESTS
         Log.d("BenchmarkSuiteActivity", "onCreate completed, UI initialized")
+        val launchTime = System.currentTimeMillis() - testStartTime
+        currentTestInfo.append("App Launched in: ")
+        currentTestInfo.append(launchTime.toString())
+        currentTestInfo.append("ms \nReady to start tests.")
     }
 
     private fun startTestSuite() {
@@ -133,12 +133,12 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
     private fun onTestCompleted(result: TestResult) {
         allResults.add(result)
-    val iterationNum = currentIteration
-    val entry = TestEntry(iteration = iterationNum, result = result)
-    val list = perTestResults.getOrPut(result.testName) { mutableListOf() }
-    list.add(entry)
+        val iterationNum = currentIteration
+        val entry = TestEntry(iteration = iterationNum, result = result)
+        val list = perTestResults.getOrPut(result.testName) { mutableListOf() }
+        list.add(entry)
         updateProgress()
-    updateCsvDisplay()
+        updateCsvDisplay()
         handler.postDelayed({ runNextTest() }, 1000)
     }
 
@@ -273,5 +273,4 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             if (result != null) onTestCompleted(result) else Log.e("BenchmarkSuiteActivity", "No TestResult received from test activity")
         }
     }
-
 }
