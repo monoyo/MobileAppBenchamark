@@ -38,7 +38,7 @@ import java.util.Comparator;
 public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 123;
-    private static final int TEST_ITERATIONS = 30;
+    private static final int TEST_ITERATIONS = 1;
     private static final int ALL_TESTS = 6;
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
 
@@ -58,6 +58,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        long testStartTime = System.currentTimeMillis();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_benchmark_suite);
 
@@ -77,6 +78,10 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
         testProgress.setMax(TEST_ITERATIONS * ALL_TESTS);
         Log.d("BenchmarkSuiteActivity", "onCreate completed, UI initialized");
+        long launchTime = System.currentTimeMillis() - testStartTime;
+        currentTestInfo.append("App Launched in: ");
+        currentTestInfo.append(Long.toString(launchTime));
+        currentTestInfo.append("ms \nReady to start tests.");
     }
 
     private void startTestSuite() {
@@ -194,7 +199,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
             String testName = e.getKey();
             List<TestEntry> entries = e.getValue();
             sb.append("# ").append(testName).append('\n');
-            sb.append("iteration,executionTimeMs,details,success\n");
+            sb.append("iteration,executionTimeMs,details\n");
             List<TestEntry> sorted = new ArrayList<>(entries);
             sorted.sort(Comparator.comparingInt(a -> a.iteration));
             for (TestEntry te : sorted) {
@@ -261,7 +266,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private String buildCsv(List<TestEntry> entries) {
         StringBuilder sb = new StringBuilder();
-        sb.append("iteration,executionTimeMs,details,success\n");
+        sb.append("iteration,executionTimeMs,details\n");
         List<TestEntry> sorted = new ArrayList<>(entries);
         sorted.sort(Comparator.comparingInt(a -> a.iteration));
         for (TestEntry te : sorted) {

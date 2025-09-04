@@ -1,6 +1,7 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -11,7 +12,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
@@ -70,7 +73,8 @@ public class ImageLoadingActivity extends AppCompatActivity {
                  .listener(new RequestListener<>() {
                      @Override
                      public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
-                         loadedImages++;
+                         if(loadedImages < IMAGE_URLS.size())
+                            loadedImages++;
                          Log.w("ImageLoadingActivity",
                                  "Image failed to load: ${IMAGE_URLS[position]} (processed $loadedImages/${IMAGE_URLS.size})");
                          checkCompletion(loadedImages);
@@ -79,13 +83,14 @@ public class ImageLoadingActivity extends AppCompatActivity {
                      }
 
                      @Override
-                     public boolean onResourceReady(android.graphics.drawable.Drawable resource, Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
-                         loadedImages++;
+                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                         if(loadedImages < IMAGE_URLS.size())
+                             loadedImages++;
                          Log.d("ImageLoadingActivity", "Image loaded: " + loadedImages + "/" + IMAGE_URLS.size());
-                         checkCompletion(loadedImages);
-                         if (loadedImages < IMAGE_URLS.size()) {
+                         if (loadedImages <= IMAGE_URLS.size()) {
                              recyclerView.smoothScrollToPosition(loadedImages);
                          }
+                         checkCompletion(loadedImages);
                          return false;
                      }
                  })
@@ -99,16 +104,14 @@ public class ImageLoadingActivity extends AppCompatActivity {
     }
 
     private void checkCompletion(int loadedImages) {
-        if (((LinearLayoutManager) recyclerView.getLayoutManager()).findLastCompletelyVisibleItemPosition() == IMAGE_URLS.size() - 1) {
-            if (loadedImages == IMAGE_URLS.size()) {
-                long totalTime = System.currentTimeMillis() - startTime;
-                Log.d("ImageLoadingActivity", "All images loaded, transitioning to the next test");
-                TestResult result = new TestResult("Image Loading Test", totalTime, "Image Loading Test Completed", true);
-                Intent intent = new Intent();
-                intent.putExtra(BenchmarkApplication.RESULT, result);
-                setResult(RESULT_OK, intent);
-                finish();
-            }
+        if (loadedImages == IMAGE_URLS.size()) {
+            long totalTime = System.currentTimeMillis() - startTime;
+            Log.d("ImageLoadingActivity", "All images loaded, transitioning to the next test");
+            TestResult result = new TestResult("Image Loading Test", totalTime, "Image Loading Test Completed", true);
+            Intent intent = new Intent();
+            intent.putExtra(BenchmarkApplication.RESULT, result);
+            setResult(RESULT_OK, intent);
+            finish();
         }
     }
 
