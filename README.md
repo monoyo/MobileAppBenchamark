@@ -20,13 +20,12 @@ Aplikacja Android (Java) do syntetycznych testów wydajności: CPU, RAM, UI, ła
 - [8. Format wyniku](#8-format-wyniku)
 - [9. Eksport](#9-eksport)
 - [10. Ograniczenia](#10-ograniczenia)
-- [11. Rozszerzenia (propozycje)](#11-rozszerzenia-propozycje)
-- [12. Szybki start](#12-szybki-start)
-- [13. Różnice vs potencjalny wariant Kotlin](#13-różnice-vs-potencjalny-wariant-kotlin)
-- [14. Licencja / Autor](#14-licencja--autor)
+- [11. Szybki start](#11-szybki-start)
+- [12. App Launch Time](#12-app-launch-time)
+- [13. Licencja / Autor](#13-licencja--autor)
 
 ## 1. Cel
-Porównywanie urządzeń, wychwytywanie regresji wydajności, obserwacja wpływu zmian konfiguracji i bibliotek. Metryka podstawowa: czas wykonania (ms).
+Zebranie danych dotyczących wydajności technologii Java. Metryka podstawowa: czas wykonania (ms).
 
 ## 2. Wymagania
 - JDK 17
@@ -43,7 +42,7 @@ Porównywanie urządzeń, wychwytywanie regresji wydajności, obserwacja wpływu
 - Własne wątki (Thread) dla CPU testu (brak korutyn)
 
 ## 4. Struktura pakietów (Java)
-`com.jossy.android.mobilebenchmarkappjava`
+Pakiet `com.jossy.android.mobilebenchmarkappjava`
 - activity/ (BenchmarkSuiteActivity, CPUTestActivity, RAMTestActivity, UITestActivity, ImageLoadingActivity, ApiTestActivity, LocationTestActivity)
 - data/ (TestResult, TestEntry, CpuResult, User, Post)
 - service/ (ApiService – Retrofit interface)
@@ -103,8 +102,8 @@ RAM: powtarzające sortowania, tworzenie kopii list, serializacja (Gson) – mik
 
 CSV per test:
 ```
-iteration,executionTimeMs,details,success
-0,512,"threads=8, iterations=1234567",true
+iteration,executionTimeMs,details
+0,512,"threads=8, iterations=1234567"
 ...
 ```
 
@@ -113,31 +112,20 @@ Plik per test: `<test_name>_<timestamp>.csv` w `.../files/Documents/benchmarks/`
 
 ## 10. Ograniczenia
 - Użycie `startActivityForResult` (legacy) – można zmodernizować do Activity Result API.
-- Brak percentyli/statystyki odchylenia – tylko średnie.
 - Sieć niestabilna wpływa na Image/API test.
 - Kolejność testów może wpływać (throttling, nagrzewanie CPU).
 
-## 11. Rozszerzenia (propozycje)
-- Migracja na ActivityResultContracts.
-- Dodanie MockWebServer dla deterministycznego API testu.
-- Zbieranie P95/P99 czasów.
-- Pomiar PSS pamięci podczas RAMTest.
-- Dodatkowy test I/O (np. zapis/odczyt plików).
-
-## 12. Szybki start
+## 11. Szybki start
 1. Uruchom aplikację.
 2. Naciśnij "Start Tests".
 3. Poczekaj na zakończenie wszystkich iteracji.
 4. Użyj "Export" aby zapisać CSV.
 
-## 13. Różnice vs potencjalny wariant Kotlin
-| Obszar | Java | (Kotlin potencjalny) |
-|--------|------|---------------------|
-| Współbieżność CPU | Thread/join | Coroutines |
-| Serializacja RAM | Gson | kotlinx.serialization |
-| Obrazy | Glide | Coil |
-| API | Retrofit/OkHttp | Ktor Client |
-| Pre-warm | Glide | imageLoader (Coil) |
 
-## 14. Licencja / Autor
+## 12. App Launch Time
+- Czas ładowania się pierwszego widoku.
+- Prezentowany jednorazowo na górze: `App launched in: Xms.` gdzie X to zmierzony czas.
+
+
+## 13. Licencja / Autor
 © 2025 Mobile Benchmark App (Java variant). Użycie zgodnie z licencjami bibliotek zewnętrznych.
