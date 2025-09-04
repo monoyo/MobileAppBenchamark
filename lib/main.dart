@@ -1,16 +1,14 @@
-import 'dart:async';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-
 import 'benchmark_suite.dart';
 
 void main() {
-  runApp(const BenchmarkApp());
+  final startMs = DateTime.now().millisecondsSinceEpoch;
+  runApp(BenchmarkApp(appStartEpochMs: startMs));
 }
 
 class BenchmarkApp extends StatelessWidget {
-  const BenchmarkApp({super.key});
+  final int appStartEpochMs;
+  const BenchmarkApp({super.key, required this.appStartEpochMs});
 
   @override
   Widget build(BuildContext context) {
@@ -18,72 +16,35 @@ class BenchmarkApp extends StatelessWidget {
       title: 'Mobile Benchmark',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomePage(),
+      home: _LaunchTimeResolver(appStartEpochMs: appStartEpochMs),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
+class _LaunchTimeResolver extends StatefulWidget {
+  final int appStartEpochMs;
+  const _LaunchTimeResolver({required this.appStartEpochMs});
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<_LaunchTimeResolver> createState() => _LaunchTimeResolverState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
-  late final int _startTime;
+class _LaunchTimeResolverState extends State<_LaunchTimeResolver> {
   int? _launchMs;
 
   @override
   void initState() {
     super.initState();
-    _startTime = DateTime.now().millisecondsSinceEpoch;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final elapsed = DateTime.now().millisecondsSinceEpoch - _startTime;
-      setState(() => _launchMs = elapsed);
+      final diff = DateTime.now().millisecondsSinceEpoch - widget.appStartEpochMs;
+      if (mounted) setState(() => _launchMs = diff);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('')),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome to the Mobile Benchmark App - Flutter Edition!',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black
-              ),
-            ),
-            Container(
-                padding: EdgeInsets.only(left: 25, bottom: 24, top: 24),
-                child:
-                  Center(child:  Text('App Launch Time: ${_launchMs != null ? '${_launchMs}ms' : 'calculating...'}'),)
-            ),
-            Text("Next step: Click the button below to start the benchmark."),
-            Center(child: ElevatedButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BenchmarkSuitePage())),
-              style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 8),
-                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  backgroundColor: const Color.fromARGB(255, 76, 175, 80),
-                  foregroundColor: Colors.white,
-                  shadowColor: Colors.black54,
-                ),
-              child: const Text('Run All Tests'),
-            )),
-            const SizedBox(height: 12),
-          ],
-        ),
-      ),
-    );
+    if (_launchMs == null) {
+      return const Scaffold(body: Center(child: Text('Inicjalizacja...')));
+    }
+    return BenchmarkSuitePage(appLaunchMs: _launchMs!);
   }
 }

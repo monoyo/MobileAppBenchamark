@@ -97,6 +97,5 @@ void _cpuBurn(_IsolateMsg m) {
 }
 
 int _availableProcessors() {
-  // Brak oficjalnego API w Flutterze; przyjmujemy 4 jako sensowny default.
-  return 4;
+  return 8;
 }

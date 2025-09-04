@@ -10,23 +10,24 @@ import 'api_test.dart';
 import 'location_test.dart';
 
 class BenchmarkSuitePage extends StatefulWidget {
-  const BenchmarkSuitePage({super.key});
+  final int appLaunchMs;
+  const BenchmarkSuitePage({super.key, required this.appLaunchMs});
 
   @override
   State<BenchmarkSuitePage> createState() => _BenchmarkSuitePageState();
 }
 
 class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
-  static const int _iterationsPerTest = 10;
+  static const int _iterationsPerTest = 2;
   late final int _allTests;
-  int _currentIteration = 0; // per test
+  int _currentIteration = 0;
   int _currentTestIndex = 0;
   bool _running = false;
   bool _disposed = false;
   String _currentInfo = '';
   double _progress = 0.0;
+  String? _averagesBlock;
 
-  // Results per test for CSV
   final Map<String, List<_TestEntry>> _perTestResults = {};
 
   final List<String> _testNames = const [
@@ -42,6 +43,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   void initState() {
     super.initState();
     _allTests = _testNames.length;
+    _currentInfo = 'App launched in: ${widget.appLaunchMs}ms.\nReady to start tests';
   }
 
   void _startSuite() async {
@@ -50,7 +52,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       _perTestResults.clear();
       _currentIteration = 0;
       _currentTestIndex = 0;
-      _currentInfo = '';
       _progress = 0.0;
     });
     await _runNext();
@@ -138,10 +139,17 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     }
   }
 
-
   void _appendAverages() {
-    // Optionally we can append a summary to display; we'll just update info
+    final buffer = StringBuffer('# Averages (ms)\n');
+    for (final entry in _perTestResults.entries) {
+      final values = entry.value;
+      if (values.isEmpty) continue;
+      final total = values.fold<int>(0, (acc, e) => acc + e.result.executionTimeMs);
+      final avg = total / values.length;
+      buffer.writeln('${entry.key},${avg.toStringAsFixed(2)}');
+    }
     setState(() {
+      _averagesBlock = buffer.toString();
       _currentInfo = 'All tests completed!';
     });
   }
@@ -149,10 +157,8 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   Future<Directory?> _getBenchmarksDir() async {
     try {
       if (Platform.isAndroid) {
-        // Prefer app-specific external directory (Android/data/<package>/files)
         final Directory? ext = await getExternalStorageDirectory();
         final Directory base = ext ?? await getApplicationDocumentsDirectory();
-        // Ensure Documents/benchmarks exists inside the app-specific directory
         final Directory docs = Directory('${base.path}/Documents');
         if (!(await docs.exists())) {
           await docs.create(recursive: true);
@@ -196,7 +202,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       if (rows.isEmpty) continue;
       final safe = name.toLowerCase().replaceAll(' ', '_');
       final file = File('${dir.path}/$safe.$stamp.csv');
-      final sb = StringBuffer()..writeln('iteration,executionTimeMs,details,success');
+      final sb = StringBuffer()..writeln('iteration,executionTimeMs,details');
       for (final r in rows) {
         sb.writeln('${r.iteration},${r.result.executionTimeMs},${_csv(r.result.details)},${r.result.success}');
       }
@@ -207,7 +213,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
           written.add(file.path);
         }
       } catch (_) {
-        // ignore individual file errors for this directory
       }
     }
     return written;
@@ -225,9 +230,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       final ts = DateTime.now();
       final stamp = '${ts.year.toString().padLeft(4, '0')}${ts.month.toString().padLeft(2, '0')}${ts.day.toString().padLeft(2, '0')}_${ts.hour.toString().padLeft(2, '0')}${ts.minute.toString().padLeft(2, '0')}${ts.second.toString().padLeft(2, '0')}';
 
-      // Write to primary (Android: external app dir; iOS: documents)
       List<String> writtenPrimary = await _writeCsvFilesToDir(primaryDir, stamp);
-      // Additionally write to internal documents as a fallback on Android
       List<String> writtenInternal = <String>[];
       if (Platform.isAndroid) {
         final internalDir = await _getInternalBenchmarksDir();
@@ -268,26 +271,22 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         padding: const EdgeInsets.symmetric(
           horizontal: 32.0,
           vertical: 52.0,
-        ), // match XML padding
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header (centered, bold, 18sp)
             Text(
-              _running ? _currentInfo : 'Ready',
+              _currentInfo.isNotEmpty ? _currentInfo : 'Ready',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
-            // Horizontal progress bar
             LinearProgressIndicator(value: _running ? progress : 0.0),
             const SizedBox(height: 16),
 
-            // Scrollable results area
             Expanded(
               child: Container(
-                // ensure it scrolls when content is large
                 child: SingleChildScrollView(
                   child: SelectableText(csvText, style: const TextStyle(fontSize: 14)),
                 ),
@@ -296,7 +295,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
 
             const SizedBox(height: 16),
 
-            // Control buttons row (centered)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -350,7 +348,7 @@ String _csv(String v) {
   return needs ? '"$esc"' : esc;
 }
 
-String _buildCsvDisplayFrom(Map<String, List<_TestEntry>> data) {
+String _buildCsvDisplayFrom(Map<String, List<_TestEntry>> data, String? averagesBlock) {
   final sb = StringBuffer();
   final keys = data.keys.toList();
   for (final testName in keys) {
@@ -359,15 +357,19 @@ String _buildCsvDisplayFrom(Map<String, List<_TestEntry>> data) {
     sb.writeln('# $testName');
     sb.writeln('iteration,executionTimeMs,details,success');
     for (final e in entries) {
-      sb.writeln('${e.iteration},${e.result.executionTimeMs},${_csv(e.result.details)},${e.result.success}');
+      sb.writeln('${e.iteration},${e.result.executionTimeMs},${_csv(e.result.details)}');
     }
     sb.writeln();
+    if (averagesBlock != null) {
+      sb.writeln(averagesBlock.trim());
+      sb.writeln();
+    }
   }
   return sb.toString();
 }
 
 extension on _BenchmarkSuitePageState {
   String _buildCsvDisplayState() {
-    return _buildCsvDisplayFrom(_perTestResults);
+    return _buildCsvDisplayFrom(_perTestResults, _averagesBlock);
   }
 }

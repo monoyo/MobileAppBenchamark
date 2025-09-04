@@ -7,7 +7,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'models/test_result.dart';
 
 class ImageLoadingTestPage extends StatefulWidget {
-  final int runId; // unique per iteration to avoid cache hits
+  final int runId;
   const ImageLoadingTestPage({super.key, required this.runId});
 
   @override
@@ -23,7 +23,7 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   late final List<bool> _successList;
   late final List<bool> _done;
   late final List<int> _retries;
-  late final List<bool> _resolving; // true when waiting for ImageStream
+  late final List<bool> _resolving;
   final Set<int> _retryQueued = <int>{};
 
   int _currentIndex = 0;
@@ -36,11 +36,10 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   Timer? _watchdogTimer;
   BaseCacheManager? _cacheManager;
 
-  // timing and limits
   late final int _startMs;
   int _lastProgressMs = 0;
-  final int _maxRunMs = 60 * 1000; // 60s
-  final int _stallMs = 10 * 1000; // 10s
+  final int _maxRunMs = 60 * 1000;
+  final int _stallMs = 10 * 1000;
   final int _maxRetries = 2;
 
   @override
@@ -57,7 +56,6 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
     _startMs = DateTime.now().millisecondsSinceEpoch;
     _lastProgressMs = _startMs;
 
-    // small nudge so ListView attaches
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (_scrollController.hasClients) {
@@ -82,7 +80,6 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
       }
     });
 
-    // watchdog
     _watchdogTimer = Timer.periodic(const Duration(milliseconds: 500), (t) {
       if (!mounted || _completed) {
         t.cancel();
@@ -113,7 +110,6 @@ List<String> linkList = [
     return linkList[index];
   }
 
-  // Retry logic kept inline where needed; helper removed to avoid unused warning
 
   @override
   void dispose() {
@@ -195,20 +191,17 @@ List<String> linkList = [
     });
   }
 
-  // Resolve an ImageProvider to ensure the image is decoded. If decoding
-  // succeeds, mark the item done; otherwise retry with backoff up to limit.
   void _resolveProviderAndMark(int index, ImageProvider provider) {
     if (!mounted || _completed) return;
     if (index < 0 || index >= _itemCount) return;
     if (_done[index]) return;
-    if (_resolving[index]) return; // already resolving
+    if (_resolving[index]) return;
 
     _resolving[index] = true;
 
     final ImageStream stream = provider.resolve(const ImageConfiguration());
     ImageStreamListener? listener;
     listener = ImageStreamListener((ImageInfo info, bool syncCall) {
-      // success: image decoded
       try {
         _resolving[index] = false;
         _markDone(index, success: true);
@@ -218,13 +211,11 @@ List<String> linkList = [
     }, onError: (dynamic error, StackTrace? stackTrace) {
       stream.removeListener(listener!);
       _resolving[index] = false;
-      // schedule retry with simple backoff
       if (_retries[index] < _maxRetries && !_done[index]) {
         _retries[index]++;
         final int delayMs = 250 * (1 << (_retries[index] - 1));
         Future.delayed(Duration(milliseconds: delayMs), () {
           if (!mounted || _completed || _done[index]) return;
-          // keep same URL; CachedNetworkImage + headers will re-fetch
           _runUrls[index] = linkList[index];
           setState(() {});
         });
@@ -273,9 +264,7 @@ List<String> linkList = [
                   );
                 },
                 imageBuilder: (ctx, imageProvider) {
-                  // store provider for later reuse
                   _providers[i] = imageProvider;
-                  // resolve provider and ensure the image was decoded successfully
                   _resolveProviderAndMark(i, imageProvider);
                   return Image(image: imageProvider, fit: BoxFit.cover);
                 },
