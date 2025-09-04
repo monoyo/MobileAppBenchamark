@@ -692,3 +692,119 @@ dkms.conf
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/.filecache
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/.filecache
+/.flutter-plugins-dependencies
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/App.framework/App
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/app.dill
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/app.dill
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/dart_build.stamp
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/dart_build.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/dart_build_result.json
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/dart_build_result.json
+/.dart_tool/flutter_build/dart_plugin_registrant.dart
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/debug_android_application.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/debug_ios_bundle_flutter_assets.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/debug_ios_lldb_init.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/debug_universal_framework.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/debug_unpack_ios.stamp
+/ios/Pods/Target Support Files/Flutter/Flutter.debug.xcconfig
+/ios/Flutter/Flutter.podspec
+/ios/Pods/Local Podspecs/Flutter.podspec.json
+/ios/Pods/Target Support Files/Flutter/Flutter.release.xcconfig
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/Flutter.xcscheme
+/macos/Flutter/ephemeral/Flutter-Generated.xcconfig
+/ios/Flutter/flutter_export_environment.sh
+/macos/Flutter/ephemeral/flutter_export_environment.sh
+/ios/Flutter/ephemeral/flutter_lldb_helper.py
+/ios/Flutter/ephemeral/flutter_lldbinit
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/gen_dart_plugin_registrant.stamp
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/gen_dart_plugin_registrant.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/gen_localizations.stamp
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/gen_localizations.stamp
+/ios/Flutter/Generated.xcconfig
+/ios/Runner/GeneratedPluginRegistrant.h
+/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+/ios/Runner/GeneratedPluginRegistrant.m
+/ios/.symlinks/plugins/geolocator_apple/
+/ios/Pods/Target Support Files/geolocator_apple/geolocator_apple.debug.xcconfig
+/ios/Pods/Local Podspecs/geolocator_apple.podspec.json
+/ios/Pods/Target Support Files/geolocator_apple/geolocator_apple.release.xcconfig
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/geolocator_apple.xcscheme
+/ios/Pods/Target Support Files/geolocator_apple/geolocator_apple-dummy.m
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/geolocator_apple-geolocator_apple_privacy.xcscheme
+/ios/Pods/Target Support Files/geolocator_apple/geolocator_apple-Info.plist
+/windows/flutter/ephemeral/.plugin_symlinks/geolocator_windows/
+/android/gradlew
+/android/gradlew.bat
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/install_code_assets.stamp
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/install_code_assets.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/IssueLaunchRootViewControllerAccess.stamp
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/kernel_snapshot_program.stamp
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/kernel_snapshot_program.stamp
+/ios/Pods/Manifest.lock
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/native_assets.json
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/native_assets.json
+/.dart_tool/flutter_build/15fda680ffa13aac5eb14add4fbf641c/outputs.json
+/.dart_tool/flutter_build/d174b94869ec98956d19e17eeff099ab/outputs.json
+/.dart_tool/package_config.json
+/.dart_tool/package_graph.json
+/ios/.symlinks/plugins/path_provider_foundation/
+/ios/Pods/Target Support Files/path_provider_foundation/path_provider_foundation.debug.xcconfig
+/ios/Pods/Local Podspecs/path_provider_foundation.podspec.json
+/ios/Pods/Target Support Files/path_provider_foundation/path_provider_foundation.release.xcconfig
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/path_provider_foundation.xcscheme
+/ios/Pods/Target Support Files/path_provider_foundation/path_provider_foundation-dummy.m
+/ios/Pods/Target Support Files/path_provider_foundation/path_provider_foundation-Info.plist
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/path_provider_foundation-path_provider_foundation_privacy.xcscheme
+/ios/Pods/Target Support Files/path_provider_foundation/path_provider_foundation-umbrella.h
+/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/
+/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/Pods-Runner.xcscheme
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-acknowledgements.markdown
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-acknowledgements.plist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-dummy.m
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks-Debug-input-files.xcfilelist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks-Debug-output-files.xcfilelist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks-Profile-input-files.xcfilelist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks-Profile-output-files.xcfilelist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks-Release-input-files.xcfilelist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks-Release-output-files.xcfilelist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-Info.plist
+/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-umbrella.h
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/Pods-RunnerTests.xcscheme
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-acknowledgements.markdown
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-acknowledgements.plist
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-dummy.m
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-Info.plist
+/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-umbrella.h
+/ios/Pods/Pods.xcodeproj/project.pbxproj
+/ios/Pods/Target Support Files/geolocator_apple/ResourceBundle-geolocator_apple_privacy-geolocator_apple-Info.plist
+/ios/Pods/Target Support Files/path_provider_foundation/ResourceBundle-path_provider_foundation_privacy-path_provider_foundation-Info.plist
+/ios/Pods/Target Support Files/sqflite_darwin/ResourceBundle-sqflite_darwin_privacy-sqflite_darwin-Info.plist
+/ios/.symlinks/plugins/sqflite_darwin/
+/ios/Pods/Target Support Files/sqflite_darwin/sqflite_darwin.debug.xcconfig
+/ios/Pods/Local Podspecs/sqflite_darwin.podspec.json
+/ios/Pods/Target Support Files/sqflite_darwin/sqflite_darwin.release.xcconfig
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/sqflite_darwin.xcscheme
+/ios/Pods/Target Support Files/sqflite_darwin/sqflite_darwin-dummy.m
+/ios/Pods/Target Support Files/sqflite_darwin/sqflite_darwin-Info.plist
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/sqflite_darwin-sqflite_darwin_privacy.xcscheme
+/ios/Pods/Target Support Files/sqflite_darwin/sqflite_darwin-umbrella.h
+/ios/Runner.xcworkspace/xcuserdata/nbjprochniewicz.xcuserdatad/UserInterfaceState.xcuserstate
+/.dart_tool/version
+/.dart_tool/dartpad/web_plugin_registrant.dart
+/ios/Pods/Pods.xcodeproj/xcuserdata/nbjprochniewicz.xcuserdatad/xcschemes/xcschememanagement.plist
+/ios/.symlinks/plugins/geolocator_apple/
+/windows/flutter/ephemeral/.plugin_symlinks/geolocator_windows/
+/ios/.symlinks/plugins/path_provider_foundation/
+/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/
+/windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/
+/ios/.symlinks/plugins/sqflite_darwin/

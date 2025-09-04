@@ -1,125 +1,142 @@
 # Mobile Benchmark App (Kotlin)
 
-Kompleksowa aplikacja Android do wykonywania powtarzalnych testów wydajności urządzenia: CPU, RAM, UI (rendering/animacje), ładowanie obrazów, API (sieć), lokalizacja (GPS / Network) oraz orkiestracja wielu iteracji i eksport wyników do CSV.
+Aplikacja Android (Kotlin) do syntetycznych testów wydajności: CPU, RAM, UI, ładowanie obrazów, API, lokalizacja + orkiestracja wielu iteracji i eksport wyników do CSV.
 
 ## Spis treści
-1. Cel projektu
-2. Wymagania środowiskowe
-3. Konfiguracja / Budowanie
-4. Struktura pakietów i modułów
-5. Użyte biblioteki (wersje i rola)
-6. Opis testów i przepływ działania (flow)
-7. Analiza złożoności i charakterystyka obciążeń
-8. Format wyników i eksport CSV
-9. Modele danych
-10. Strategia testowania / możliwe rozszerzenia testów
-11. Dobre praktyki i ograniczenia
-12. Pomysły na dalszy rozwój
+- [1. Cel](#1-cel)
+- [2. Wymagania](#2-wymagania)
+- [3. Technologie / Biblioteki (Kotlin wariant)](#3-technologie--biblioteki-kotlin-wariant)
+- [4. Struktura pakietów (Kotlin)](#4-struktura-pakietów-kotlin)
+- [5. Orkiestracja (BenchmarkSuiteActivity)](#5-orkiestracja-benchmarksuiteactivity)
+- [6. Testy](#6-testy)
+  - [6.1 CPU Test](#61-cpu-test)
+  - [6.2 RAM Test](#62-ram-test)
+  - [6.3 UI Test](#63-ui-test)
+  - [6.4 Image Loading Test](#64-image-loading-test)
+  - [6.5 API Test](#65-api-test)
+  - [6.6 Location Test](#66-location-test)
+  - [6.7 Application Init](#67-application-init)
+- [7. Złożoność (dominujące czynniki)](#7-złożoność-dominujące-czynniki)
+- [8. Format wyniku](#8-format-wyniku)
+- [9. Eksport](#9-eksport)
+- [10. Ograniczenia](#10-ograniczenia)
+- [11. Szybki start](#11-szybki-start)
+- [12. App Launch Time](#12-app-launch-time)
+- [13. Dalszy rozwój](#13-dalszy-rozwoj)
+- [14. Licencja / Autor](#14-licencja--autor)
 
 ---
-## 1. Cel projektu
-Aplikacja ma umożliwić szybkie uzyskanie wielu metryk obserwowalnych (czas wykonania) dla podstawowych klas obciążeń na urządzeniu mobilnym Android. Wyniki mogą służyć do:
-- Porównań między urządzeniami
-- Rejestrowania regresji wydajności build-to-build
-- Walidacji wpływu zmian w konfiguracji (np. wersji bibliotek)
+## 1. Cel
+Zebranie danych dotyczących wydajności technologii Kotlin. Metryka podstawowa: czas wykonania (ms).
 
-## 2. Wymagania środowiskowe
-- Android Studio Giraffe/Koala+ (dowolna wersja wspierająca AGP dla compileSdk 35)
-- JDK 17 (ustawione w projekcie: `sourceCompatibility = JavaVersion.VERSION_17`)
-- Gradle Wrapper (Version Catalog `libs.*`)
-- minSdk = 24, targetSdk = 35, compileSdk = 35
-- Dostęp do Internetu (test API + ładowanie obrazów – Coil/Ktor)
-- Uprawnienia lokalizacji (Location Test)
+## 2. Wymagania
+- JDK 17 ( `sourceCompatibility = JavaVersion.VERSION_17` )
+- Android Studio (compileSdk 35, targetSdk 35, minSdk 24)
+- Gradle Wrapper + Version Catalog (`libs.*`)
+- Dostęp do Internetu (API + obrazy)
+- Uprawnienia lokalizacji (ACCESS_FINE_LOCATION)
 
-## 3. Konfiguracja / Budowanie
-1. Sklonuj repo.
-2. Otwórz w Android Studio.
-3. Gradle sync (automatycznie zaciągnie Coil + Ktor).
-4. Build: `assembleDebug`.
-5. Uruchom na urządzeniu fizycznym (zalecane).
-
-## 4. Struktura pakietów i modułów
-`com.jossy.android.mobilebenchmarkappkotlin`
-- `activity/` – ekrany testów.
-- `data/` – modele danych + wynik testu.
-- `service/` – klient API (Ktor: `ApiService`).
-- `CPUTest.kt`, `RAMTest.kt` – logika testów syntetycznych.
-
-Orkiestracja: `BenchmarkSuiteActivity`.
-
-## 5. Użyte biblioteki (po migracji)
+## 3. Technologie / Biblioteki (Kotlin wariant)
 | Biblioteka | Rola |
 |-----------|------|
-| AndroidX Core/AppCompat/ConstraintLayout/RecyclerView | Podstawy UI |
-| Material Components | Elementy Material |
-| Kotlin Coroutines (Android, Play Services) | Współbieżność testów, asynchroniczność |
-| Kotlinx Serialization JSON | Serializacja (RAMTest, API) |
-| Coil | Ładowanie i dekodowanie obrazów (Image Loading Test) |
+| AndroidX Core / AppCompat / ConstraintLayout / RecyclerView | Podstawy UI |
+| Material Components | Komponenty Material |
+| Kotlin Coroutines (core, android) | Współbieżność testów (CPU, API, obrazy) |
+| Kotlinx Serialization JSON | Serializacja / deserializacja (RAM, API) |
+| Coil | Ładowanie i dekodowanie obrazów (Image Test) |
 | Ktor Client (core, android, logging, content-negotiation, serialization) | HTTP (API Test) |
-| Play Services Location | Lokalizacja |
-| Lifecycle Runtime KTX | `lifecycleScope` w aktywnościach (API test) |
+| Play Services Location | Lokalizacja (Location Test) |
+| Lifecycle Runtime KTX | `lifecycleScope` w aktywnościach |
 
-Usunięte: Glide, Retrofit, OkHttp (zastąpione przez Coil + Ktor). 
+Usunięte po migracji: Glide, Retrofit, OkHttp (zastąpione przez Coil + Ktor).
 
-## 6. Opis testów i przepływ działania (flow)
-### Suite
-- 6 testów * 30 iteracji (konfigurowalne w kodzie) sekwencyjnie.
-- Zbiór wyników → podsumowanie + eksport CSV.
+## 4. Struktura pakietów (Kotlin)
+Pakiet `com.jossy.android.mobilebenchmarkappkotlin`
+- activity/ (BenchmarkSuiteActivity, CPUTestActivity, RAMTestActivity, UITestActivity, ImageLoadingActivity, ApiTestActivity, LocationTestActivity)
+- data/ (TestResult, modele domenowe, np. Post)
+- service/ (ApiService – Ktor)
+- CPUTest.kt / RAMTest.kt
+- BenchmarkApplication.kt (pre-warm Coil, StrictMode w debug)
 
-### CPU Test
-- Równoległe korutyny (Default dispatcher) = liczba rdzeni.
-- Ciasna pętla funkcji `sin/cos/sqrt` do upłynięcia limitu czasu.
+## 5. Orkiestracja (BenchmarkSuiteActivity)
+- TEST_ITERATIONS domyślnie = 30; ALL_TESTS = 6 → 180 przebiegów.
+- Testy wykonywane sekwencyjnie; po każdym wynik (TestResult) dodawany do listy.
+- Po zakończeniu: agregacja + podgląd + eksport CSV (per test).
 
-### RAM Test
-- `RUNS = 95_000` powtórzeń transformacji kolekcji + JSON (wysoka presja alokacyjna).
+## 6. Testy
+### 6.1 CPU Test
+- Korutyny na `Dispatchers.Default` (liczba wątków ≈ liczbie rdzeni).
+- Pętla do deadlinu (`now + durationMs`): `sin`, `cos`, `sqrt` + akumulacja.
+- Wynik: liczba korutyn, czas, suma iteracji, checksum.
 
-### Image Loading Test
-- 10 URL (Picsum).
-- Coil ładuje obrazy w `RecyclerView`; mierzy czas do przetworzenia (sukces/porażka) wszystkich żądań.
+### 6.2 RAM Test
+- RUNS = 95_000.
+- Intensywne operacje na kolekcjach + serializacja / deserializacja JSON (kotlinx.serialization) → wysoka presja alokacyjna i GC.
+- Kopiowanie, shuffle, sort, filtr, mapowanie, serializacja, deserializacja, agregacje.
 
-### API Test
-- Ktor GET `/posts` (JSONPlaceholder).
-- Mierzy latency request→response; dane dekodowane przez kotlinx.serialization.
+### 6.3 UI Test
+- Generowanie ~1500 widoków.
+- Animacje property (obciążenie render pipeline / measure/layout/draw).
 
-### UI Test
-- Generowanie 1500 widoków + animacje property.
+### 6.4 Image Loading Test
+- 10 URL (Picsum) ładowanych Coil w RecyclerView.
+- Zliczanie sukces/porażka; koniec po obsłużeniu wszystkich.
 
-### Location Test
-- Pomiar czasu pobrania aktualnej lokalizacji (Fused Provider).
+### 6.5 API Test
+- Ktor GET `https://jsonplaceholder.typicode.com/posts`.
+- Pomiar latency request→response + dekodowanie JSON (serialization plugin).
 
-### Application Init
-- StrictMode w debug + pre-warm `Coil.imageLoader` w wątku tła.
+### 6.6 Location Test
+- Fused Location Provider (Play Services) – jednorazowe pobranie aktualnej lokalizacji; pomiar czasu.
 
-## 7. Analiza złożoności
-(bez zmian vs wersja sprzed migracji – charakterystyka obciążeń identyczna, zmienił się tylko stos HTTP/obrazów)
+### 6.7 Application Init
+- StrictMode (debug) + pre-warm `Coil.imageLoader` w tle.
 
-| Test | Złożoność dominująca | Uwagi |
-|------|----------------------|-------|
-| CPU | O(T * I) | Operacje FPU trygonometryczne |
-| RAM | O(R * n log n) | sort/shuffle + JSON |
-| Image | O(k) | k = liczba obrazów (10), zależne od sieci/cache |
+## 7. Złożoność (dominujące czynniki)
+| Test | Czasowa | Uwagi |
+|------|---------|-------|
+| CPU | O(T * I) | I = liczba iteracji FP do deadlinu |
+| RAM | O(R * n log n) | sort/shuffle + JSON + wielokrotne kopie |
+| UI | O(n) | n = liczba generowanych View |
+| Image | O(k) | k = 10 żądań (sieć/cache zależne) |
 | API | O(1) | Pojedynczy request |
-| UI | O(n) | n = liczba wygenerowanych View |
 | Location | O(1) | Zależne od providerów |
 
-## 8. Format wyników i eksport CSV
-Struktura `TestResult` niezmieniona.
+## 8. Format wyniku
+Struktura `TestResult(testName: String, executionTimeMs: Long, details: String, isSuccessful: Boolean)`.
 
-## 9. Modele danych
-`Post` oznaczony `@Serializable` (dla Ktor + kotlinx.serialization).
+Przykładowy CSV:
+```
+iteration,executionTimeMs,details
+0,512,"threads=8, iterations=1234567"
+```
 
-## 10. Strategia testowania
-Propozycje: test mock API z Ktor `MockEngine`, test skrócony RAM (RUNS małe), walidacja `iterations > 0` w CPU przy małym `durationMs`.
+## 9. Eksport
+- Plik per test: `<test_name>_<timestamp>.csv`.
+- Katalog docelowy: `.../files/Documents/benchmarks/` (prywatne dla aplikacji, dostępne przez systemowy picker / adb pull).
 
-## 11. Dobre praktyki i ograniczenia
-Sieć (API/Image) podatna na jitter; dla stabilności można dodać retry lub lokalny serwer mock.
+## 10. Ograniczenia
+- Zmienność sieci (API / Image) → jitter; brak retry (można dodać).
+- Sekwencyjne uruchamianie testów: możliwe nagrzewanie CPU wpływa na późniejsze.
+- Brak percentyli – raportuje tylko średnie / surowe przebiegi (możliwość rozszerzenia).
+- Lokalizacja zależna od ustawień urządzenia (GPS/Wi-Fi). 
 
-## 12. Dalszy rozwój
-- Percentyle (P95) czasów.
-- Rejestr użycia pamięci (PSS) w trakcie.
-- Macrobenchmark / Baseline Profiles dla start-up.
+## 11. Szybki start
+1. Uruchom aplikację.
+2. Kliknij "Start Suite".
+3. Poczekaj aż wszystkie testy (6 * 30) się zakończą.
+4. Użyj opcji "Export" aby zapisać CSV.
 
----
-Szybki start: Uruchom → Start Suite → Export.
+## 12. App Launch Time
+- Mierzony czas od startu procesu do wyświetlenia pierwszego ekranu.
+- Wyświetlany jednorazowo: `App launched in: Xms`.
 
-Migracja: Glide→Coil, Retrofit/OkHttp→Ktor wykonana w kodzie (`ImageLoadingActivity`, `ApiTestActivity`, `ApiService`, `BenchmarkApplication`).
+## 13. Dalszy rozwój
+- Percentyle (P95 / P99) czasów.
+- Rejestr pamięci (PSS) w trakcie testów.
+- Macrobenchmark / Baseline Profiles (start-up, scroll, animacje).
+- Lokalny mock serwer (stabilizacja API/Image testów).
+- Telemetria energii (Battery Historian / Perfetto integracja).
+
+## 14. Licencja / Autor
+© 2025 Mobile Benchmark App (Kotlin variant). Użycie zgodnie z licencjami bibliotek zewnętrznych.
