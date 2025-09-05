@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { resolveResult } from './utils/navResult';
-import type { TestResult, User } from './types';
+import React from 'react';
+import { Text, View } from 'react-native';
 import usersData from '../assets/users.json';
+import type { TestResult, User } from './types';
+import { resolveResult } from './utils/navResult';
 
 const RUNS = 95000; // target iterations (will cap by time on RN)
 const MAX_MS = 10_000; // align with Flutter's ~10s max duration
@@ -56,7 +56,7 @@ export default function RAMTest() {
       bigList.length = 0;
       const elapsed = Date.now() - start;
   const endedByCap = elapsed >= MAX_MS;
-  const res: TestResult = { testName: 'RAM Test', executionTimeMs: elapsed, details: endedByCap ? 'Completed (time-capped)' : 'RAM intensive operations completed', success: true };
+  const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: endedByCap ? 'Completed (time-capped)' : 'RAM intensive operations completed', success: true };
       resolveResult(params.key as string, res);
       router.back();
     };

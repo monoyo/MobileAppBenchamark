@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { resolveResult } from './utils/navResult';
+import React from 'react';
+import { Text, View } from 'react-native';
 import type { TestResult } from './types';
+import { resolveResult } from './utils/navResult';
 
 export default function CPUTest() {
   const router = useRouter();
@@ -89,7 +89,7 @@ export default function CPUTest() {
       });
 
       const elapsed = Date.now() - start;
-      const res: TestResult = { testName: 'CPU Test', executionTimeMs: elapsed, details: '', success: true };
+  const res: TestResult = { testName: 'CPU Test', group: 'cpu', executionTimeMs: elapsed, details: '', success: true };
       resolveResult(params.key as string, res);
       router.back();
     };

@@ -1,9 +1,9 @@
-import React from 'react';
-import { ScrollView, View, Text } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { resolveResult } from './utils/navResult';
+import React from 'react';
+import { ScrollView, View } from 'react-native';
 import type { TestResult } from './types';
+import { resolveResult } from './utils/navResult';
 
 const urls = [
   "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
@@ -37,6 +37,7 @@ export default function ImageTest() {
       const failed = doneCountRef.current - ok;
       const res: TestResult = {
         testName: 'Image Loading Test',
+        group: 'io',
         executionTimeMs: elapsed,
         details: failed > 0 ? `Loaded ${ok}/${urls.length} (failed ${failed})` : 'All images loaded',
         success: failed === 0,

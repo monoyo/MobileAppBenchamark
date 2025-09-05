@@ -1,6 +1,10 @@
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { enableScreens } from 'react-native-screens';
+import { markAppStart } from './utils/launchTime';
+
+// Capture earliest timestamp (if not already captured by another platform entry point)
+markAppStart(Date.now());
 
 export default function RootLayout() {
   enableScreens(true);

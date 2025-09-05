@@ -1,17 +1,24 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
-import { useRouter, Href } from 'expo-router';
-import { createResultKey, waitForResult } from './utils/navResult';
-import type { TestResult } from './types';
 import * as FileSystem from 'expo-file-system';
+import { Href, useRouter } from 'expo-router';
+import React from 'react';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { EXPORT_FILE_PREFIX } from './constants/testConfig';
+import type { GroupAverage, TestResult } from './types';
+import { computeGroupAverages, formatResult } from './types';
+import { getLaunchDurationMs, markSuiteReady } from './utils/launchTime';
+import { createResultKey, waitForResult } from './utils/navResult';
+// Clipboard is optional; wrap in dynamic require to avoid type issues if not installed.
+let Clipboard: { setStringAsync?: (s: string) => Promise<void> } = {} as any;
+try { Clipboard = require('expo-clipboard'); } catch { /* optional */ }
 
-const TESTS: { name: string; route: Href }[] = [
-  { name: 'UI Test', route: '/ui-test' },
-  { name: 'CPU Test', route: '/cpu-test' },
-  { name: 'RAM Test', route: '/ram-test' },
-  { name: 'Image Loading Test', route: '/image-test' },
-  { name: 'API Test', route: '/api-test' },
-  { name: 'Location Test', route: '/location-test' },
+// Define test groups (example grouping). TODO: refine grouping logic based on domain.
+const TESTS: { name: string; route: Href; group: string }[] = [
+  { name: 'UI Test', route: '/ui-test', group: 'ui' },
+  { name: 'CPU Test', route: '/cpu-test', group: 'cpu' },
+  { name: 'RAM Test', route: '/ram-test', group: 'memory' },
+  { name: 'Image Loading Test', route: '/image-test', group: 'io' },
+  { name: 'API Test', route: '/api-test', group: 'network' },
+  { name: 'Location Test', route: '/location-test', group: 'sensors' },
 ];
 
 export default function Suite() {
@@ -21,7 +28,14 @@ export default function Suite() {
   const [iteration, setIteration] = React.useState(0);
   const [testIndex, setTestIndex] = React.useState(0);
   const [lastSavedPath, setLastSavedPath] = React.useState<string | null>(null);
-  const iterations = 3;
+  const iterations = 3; // TODO: expose configurable iterations if desired
+  const launchTimeRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    // Mark that suite is visible and ready.
+    markSuiteReady();
+    launchTimeRef.current = getLaunchDurationMs();
+  }, []);
 
   const startSuite = async () => {
     setRunning(true);
@@ -40,7 +54,7 @@ export default function Suite() {
   const key = createResultKey();
   // Use direct href with query to satisfy typed routes
   router.push((`${TESTS[idx].route}?key=${encodeURIComponent(key)}`) as any);
-    const res = await waitForResult<TestResult | null>(key);
+  const res = await waitForResult<TestResult | null>(key);
     if (res) acc.push(res);
     setResults([...acc]);
   // tiny pause to let UI settle (reduced)
@@ -56,9 +70,20 @@ export default function Suite() {
     Alert.alert('Suite finished', path ? `Results saved to ${path}` : 'Failed to save results');
   };
 
+  const buildExportPayload = (res: TestResult[]) => {
+    const groupAverages = computeGroupAverages(res);
+    return {
+      launchTimeMs: launchTimeRef.current,
+      tests: res,
+      groupAverages,
+      generatedAt: new Date().toISOString(),
+    };
+  };
+
   const saveToFile = async (res: TestResult[]) => {
-    const text = res.map(r => `${r.testName}: ${r.executionTimeMs}ms (${r.details})`).join('\n');
-    const fileUri = `${FileSystem.documentDirectory}benchmark_results_${Date.now()}.txt`;
+    const payload = buildExportPayload(res);
+    const text = JSON.stringify(payload, null, 2);
+    const fileUri = `${FileSystem.documentDirectory}${EXPORT_FILE_PREFIX}_${Date.now()}.json`;
     try {
       await FileSystem.writeAsStringAsync(fileUri, text, { encoding: FileSystem.EncodingType.UTF8 });
       return fileUri;
@@ -69,6 +94,11 @@ export default function Suite() {
 
   const exportResults = async () => {
     const path = await saveToFile(results);
+    if (path && Clipboard?.setStringAsync) {
+      // copy JSON to clipboard also (best-effort)
+      const payload = buildExportPayload(results);
+      try { await Clipboard.setStringAsync(JSON.stringify(payload)); } catch {}
+    }
     setLastSavedPath(path);
     Alert.alert(path ? 'Export complete' : 'Export failed', path ?? '');
   };
@@ -77,19 +107,32 @@ export default function Suite() {
   const completed = iteration * TESTS.length + testIndex;
   const progress = total === 0 ? 0 : Math.max(0, Math.min(1, completed / total));
 
+  const groupAverages: GroupAverage[] = computeGroupAverages(results);
+
   return (
     <View style={styles.root}>
-      {running && (
-        <Text style={styles.header}>Running: {TESTS[testIndex]?.name}</Text>
-      )}
+      <Text style={styles.header}>Launch: {launchTimeRef.current != null ? `${launchTimeRef.current} ms` : '...'} | Ready to test</Text>
+      {running && <Text style={styles.subHeader}>Running: {TESTS[testIndex]?.name}</Text>}
       <View style={styles.progressBarWrap}>
         <View style={[styles.progressBarFill, { flex: progress }]} />
         <View style={{ flex: 1 - progress }} />
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 8 }}>
-        <Text style={{ fontSize: 14 }}>
-          {results.length === 0 ? 'No results yet.' : results.map(r => `${r.testName}: ${r.executionTimeMs}ms (${r.details})`).join('\n')}
+        <Text style={styles.sectionTitle}>Results</Text>
+        <Text style={styles.mono}>
+          {results.length === 0 ? 'No results yet.' : results.map(r => formatResult(r)).join('\n')}
         </Text>
+        {groupAverages.length > 0 && (
+          <View style={{ marginTop: 16 }}>
+            <Text style={styles.sectionTitle}>Group Averages</Text>
+            {groupAverages.map(g => (
+              <Text key={g.group} style={styles.avgLine}>{g.group}: {g.averageMs.toFixed(2)} ms ({g.samples})</Text>
+            ))}
+          </View>
+        )}
+        {lastSavedPath && (
+          <Text style={{ marginTop: 12, fontSize: 12, color: '#555' }}>Last export: {lastSavedPath}</Text>
+        )}
       </ScrollView>
       <View style={styles.row}>
         <Pressable disabled={running} onPress={startSuite} style={[styles.btn, { backgroundColor: 'rgb(68,63,216)' }, running && styles.btnDisabled]}>
@@ -106,7 +149,8 @@ export default function Suite() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 32, paddingVertical: 52 },
-  header: { textAlign: 'center', fontSize: 18, fontWeight: '700', marginBottom: 16 },
+  header: { textAlign: 'center', fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  subHeader: { textAlign: 'center', fontSize: 14, fontWeight: '600', marginBottom: 8 },
   progressBarWrap: { height: 4, backgroundColor: '#eee', borderRadius: 2, flexDirection: 'row', overflow: 'hidden', marginBottom: 16 },
   progressBarFill: { backgroundColor: '#3b82f6' },
   row: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 12 },
@@ -114,4 +158,7 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', fontWeight: '600' },
   btnDisabled: { opacity: 0.6 },
   btnTextDisabled: { color: '#363535' },
+  sectionTitle: { fontWeight: '700', marginBottom: 4 },
+  avgLine: { fontSize: 13 },
+  mono: { fontSize: 12, fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }) },
 });

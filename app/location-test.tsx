@@ -1,9 +1,8 @@
-import React from 'react';
-import { View, Text } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React from 'react';
+import { Text, View } from 'react-native';
 import { resolveResult } from './utils/navResult';
-import type { TestResult } from './types';
 
 export default function LocationTest() {
   const router = useRouter();
@@ -14,7 +13,7 @@ export default function LocationTest() {
       const start = Date.now();
       const serviceEnabled = await Location.hasServicesEnabledAsync();
       if (!serviceEnabled) {
-        resolveResult(params.key as string, { testName: 'Location Test', executionTimeMs: -1, details: 'Location services disabled', success: false });
+  resolveResult(params.key as string, { testName: 'Location Test', group: 'sensors', executionTimeMs: -1, details: 'Location services disabled', success: false });
         router.back();
         return;
       }
@@ -23,14 +22,14 @@ export default function LocationTest() {
         const req = await Location.requestForegroundPermissionsAsync();
         status = req.status;
         if (status !== 'granted') {
-          resolveResult(params.key as string, { testName: 'Location Test', executionTimeMs: -1, details: 'Permission denied', success: false });
+          resolveResult(params.key as string, { testName: 'Location Test', group: 'sensors', executionTimeMs: -1, details: 'Permission denied', success: false });
           router.back();
           return;
         }
       }
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       const elapsed = Date.now() - start;
-      resolveResult(params.key as string, { testName: 'Location Test', executionTimeMs: elapsed, details: `${pos.coords.latitude},${pos.coords.longitude}`, success: true });
+  resolveResult(params.key as string, { testName: 'Location Test', group: 'sensors', executionTimeMs: elapsed, details: `${pos.coords.latitude},${pos.coords.longitude}`, success: true });
       router.back();
     })();
   }, []);
