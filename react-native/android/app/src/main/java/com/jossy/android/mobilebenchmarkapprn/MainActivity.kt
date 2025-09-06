@@ -1,4 +1,4 @@
-package com.jossy.android.mobilebenchmarkapprn
+package com.jossy.android.mobilebenchmarkappreactnative
 
 import android.os.Build
 import android.os.Bundle

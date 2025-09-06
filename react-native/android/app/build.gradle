@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.jossy.android.mobilebenchmarkapprn'
+    namespace 'com.jossy.android.mobilebenchmarkappreactnative'
     defaultConfig {
-        applicationId 'com.jossy.android.mobilebenchmarkapprn'
+    applicationId 'com.jossy.android.mobilebenchmarkappreactnative'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

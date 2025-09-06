@@ -5,7 +5,9 @@ import usersData from '../assets/users.json';
 import type { TestResult, User } from './types';
 import { resolveResult } from './utils/navResult';
 
-const RUNS = 1800; // fixed iterations
+const RUNS = 1800; // stała liczba iteracji
+const DEFAULT_MAX_MS = 10_000; // limit czasu dla trybu normalnego
+const DEFAULT_MAX_LIST = 200_000; // limit pamięci (liczba obiektów) w trybie normalnym
 
 // Deterministyczny generator (LCG) emulujący Kotlin Random(it)
 function makeSeededRng(seed: number) {
@@ -31,7 +33,8 @@ function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
 
 export default function RAMTest() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ key: string }>();
+  const params = useLocalSearchParams<{ key: string; stress?: string }>();
+  const STRESS = params.stress === '1'; // tryb pełnego obciążenia bez limitów
 
   React.useEffect(() => {
     const run = async () => {
@@ -41,6 +44,8 @@ export default function RAMTest() {
       const nameCounter: Record<string, number> = {};
       const surnameCounter: Record<string, number> = {};
       const rand = () => Math.random();
+      const MAX_MS = STRESS ? Number.POSITIVE_INFINITY : DEFAULT_MAX_MS;
+      const MAX_LIST = STRESS ? Number.POSITIVE_INFINITY : DEFAULT_MAX_LIST;
 
       await new Promise<void>(resolve => {
         let iteration = 0;
@@ -50,6 +55,10 @@ export default function RAMTest() {
             const shuffled = shuffleWithSeed(users, iteration);
 
             bigList.push(...shuffled);
+            if (bigList.length > MAX_LIST) {
+              // utrzymujemy tylko część aby ograniczyć peak – zachowujemy ostatnie shuffled
+              bigList.splice(0, bigList.length - shuffled.length);
+            }
 
             const sorted = shuffled.slice().sort((a, b) => a.name.localeCompare(b.name));
 
@@ -75,13 +84,14 @@ export default function RAMTest() {
             }
 
           }
-          if (iteration < RUNS) setTimeout(step, 0); else resolve();
+    if (iteration < RUNS && Date.now() - start < MAX_MS) setTimeout(step, 0); else resolve();
         };
         step();
       });
       bigList.length = 0;
       const elapsed = Date.now() - start;
-  const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: 'RAM intensive operations completed', success: true };
+  const capped = !STRESS && elapsed >= DEFAULT_MAX_MS;
+  const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: STRESS ? 'Stress mode (no caps)' : capped ? 'Completed (time-capped)' : 'Completed', success: true };
       resolveResult(params.key as string, res);
       router.back();
     };
