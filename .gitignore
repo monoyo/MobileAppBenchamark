@@ -808,3 +808,4 @@ hs_err_pid*
 /linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux/
 /windows/flutter/ephemeral/.plugin_symlinks/path_provider_windows/
 /ios/.symlinks/plugins/sqflite_darwin/
+node_modules
