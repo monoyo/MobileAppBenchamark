@@ -10,86 +10,95 @@ export default function CPUTest() {
 
   React.useEffect(() => {
     const run = async () => {
+      const TIME_LIMIT_MS = 3000; // 3s hard limit
       const start = Date.now();
 
-      // 1) Primes (chunked)
-      const countPrimesChunked = (max: number, chunk = 5000) => new Promise<number>(resolve => {
-        let i = 2, count = 0;
-        const step = () => {
-          const end = Math.min(i + chunk, max + 1);
-          for (; i < end; i++) {
-            let prime = true;
-            const sqrtI = Math.floor(Math.sqrt(i));
-            for (let j = 2; j <= sqrtI; j++) { if (i % j === 0) { prime = false; break; } }
-            if (prime) count++;
+      // Accumulators / counters
+      let primeChecks = 0;
+      let foundPrimes = 0;
+      let matrixRows = 0;
+      let mathIters = 0;
+      let sortIters = 0;
+      let logOps = 0;
+
+      // Pre-create small matrices (we'll rotate values)
+      const SIZE = 48;
+      const A = Array.from({ length: SIZE }, () => Float64Array.from({ length: SIZE }, () => Math.random()));
+      const B = Array.from({ length: SIZE }, () => Float64Array.from({ length: SIZE }, () => Math.random()));
+      const R = Array.from({ length: SIZE }, () => Float64Array.from({ length: SIZE }, () => 0));
+
+      const now = () => Date.now();
+
+      const doPrimesBatch = () => {
+        const limit = primeChecks + 2000;
+        for (; primeChecks < limit; primeChecks++) {
+          const n = primeChecks + 2; // shift away from 0/1
+          let prime = true;
+            const r = Math.floor(Math.sqrt(n));
+            for (let j = 2; j <= r; j++) { if (n % j === 0) { prime = false; break; } }
+          if (prime) foundPrimes++;
+        }
+      };
+
+      const doMatrixRows = () => {
+        const rowsPer = 4;
+        const target = Math.min(matrixRows + rowsPer, SIZE);
+        for (; matrixRows < target; matrixRows++) {
+          for (let c = 0; c < SIZE; c++) {
+            let sum = 0;
+            for (let k = 0; k < SIZE; k++) sum += A[matrixRows][k] * B[k][c];
+            R[matrixRows][c] = sum;
           }
-          if (i <= max) setTimeout(step, 0); else resolve(count);
-        };
-        step();
-      });
-      const primes = await countPrimesChunked(600_000); // zmniejszone by uniknąć ANR
+        }
+        if (matrixRows === SIZE) matrixRows = 0; // wrap to keep continuous work
+      };
 
-      // 2) Matrix multiply (chunked rows)
-      const size = 120; // lekko zmniejszone
-      const a = Array.from({ length: size }, () => Array.from({ length: size }, () => Math.random()));
-      const b = Array.from({ length: size }, () => Array.from({ length: size }, () => Math.random()));
-      const result = Array.from({ length: size }, () => Array.from({ length: size }, () => 0));
-      await new Promise<void>(resolve => {
-        let row = 0;
-        const rowsPerTick = 4;
-        const step = () => {
-          const end = Math.min(row + rowsPerTick, size);
-          for (; row < end; row++) {
-            for (let j = 0; j < size; j++) {
-              let sum = 0;
-              for (let k = 0; k < size; k++) sum += a[row][k] * b[k][j];
-              result[row][j] = sum;
-            }
-          }
-          if (row < size) setTimeout(step, 0); else resolve();
-        };
-        step();
-      });
+      const doMathOps = () => {
+        const chunk = 8000;
+        for (let i = 0; i < chunk; i++) {
+          mathIters++;
+          const x = mathIters + Math.random();
+          // a few transcendentals
+          Math.sin(x) + Math.cos(x) + Math.sqrt(x);
+        }
+      };
 
-      // 3) Heavy math ops (chunked)
-      const heavyMathOpsChunked = (iterations: number, chunk = 10_000) => new Promise<number>(resolve => {
-        let i = 1; let res = 0;
-        const step = () => {
-          const end = Math.min(i + chunk, iterations + 1);
-          for (; i < end; i++) res += Math.sqrt(i) * Math.pow(i, 1.5) / (Math.random() + 1);
-          if (i <= iterations) setTimeout(step, 0); else resolve(res);
-        };
-        step();
-      });
-      const mathOps = await heavyMathOpsChunked(300_000);
+      const doSortSmall = () => {
+        const arr = Array.from({ length: 4000 }, () => Math.random());
+        arr.sort((a, b) => a - b);
+        sortIters++;
+      };
 
-      // 4) Sort workload (split into batches with yields)
-      await new Promise<void>(resolve => {
-        const batches = 8; // 8 * 150k = ~1.2M elements total
-        const sizePerBatch = 150_000;
-        let done = 0;
-        const step = () => {
-          const arr = Array.from({ length: sizePerBatch }, () => Math.random());
-          arr.sort((x, y) => x - y);
-          done++;
-          if (done < batches) setTimeout(step, 0); else resolve();
-        };
-        step();
-      });
+      const doLogOps = () => {
+        const cap = logOps + 6000;
+        for (; logOps < cap; logOps++) {
+          const v = logOps + 1;
+          Math.log(v) * Math.pow(v, 1.1);
+        }
+      };
 
-      // 5) Log sum (chunked)
-      const logSum = await new Promise<number>(resolve => {
-        let i = 1; let sum = 0; const max = 1_200_000; const chunk = 50_000;
-        const step = () => {
-          const end = Math.min(i + chunk, max + 1);
-          for (; i < end; i++) sum += Math.log(i) * Math.pow(i, 1.2);
-          if (i <= max) setTimeout(step, 0); else resolve(sum);
-        };
-        step();
-      });
+      const step = async (): Promise<void> => {
+        // Execute a mixed batch
+        doPrimesBatch();
+        doMatrixRows();
+        doMathOps();
+        doSortSmall();
+        doLogOps();
+        if (now() - start < TIME_LIMIT_MS) {
+          await new Promise(r => setTimeout(r, 0)); // yield
+          return step();
+        }
+      };
 
+      await step();
       const elapsed = Date.now() - start;
-  const res: TestResult = { testName: 'CPU Test', group: 'cpu', executionTimeMs: elapsed, details: '', success: true };
+      const res: TestResult = {
+        testName: 'CPU Test',
+        group: 'cpu',
+        executionTimeMs: elapsed,
+        details: `primesChecked=${primeChecks} found=${foundPrimes} matrixRows=${matrixRows} mathIters=${mathIters} sorts=${sortIters} logOps=${logOps}`,
+        success: true,
+      };
       resolveResult(params.key as string, res);
       router.back();
     };

@@ -7,7 +7,7 @@ Aplikacja React Native (Expo, TypeScript) do syntetycznych testów wydajności: 
 - [2. Wymagania](#2-wymagania)
 - [3. Technologie / Biblioteki (React Native)](#3-technologie--biblioteki-react-native)
 - [4. Struktura katalogów / plików](#4-struktura-katalogów--plików)
-- [5. Orkiestracja (suite.tsx)](#5-orkiestracja-suitetsx)
+- [5. Orkiestracja (Benchmark.tsx)](#5-orkiestracja-benchmarktsx)
 - [6. Testy](#6-testy)
   - [6.1 CPU Test](#61-cpu-test)
   - [6.2 RAM Test](#62-ram-test)
@@ -46,7 +46,7 @@ Zebranie danych dotyczących wydajności stosu React Native (JS/TS + bridge + na
 
 ## 4. Struktura katalogów / plików
 `app/`
-- `suite.tsx` – ekran orkiestrujący wszystkie testy (postęp, zapis)
+- `Benchmark.tsx` – ekran startowy + orkiestracja testów (postęp, statystyki, eksport JSON/CSV)
 - `ui-test.tsx` – test animacji (1500 ruchomych kwadratów Reanimated)
 - `cpu-test.tsx` – test obciążenia CPU (chunkowane: primes, mnożenie macierzy, operacje FP, sort, log-sum)
 - `ram-test.tsx` – test pamięciowy (operacje na listach użytkowników, sortowanie, filtracja, liczniki)
@@ -60,14 +60,14 @@ Zebranie danych dotyczących wydajności stosu React Native (JS/TS + bridge + na
 
 (Inne pliki Expo / konfiguracyjne pominięto dla zwięzłości.)
 
-## 5. Orkiestracja (suite.tsx)
-- Tablica TESTS z kolejnością: UI → CPU → RAM → Image → API → Location.
-- Stała `iterations = 3` (obecnie mniejsza niż we Flutter/Java przykładach; łatwo zwiększyć).
-- Rekurencyjna funkcja `runNext(iter, idx, acc)` wywołuje kolejny test przez `router.push(route?key=...)` i czeka na wynik `waitForResult`.
-- Każdy test po zakończeniu wywołuje `resolveResult(key, testResult)` i wraca `router.back()`.
-- Postęp = (aktualny numer iteracji * liczba testów + index testu) / (iterations * tests).
-- Po zakończeniu wszystkich iteracji: automatyczny zapis wyników do pliku tekstowego w `FileSystem.documentDirectory`.
-- Przycisk `Export Results` pozwala ręcznie wyeksportować ponownie aktualne wyniki.
+## 5. Orkiestracja (Benchmark.tsx)
+- Kolejność testów: UI → CPU → RAM → Image → API → Location.
+- Model wykonania: każdy test wykonywany jest 30 razy z rzędu (blokowo), potem przejście do następnego testu.
+- Postęp liczony na podstawie zakończonych powtórzeń względem `30 * liczba_testów`.
+- Mechanizm przekazywania wyniku: identyczny (klucz w query + `waitForResult/resolveResult`).
+- Po zakończeniu całej serii: automatyczny zapis JSON zawierający: surowe wyniki, statystyki per test (avg, median, p95, p99, min, max), agregaty grup, launch time.
+- Eksport CSV: dodatkowy przycisk generuje osobne pliki CSV per test z kolumnami: `iteration,executionTimeMs,details`.
+- Interfejs ograniczony do dwóch przycisków: Start Tests, Export CSV (JSON eksport wykonywany automatycznie na zakończenie – można powtórzyć ręcznie).
 
 ## 6. Testy
 ### 6.1 CPU Test
@@ -118,9 +118,9 @@ Wynik: łączny czas; `details` aktualnie puste (można dodać np. checksumy dla
 Aktualnie wszystkie iteracje dopisywane są do jednej tablicy w pamięci i serializowane do pliku tekstowego (linia per wynik: `TestName: Xms (details)`). Nie ma jeszcze strukturalnego CSV.
 
 ## 9. Eksport wyników
-- Auto-zapis po zakończeniu całej serii: `benchmark_results_<timestamp>.txt` w `FileSystem.documentDirectory` (Expo sandbox – na Androidzie zwykle: `.../files/` w katalogu aplikacji; iOS: wewnętrzny sandbox Documents/). 
-- Manualny przycisk `Export Results` wykonuje identyczny zapis na żądanie.
-- (Sugestia) Przekształcić format na CSV: per test plik lub jeden scalony plik z kolumnami: `iteration,testName,executionTimeMs,details,success`.
+- Auto-zapis JSON po zakończeniu całej serii: `bench_<timestamp>.json` (zawiera statystyki i surowe dane).
+- Przycisk Export CSV generuje zestaw plików `bench_<testName>.csv` (1 plik per test) z kolumnami: `iteration,executionTimeMs,details`.
+- Surowe wyniki w pamięci można ponownie wyeksportować (JSON/CSV) bez ponownego uruchamiania testów.
 
 ## 10. Ograniczenia
 - Brak natywnego wątku równoległego dla CPU – użyto chunkowania z `setTimeout` zamiast `JSI/Workers`; wyniki obejmują overhead JS event loop.
@@ -142,14 +142,14 @@ yarn install
 npx expo start
 ```
 3. Wybierz platformę (a - Android emulator, i - iOS, w - Web) w konsoli Expo.
-4. Na ekranie `suite` kliknij `Start Tests`.
+4. Na ekranie `Benchmark` kliknij `Start Tests`.
 5. Poczekaj na zakończenie wszystkich iteracji → komunikat + auto-zapis.
 6. (Opcjonalnie) kliknij `Export Results` aby ponowić zapis.
 
 ## 12. App Launch Time
 Obecnie NIE mierzone. Propozycja implementacji:
 - Na samym początku (pierwsza linia pliku wejściowego – np. `index.js` / root layout) zapisz `const launchStart = Date.now()`.
-- Po zamontowaniu ekranu `suite` (useEffect) zmierz `Date.now() - launchStart` i wyświetl w nagłówku.
+- Po zamontowaniu ekranu `Benchmark` (useEffect) zmierz `Date.now() - launchStart` i wyświetl w nagłówku.
 - Zapisz wartość jako pseudo-test (np. `App Launch Time`) i dołącz do eksportu.
 
 ## 13. Licencja / Autor

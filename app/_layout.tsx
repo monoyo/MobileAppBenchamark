@@ -12,7 +12,6 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="suite" />
         <Stack.Screen name="ui-test" />
         <Stack.Screen name="cpu-test" />
         <Stack.Screen name="ram-test" />

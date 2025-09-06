@@ -45,10 +45,9 @@ export default function UITest() {
   const clock = useSharedValue(0);
   React.useEffect(() => {
     const start = Date.now();
-    // animate clock from 0 -> UI_TEST_ITERATIONS*2 (because each full ping-pong cycle is 2 units in our modulo arithmetic)
-    const totalCycles = UI_TEST_ITERATIONS; // number of forward+back motions we want to measure
-    const target = totalCycles * 2; // because we mod by 2 for ping-pong
-    clock.value = withTiming(target, { duration: totalCycles * 2000, easing: Easing.linear }, (finished) => {
+  // animate clock from 0 -> UI_TEST_ITERATIONS*2 (each full A->B->A ping-pong is length 2). Now limited to 3 cycles.
+  const totalCycles = UI_TEST_ITERATIONS; // number of forward+back motions (ping-pong cycles)
+    clock.value = withTiming(totalCycles, { duration: totalCycles * 2000, easing: Easing.linear }, (finished) => {
       // no-op on worklet side; finalization handled on JS timer below
     });
     const timer = setTimeout(() => {
@@ -65,7 +64,7 @@ export default function UITest() {
 
   // Precompute squares once (or on dimension/density change) to avoid random respawns
   const squaresData = React.useMemo(() => {
-    const COUNT = 600; // reduced from 1500 to improve frame stability (windowing alternative). TODO: experiment with Skia Canvas for >2k.
+    const COUNT = 1500; // reduced from 1500 to improve frame stability (windowing alternative). TODO: experiment with Skia Canvas for >2k.
     const arr: { startX: number; startY: number; dx: number; dy: number; color: string; phaseOffset: number }[] = [];
     for (let i = 0; i < COUNT; i++) {
       const startX = rand(Math.max(0, width - size));

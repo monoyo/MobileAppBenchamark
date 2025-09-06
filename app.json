@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jossy.android.mobilebenchmarkappreactnative"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,9 +19,12 @@
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION"
       ],
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.jossy.android.mobilebenchmarkappreactnative"
     },
     "web": {
       "bundler": "metro",

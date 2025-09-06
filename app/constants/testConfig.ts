@@ -1,6 +1,7 @@
 // Central test configuration constants.
 // Adjust here to change global test iteration counts or timing thresholds.
-export const UI_TEST_ITERATIONS = 30; // number of animation cycles or measurement iterations for UI test
+// UI test: number of full A->B->A ping-pong cycles (reduced to 3 per requirement)
+export const UI_TEST_ITERATIONS = 3;
 export const SUITE_GROUPS = 6; // expected number of logical groups
 export const DEFAULT_ITERATIONS_PER_SUITE = 6; // fallback if needed elsewhere
 

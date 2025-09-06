@@ -3,10 +3,14 @@ import { Href, useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { EXPORT_FILE_PREFIX } from './constants/testConfig';
-import type { GroupAverage, TestResult } from './types';
-import { computeGroupAverages, formatResult } from './types';
-import { getLaunchDurationMs, markSuiteReady } from './utils/launchTime';
+import type { AggregatedStats, GroupAverage, TestResult } from './types';
+import { aggregatePerTest, computeGroupAverages, formatResult } from './types';
+import { exportAllPerTestCsv } from './utils/csvExport';
+import { getLaunchTime, markSuiteReady } from './utils/launchTime';
 import { createResultKey, waitForResult } from './utils/navResult';
+// Allow CommonJS style require for optional deps without adding @types/node
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const require: any;
 // Clipboard is optional; wrap in dynamic require to avoid type issues if not installed.
 let Clipboard: { setStringAsync?: (s: string) => Promise<void> } = {} as any;
 try { Clipboard = require('expo-clipboard'); } catch { /* optional */ }
@@ -28,13 +32,14 @@ export default function Suite() {
   const [iteration, setIteration] = React.useState(0);
   const [testIndex, setTestIndex] = React.useState(0);
   const [lastSavedPath, setLastSavedPath] = React.useState<string | null>(null);
-  const iterations = 3; // TODO: expose configurable iterations if desired
+  // Iteracje są stałe (30) – brak UI do zmiany
+  const iterations = 30;
   const launchTimeRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     // Mark that suite is visible and ready.
     markSuiteReady();
-    launchTimeRef.current = getLaunchDurationMs();
+  launchTimeRef.current = getLaunchTime();
   }, []);
 
   const startSuite = async () => {
@@ -72,10 +77,13 @@ export default function Suite() {
 
   const buildExportPayload = (res: TestResult[]) => {
     const groupAverages = computeGroupAverages(res);
+    const aggregated: AggregatedStats[] = aggregatePerTest(res);
     return {
       launchTimeMs: launchTimeRef.current,
       tests: res,
       groupAverages,
+      aggregatedStats: aggregated,
+      iterationsPlanned: iterations,
       generatedAt: new Date().toISOString(),
     };
   };
@@ -108,6 +116,7 @@ export default function Suite() {
   const progress = total === 0 ? 0 : Math.max(0, Math.min(1, completed / total));
 
   const groupAverages: GroupAverage[] = computeGroupAverages(results);
+  const aggregated: AggregatedStats[] = React.useMemo(() => aggregatePerTest(results), [results]);
 
   return (
     <View style={styles.root}>
@@ -118,15 +127,24 @@ export default function Suite() {
         <View style={{ flex: 1 - progress }} />
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 8 }}>
+  <Text style={{ fontSize: 12, fontWeight: '600', marginBottom: 8 }}>Iterations: {iterations} (fixed)</Text>
         <Text style={styles.sectionTitle}>Results</Text>
         <Text style={styles.mono}>
-          {results.length === 0 ? 'No results yet.' : results.map(r => formatResult(r)).join('\n')}
+          {results.length === 0 ? 'No results yet.' : results.map((r: TestResult) => formatResult(r)).join('\n')}
         </Text>
         {groupAverages.length > 0 && (
           <View style={{ marginTop: 16 }}>
             <Text style={styles.sectionTitle}>Group Averages</Text>
             {groupAverages.map(g => (
               <Text key={g.group} style={styles.avgLine}>{g.group}: {g.averageMs.toFixed(2)} ms ({g.samples})</Text>
+            ))}
+          </View>
+        )}
+        {aggregated.length > 0 && (
+          <View style={{ marginTop: 16 }}>
+            <Text style={styles.sectionTitle}>Per-Test Stats (median / p95)</Text>
+            {aggregated.map(a => (
+              <Text key={a.testName} style={styles.avgLine}>{a.testName}: n={a.samples} avg={a.avgMs.toFixed(1)} ms med={a.medianMs.toFixed(1)} p95={a.p95Ms.toFixed(1)} min={a.minMs.toFixed(0)} max={a.maxMs.toFixed(0)} ok={a.successes}/{a.samples}</Text>
             ))}
           </View>
         )}
@@ -140,7 +158,14 @@ export default function Suite() {
         </Pressable>
         <View style={{ width: 8 }} />
         <Pressable disabled={results.length === 0} onPress={exportResults} style={[styles.btn, { backgroundColor: 'rgb(68,63,216)' }]}>
-          <Text style={styles.btnText}>Export Results</Text>
+          <Text style={styles.btnText}>Export JSON</Text>
+        </Pressable>
+        <View style={{ width: 8 }} />
+        <Pressable disabled={results.length === 0} onPress={async () => {
+          const paths = await exportAllPerTestCsv('bench', results);
+          Alert.alert(paths.length ? 'CSV Exported' : 'CSV Export Failed', paths.join('\n'));
+        }} style={[styles.btn, { backgroundColor: '#059669' }]}>
+          <Text style={styles.btnText}>Export CSV</Text>
         </Pressable>
       </View>
     </View>

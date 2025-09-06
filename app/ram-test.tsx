@@ -5,7 +5,7 @@ import usersData from '../assets/users.json';
 import type { TestResult, User } from './types';
 import { resolveResult } from './utils/navResult';
 
-const RUNS = 95000; // target iterations (will cap by time on RN)
+const RUNS = 1800; // target iterations (will cap by time on RN)
 const MAX_MS = 10_000; // align with Flutter's ~10s max duration
 const MAX_LIST = 200_000; // cap for bigList to avoid unbounded memory growth
 
