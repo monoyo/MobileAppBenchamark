@@ -5,9 +5,29 @@ import usersData from '../assets/users.json';
 import type { TestResult, User } from './types';
 import { resolveResult } from './utils/navResult';
 
-const RUNS = 1800; // target iterations (will cap by time on RN)
-const MAX_MS = 10_000; // align with Flutter's ~10s max duration
-const MAX_LIST = 200_000; // cap for bigList to avoid unbounded memory growth
+const RUNS = 1800; // fixed iterations
+
+// Deterministyczny generator (LCG) emulujący Kotlin Random(it)
+function makeSeededRng(seed: number) {
+  // constants from Numerical Recipes
+  let state = (seed ^ 0x9e3779b9) >>> 0; // scramble
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    // convert to [0,1)
+    return state / 0xffffffff;
+  };
+}
+
+// Fisher-Yates using deterministic RNG
+function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
+  const a = arr.slice();
+  const rng = makeSeededRng(seed);
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function RAMTest() {
   const router = useRouter();
@@ -27,27 +47,33 @@ export default function RAMTest() {
         const step = () => {
           const until = Math.min(iteration + 500, RUNS); // chunk 500 iterations
           for (; iteration < until; iteration++) {
-            const shuffled = users.slice().sort(() => rand() - 0.5);
+            const shuffled = shuffleWithSeed(users, iteration);
+
             bigList.push(...shuffled);
-            // cap memory footprint to keep GC under control
-            if (bigList.length > MAX_LIST) bigList.splice(0, bigList.length - MAX_LIST);
 
             const sorted = shuffled.slice().sort((a, b) => a.name.localeCompare(b.name));
-            const filtered = sorted.filter(u => u.active && u.age > 18).map(u => ({ ...u, name: u.name.toUpperCase() }));
-            if (filtered.length > 0) {
-              const randomUser = filtered[Math.floor(rand() * filtered.length)];
-              const randomUserName = randomUser.name; // intentional use to mimic workload
+
+            const filteredMapped = sorted
+              .filter(u => u.active && u.age > 18)
+              .map(u => ({ ...u, name: u.name.toUpperCase() }));
+
+            let deserialized: typeof filteredMapped = filteredMapped;
+            if (filteredMapped.length) {
+              const serialized = JSON.stringify(filteredMapped);
+              deserialized = JSON.parse(serialized);
             }
+
+            if (deserialized.length > 0) {
+              const sampled = deserialized[Math.floor(rand() * deserialized.length)];
+              if (!sampled.name) throw new Error('Invariant');
+            }
+
             for (const user of users) {
               const parts = user.name.split(' ');
               if (parts.length > 0) nameCounter[parts[0]] = (nameCounter[parts[0]] ?? 0) + 1;
               if (parts.length > 1) surnameCounter[parts[1]] = (surnameCounter[parts[1]] ?? 0) + 1;
             }
-            // early time cap to avoid endless run on slow devices
-            if (Date.now() - start >= MAX_MS) {
-              resolve();
-              return;
-            }
+
           }
           if (iteration < RUNS) setTimeout(step, 0); else resolve();
         };
@@ -55,8 +81,7 @@ export default function RAMTest() {
       });
       bigList.length = 0;
       const elapsed = Date.now() - start;
-  const endedByCap = elapsed >= MAX_MS;
-  const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: endedByCap ? 'Completed (time-capped)' : 'RAM intensive operations completed', success: true };
+  const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: 'RAM intensive operations completed', success: true };
       resolveResult(params.key as string, res);
       router.back();
     };
