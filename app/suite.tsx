@@ -57,13 +57,19 @@ export default function Suite() {
     setIteration(iter);
     setTestIndex(idx);
   const key = createResultKey();
-  // Use direct href with query to satisfy typed routes
-  router.push((`${TESTS[idx].route}?key=${encodeURIComponent(key)}`) as any);
+  const testMeta = TESTS[idx];
+  const dispatchTs = Date.now();
+  if (__DEV__) console.log('[Suite] dispatch', { iter, idx, name: testMeta.name, key });
+  router.push((`${testMeta.route}?key=${encodeURIComponent(key)}`) as any);
   const res = await waitForResult<TestResult | null>(key);
+  const receiveTs = Date.now();
+  if (__DEV__) console.log('[Suite] receive', { name: testMeta.name, iter, idx, duration: res?.executionTimeMs, wall: receiveTs - dispatchTs });
     if (res) acc.push(res);
     setResults([...acc]);
   // tiny pause to let UI settle (reduced)
-  await new Promise(r => setTimeout(r, 100));
+  const pauseStart = Date.now();
+  await new Promise(r => setTimeout(r, 50));
+  if (__DEV__) console.log('[Suite] post-pause', { name: testMeta.name, pause: Date.now() - pauseStart });
     await runNext(iter, idx + 1, acc);
   };
 

@@ -5,20 +5,18 @@ import usersData from '../assets/users.json';
 import type { TestResult, User } from './types';
 import { resolveResult } from './utils/navResult';
 
-const RUNS = 1800; // stała liczba iteracji
-
-// Deterministyczny generator (LCG) emulujący Kotlin Random(it)
+const RUNS = 1800;
+const DEBUG_INSTRUMENT = __DEV__;
+let nameCounter: Record<string, number> = {};
+let surnameCounter: Record<string, number> = {};
 function makeSeededRng(seed: number) {
-  // constants from Numerical Recipes
-  let state = (seed ^ 0x9e3779b9) >>> 0; // scramble
+  let state = (seed ^ 0x9e3779b9) >>> 0;
   return () => {
     state = (state * 1664525 + 1013904223) >>> 0;
-    // convert to [0,1)
     return state / 0xffffffff;
   };
 }
 
-// Fisher-Yates using deterministic RNG
 function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
   const a = arr.slice();
   const rng = makeSeededRng(seed);
@@ -30,23 +28,23 @@ function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
 }
 
 export default function RAMTest() {
+  const start = Date.now();
   const router = useRouter();
   const params = useLocalSearchParams<{ key: string }>();
+  const bigList: User[] = [];
+  nameCounter = {};
+  surnameCounter = {};
+  const users: User[] = usersData as unknown as User[];
+
 
   React.useEffect(() => {
     const run = async () => {
-  const start = Date.now();
-  const users: User[] = usersData as unknown as User[];
-      const bigList: User[] = [];
-      const nameCounter: Record<string, number> = {};
-      const surnameCounter: Record<string, number> = {};
-  const rand = () => Math.random();
+      const rand = () => Math.random();
 
       await new Promise<void>(resolve => {
         let iteration = 0;
         const step = () => {
-          const until = Math.min(iteration + 500, RUNS); // chunk 500 iterations
-          for (; iteration < until; iteration++) {
+          for (; iteration < RUNS; iteration++) {
             const shuffled = shuffleWithSeed(users, iteration);
 
             bigList.push(...shuffled);
@@ -81,7 +79,7 @@ export default function RAMTest() {
       });
       bigList.length = 0;
       const elapsed = Date.now() - start;
-  const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: 'RAM intensive operations completed', success: true };
+      const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: 'RAM intensive operations completed', success: true };
       resolveResult(params.key as string, res);
       router.back();
     };
