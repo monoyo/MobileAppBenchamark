@@ -31,7 +31,7 @@ export default function Benchmark() {
   const [iteration, setIteration] = React.useState(0);
   const [testIndex, setTestIndex] = React.useState(0);
   const [lastSavedPath, setLastSavedPath] = React.useState<string | null>(null);
-  const iterations = 30; // stałe
+  const iterations = 30;
   const launchTimeRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
