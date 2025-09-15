@@ -1,96 +1,115 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, PixelRatio, View } from 'react-native';
-import Animated, { Easing, cancelAnimation, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
-import { UI_TEST_ITERATIONS } from './constants/testConfig';
+import { Dimensions, View, Animated } from 'react-native';
 import type { TestResult } from './types';
 import { resolveResult } from './utils/navResult';
+import { UI_TEST_ITERATIONS } from './constants/testConfig';
 
-function rand(max: number) { return Math.random() * max; }
+const COUNT = 1500;
+const DURATION = 2000; // ms (pełny cykl A->B->A)
+const SIZE = 20;       // zmniejszone (wcześniej 40) – bloki 2x mniejsze
 
-// Animated square whose position is derived mathematically from a shared global clock.
-function AnimatedSquare({ size, color, startX, startY, dx, dy, phaseOffset, clock }: { size: number; color: string; startX: number; startY: number; dx: number; dy: number; phaseOffset: number; clock: Animated.SharedValue<number>; }) {
-  // Derive a ping-pong phase value (0->1->0) without allocating new objects each frame.
-  const progress = useDerivedValue(() => {
-    // clock.value increases linearly; add per-square offset to desync.
-    const t = (clock.value + phaseOffset) % 2; // 0..2
-    return t <= 1 ? t : 2 - t; // mirror for ping-pong
-  });
-  const style = useAnimatedStyle(() => {
-    const phase = progress.value; // 0..1
-    return {
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      width: size,
-      height: size,
-      transform: [
-        { translateX: startX + dx * phase },
-        { translateY: startY + dy * phase },
-      ],
-      backgroundColor: color as any,
-    };
-  });
-  return <Animated.View style={style} />;
+function randInt(max: number) { return Math.floor(Math.random() * max); }
+
+interface Square {
+  id: number;
+  baseX: number;
+  baseY: number;
+  deltaX: number; // docelowa zmiana względem baseX
+  deltaY: number; // docelowa zmiana względem baseY
+  color: string;
+  animX: Animated.Value; // absolutna pozycja X (odpowiednik view.x)
+  animY: Animated.Value; // absolutna pozycja Y (odpowiednik view.y)
 }
 
 export default function UITest() {
   const { width, height } = Dimensions.get('window');
-  const ratio = PixelRatio.get(); // convert px -> dp when needed
-  const size = 40 / ratio; // slightly smaller to reduce overdraw
   const router = useRouter();
   const params = useLocalSearchParams<{ key: string }>();
 
-  // Global monotonic clock shared among all squares; value increases linearly in seconds* (scaled)
-  const clock = useSharedValue(0);
+  const [squares, setSquares] = React.useState<Square[]>([]);
+  const startedRef = React.useRef(false);
+
+  // Inicjalizacja jak w Kotlin: tworzymy wszystkie widoki naraz (burst)
   React.useEffect(() => {
-    const start = Date.now();
-  // animate clock from 0 -> UI_TEST_ITERATIONS*2 (each full A->B->A ping-pong is length 2). Now limited to 3 cycles.
-  const totalCycles = UI_TEST_ITERATIONS; // number of forward+back motions (ping-pong cycles)
-    clock.value = withTiming(totalCycles, { duration: totalCycles * 2000, easing: Easing.linear }, (finished) => {
-      // no-op on worklet side; finalization handled on JS timer below
+    if (startedRef.current) return;
+    startedRef.current = true;
+    const arr: Square[] = [];
+    for (let i = 0; i < COUNT; i++) {
+      const baseX = randInt(Math.max(1, width - SIZE));
+      const baseY = randInt(Math.max(1, height - SIZE));
+      const deltaX = randInt(401) - 200; // -200..200
+      const deltaY = randInt(401) - 200;
+      const color = `rgb(${randInt(256)},${randInt(256)},${randInt(256)})`;
+      const animX = new Animated.Value(baseX);
+      const animY = new Animated.Value(baseY);
+      arr.push({ id: i, baseX, baseY, deltaX, deltaY, color, animX, animY });
+    }
+    setSquares(arr);
+  }, [width, height]);
+
+  React.useEffect(() => {
+    if (squares.length === 0) return;
+    const startTs = Date.now();
+
+    function loopAbsolute(v: Animated.Value, base: number, delta: number) {
+      return Animated.loop(
+        Animated.sequence([
+          Animated.timing(v, { toValue: base + delta, duration: DURATION / 2, useNativeDriver: true }),
+          Animated.timing(v, { toValue: base, duration: DURATION / 2, useNativeDriver: true }),
+        ])
+      );
+    }
+
+    // Start wszystkich animacji (X i Y niezależnie) jak w Kotlin (ObjectAnimator.start())
+    const anims: Animated.CompositeAnimation[] = [];
+    squares.forEach(sq => {
+      anims.push(loopAbsolute(sq.animX, sq.baseX, sq.deltaX));
+      anims.push(loopAbsolute(sq.animY, sq.baseY, sq.deltaY));
     });
+    anims.forEach(a => a.start());
+
+    // Mierzymy tylko określoną liczbę cykli (UI_TEST_ITERATIONS), same animacje są infinite
+    const totalDuration = UI_TEST_ITERATIONS * DURATION;
     const timer = setTimeout(() => {
-      const elapsed = Date.now() - start;
-      const res: TestResult = { testName: 'UI Test', group: 'ui', executionTimeMs: elapsed, details: `cycles=${totalCycles}`, success: true };
+      const elapsed = Date.now() - startTs;
+      const res: TestResult = {
+        testName: 'UI Test',
+        group: 'ui',
+        executionTimeMs: elapsed,
+        details: `COUNT=${COUNT} cyclesMeasured=${UI_TEST_ITERATIONS} durationPerCycle=${DURATION}ms absolutePath=true`,
+        success: true,
+      };
       resolveResult(params.key as string, res);
       router.back();
-    }, totalCycles * 2000);
+    }, totalDuration);
+
     return () => {
       clearTimeout(timer);
-      cancelAnimation(clock);
+      squares.forEach(sq => { sq.animX.stopAnimation(); sq.animY.stopAnimation(); });
     };
-  }, []);
+  }, [squares]);
 
-  // Precompute squares once (or on dimension/density change) to avoid random respawns
-  const squaresData = React.useMemo(() => {
-    const COUNT = 1500; // reduced from 1500 to improve frame stability (windowing alternative). TODO: experiment with Skia Canvas for >2k.
-    const arr: { startX: number; startY: number; dx: number; dy: number; color: string; phaseOffset: number }[] = [];
-    for (let i = 0; i < COUNT; i++) {
-      const startX = rand(Math.max(0, width - size));
-      const startY = rand(Math.max(0, height - size));
-      const color = `hsl(${Math.floor(rand(360))},70%,55%)`;
-      const dx = (rand(400) - 200) / ratio;
-      const dy = (rand(400) - 200) / ratio;
-      const phaseOffset = rand(2); // 0..2 to desync cycles
-      arr.push({ startX, startY, dx, dy, color, phaseOffset });
-    }
-    return arr;
-  }, [width, height, ratio, size]);
-
-  const squares = squaresData.map((sq, i) => (
-    <AnimatedSquare
-      key={i}
-      size={size}
-      color={sq.color}
-      startX={sq.startX}
-      startY={sq.startY}
-      dx={sq.dx}
-      dy={sq.dy}
-      phaseOffset={sq.phaseOffset}
-      clock={clock}
-    />
-  ));
-
-  return <View style={{ flex: 1, backgroundColor: '#fff' }}>{squares}</View>;
+  return (
+    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      {squares.map(sq => (
+        <Animated.View
+          key={sq.id}
+          style={{
+            position: 'absolute',
+            width: SIZE,
+            height: SIZE,
+            left: 0,
+            top: 0,
+            backgroundColor: sq.color,
+            // animX / animY zawierają absolutne współrzędne -> stosujemy transform z tymi wartościami
+            transform: [
+              { translateX: sq.animX },
+              { translateY: sq.animY },
+            ],
+          }}
+        />
+      ))}
+    </View>
+  );
 }

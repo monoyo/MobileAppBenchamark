@@ -74,7 +74,7 @@ Porównawcze pomiary wydajności środowiska React Native (JS/Hermes + bridge) w
 - Czas testu: 5 s → rejestracja wyniku (Animation frames rendered).
 
 ### 6.2 CPU Test
-- Czas docelowy: ~3000 ms (deadline). 
+- Czas docelowy: ~3000 ms (deadline).
 - Pętla chunkowana (`setTimeout(0)`) – operacje FP (sin, cos, sqrt) + akumulacja checksum, liczenie iterations.
 - Brak równoległości (threads=1) – JS single thread; wynik zawiera `iterations` i `checksum` (zapobiega optymalizacji dead code).
 
@@ -84,9 +84,9 @@ Porównawcze pomiary wydajności środowiska React Native (JS/Hermes + bridge) w
 - Wynik: czas + informacja czy zakończono przez limit czasu.
 
 ### 6.4 Image Loading Test
-- 10 obrazów (Picsum) ładowanych sekwencyjnie (aktywny indeks). 
+- 10 obrazów (Picsum) ładowanych sekwencyjnie (aktywny indeks).
 - Watchdog: 60 s całość, 10 s bez progresu (oznacza zakończenie z aktualnymi wartościami – `(watchdog)`).
-- Retries per obraz (MAX_RETRIES=2) z prostym backoffem. 
+- Retries per obraz (MAX_RETRIES=2) z prostym backoffem.
 - Wynik: `loaded=X, failed=Y`.
 
 ### 6.5 API Test
@@ -117,7 +117,7 @@ Porównawcze pomiary wydajności środowiska React Native (JS/Hermes + bridge) w
 - Format CSV:
   - Nagłówek: `iteration,executionTimeMs,details,success`
   - Wartości escapowane (cudzysłowy dla pól z przecinkiem/nową linią).
-- Wersja React Native (bare + Expo modules) korzysta z `expo-file-system` (sandbox aplikacji). 
+- Wersja React Native (bare + Expo modules) korzysta z `expo-file-system` (sandbox aplikacji).
 - Na Androidzie: ścieżka wewnętrzna (wymagany dostęp ADB do odczytu / log export). Dalsze rozszerzenie: zapis do External Storage (wymaga dodatkowych uprawnień WRITE/READ + migracja modułu FS).
 
 ## 10. App Launch Time
@@ -126,7 +126,7 @@ Porównawcze pomiary wydajności środowiska React Native (JS/Hermes + bridge) w
 ## 11. Ograniczenia
 - Brak równoległych workerów/JSI (CPU test jednowątkowy) – trudniej porównywać z natywnym multi-thread.
 - RAM test ogranicza czas (MAX_MS) – porównania między urządzeniami mogą mieć różną liczbę realnych iteracji (warto logować iterations, obecnie brak w szczegółach – dołączenie zalecane).
-- Brak pomiaru zużycia pamięci (wymaga natywnych modułów / profilera). 
+- Brak pomiaru zużycia pamięci (wymaga natywnych modułów / profilera).
 - Watchdog w Image test kończy całość, ale wynik `success=true` – można rozróżnić stan awaryjny flagą.
 - Eksport tylko do sandboxu (brak share picker / intent send).
 - Brak agregatów typu min / max / p95 (tylko średnia) – do rozbudowy.
@@ -168,3 +168,4 @@ yarn ios
 
 ## 14. Licencja / Autor
 © 2025 Mobile Benchmark App (React Native variant). Użycie zgodnie z licencjami bibliotek zależnych.
+

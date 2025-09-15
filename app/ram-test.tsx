@@ -5,85 +5,96 @@ import usersData from '../assets/users.json';
 import type { TestResult, User } from './types';
 import { resolveResult } from './utils/navResult';
 
-const RUNS = 1800;
-const DEBUG_INSTRUMENT = __DEV__;
-let nameCounter: Record<string, number> = {};
-let surnameCounter: Record<string, number> = {};
-function makeSeededRng(seed: number) {
-  let state = (seed ^ 0x9e3779b9) >>> 0;
+function makeRng(seed: number) {
+  let state = (seed >>> 0) || 1;
   return () => {
     state = (state * 1664525 + 1013904223) >>> 0;
-    return state / 0xffffffff;
+    return state / 0x100000000; // [0,1)
   };
 }
+function hashStringToSeed(str: string): number {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = (h * 33) ^ str.charCodeAt(i);
+  return h >>> 0;
+}
 
-function shuffleWithSeed<T>(arr: T[], seed: number): T[] {
-  const a = arr.slice();
-  const rng = makeSeededRng(seed);
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+const RUNS = 1800;
+const nameCounter: Record<string, number> = {};
+const surnameCounter: Record<string, number> = {};
+
+function shuffleWithSeed<T>(list: T[], seed: number): T[] {
+  const rng = makeRng(seed);
+  return list
+    .map((value, index) => ({ value, r: rng(), index }))
+    .sort((a, b) => (a.r === b.r ? a.index - b.index : a.r - b.r))
+    .map(obj => obj.value);
+}
+
+function runBenchmark(): void {
+  const bigList: User[] = [];
+  nameCounter.clear?.();
+  surnameCounter.clear?.();
+  for (const k in nameCounter) delete nameCounter[k];
+  for (const k in surnameCounter) delete surnameCounter[k];
+
+  const jsonData = JSON.stringify(usersData);
+  const users: User[] = JSON.parse(jsonData) as User[];
+
+  for (let it = 0; it < RUNS; it++) {
+    const shuffled = shuffleWithSeed(users, it);
+
+    for (let i = 0; i < shuffled.length; i++) bigList.push(shuffled[i]);
+
+    const sorted = shuffled.slice().sort((a, b) => a.name.localeCompare(b.name));
+
+    const filtered = sorted
+      .filter(u => u.active && u.age > 18)
+      .map(u => ({ ...u, name: u.name.toUpperCase() }));
+
+    const serialized = JSON.stringify(filtered);
+    const deserialized: User[] = JSON.parse(serialized);
+
+    if (deserialized.length > 0) {
+      const rngPick = makeRng(hashStringToSeed('pick-' + it));
+      const randomUser = deserialized[Math.floor(rngPick() * deserialized.length)];
+      const randomUserName = randomUser.name;
+      if (randomUserName === undefined && __DEV__) console.warn('Name undefined');
+    }
+
+    for (let uIdx = 0; uIdx < users.length; uIdx++) {
+      const user = users[uIdx];
+      const parts = user.name.split(' ');
+      if (parts.length > 0) {
+        const firstName = parts[0];
+        if (firstName) nameCounter[firstName] = (nameCounter[firstName] ?? 0) + 1;
+      }
+      if (parts.length > 1) {
+        const surname = parts[1];
+        if (surname) surnameCounter[surname] = (surnameCounter[surname] ?? 0) + 1;
+      }
+    }
   }
-  return a;
+
+  bigList.length = 0;
 }
 
 export default function RAMTest() {
-  const start = Date.now();
   const router = useRouter();
   const params = useLocalSearchParams<{ key: string }>();
-  const bigList: User[] = [];
-  nameCounter = {};
-  surnameCounter = {};
-  const users: User[] = usersData as unknown as User[];
-
 
   React.useEffect(() => {
-    const run = async () => {
-      const rand = () => Math.random();
-
-      await new Promise<void>(resolve => {
-        let iteration = 0;
-        const step = () => {
-          for (; iteration < RUNS; iteration++) {
-            const shuffled = shuffleWithSeed(users, iteration);
-
-            bigList.push(...shuffled);
-
-            const sorted = shuffled.slice().sort((a, b) => a.name.localeCompare(b.name));
-
-            const filteredMapped = sorted
-              .filter(u => u.active && u.age > 18)
-              .map(u => ({ ...u, name: u.name.toUpperCase() }));
-
-            let deserialized: typeof filteredMapped = filteredMapped;
-            if (filteredMapped.length) {
-              const serialized = JSON.stringify(filteredMapped);
-              deserialized = JSON.parse(serialized);
-            }
-
-            if (deserialized.length > 0) {
-              const sampled = deserialized[Math.floor(rand() * deserialized.length)];
-              if (!sampled.name) throw new Error('Invariant');
-            }
-
-            for (const user of users) {
-              const parts = user.name.split(' ');
-              if (parts.length > 0) nameCounter[parts[0]] = (nameCounter[parts[0]] ?? 0) + 1;
-              if (parts.length > 1) surnameCounter[parts[1]] = (surnameCounter[parts[1]] ?? 0) + 1;
-            }
-
-          }
-          if (iteration < RUNS) setTimeout(step, 0); else resolve();
-        };
-        step();
-      });
-      bigList.length = 0;
-      const elapsed = Date.now() - start;
-      const res: TestResult = { testName: 'RAM Test', group: 'memory', executionTimeMs: elapsed, details: 'RAM intensive operations completed', success: true };
-      resolveResult(params.key as string, res);
-      router.back();
+    const start = Date.now();
+    runBenchmark();
+    const elapsed = Date.now() - start;
+    const res: TestResult = {
+      testName: 'RAM Test',
+      group: 'memory',
+      executionTimeMs: elapsed,
+      details: `runs=${RUNS}`,
+      success: true,
     };
-    run();
+    resolveResult(params.key as string, res);
+    router.back();
   }, []);
 
   return (

@@ -1,12 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { View, Dimensions, PixelRatio, StyleSheet } from 'react-native';
 import type { TestResult } from '../lib/testTypes';
-import { Animated } from 'react-native';
-
-// UI Test: 1500 animowanych kwadratów (prosty back-and-forth) przez ~5s.
-// Brak reanimated w tym wariancie – używamy Animated.timing z useNativeDriver.
-
-const SQUARES = 1500;
+import { Animated } from 'react-native';react-native≥[;'p-]']
+;
 const TEST_DURATION_MS = 5000;
 
 export default function UITestScreen({ navigation, route }: any) {
@@ -15,12 +11,11 @@ export default function UITestScreen({ navigation, route }: any) {
 
   const { width, height } = Dimensions.get('window');
   const ratio = PixelRatio.get();
-  const size = 50 / ratio; // analog do Flutter (50px w natywnych px -> dp korekta)
+  const size = 50 / ratio; //
 
-  // Pre-generate parametry kwadratów
   const squares = useMemo(() => {
     const list: { key: number; startX: number; startY: number; dx: number; dy: number; color: string; animX: Animated.Value; animY: Animated.Value; }[] = [];
-    for (let i = 0; i < SQUARES; i++) {
+    for (let i = 0; i < 1500; i++) {
       const startX = Math.random() * Math.max(1, width - size);
       const startY = Math.random() * Math.max(1, height - size);
       const dx = (Math.random() * 400 - 200) / ratio;
@@ -32,7 +27,6 @@ export default function UITestScreen({ navigation, route }: any) {
   }, [width, height, ratio, size]);
 
   useEffect(() => {
-    // Zbuduj sekwencję powtarzającą (0->1->0) dla każdej osi (można współdzielić jedną animated value, ale tutaj zachowujemy niezależność) – performance test.
     squares.forEach(sq => {
       const createLoop = (val: Animated.Value) => {
         Animated.loop(
