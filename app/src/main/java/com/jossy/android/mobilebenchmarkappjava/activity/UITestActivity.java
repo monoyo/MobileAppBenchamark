@@ -48,13 +48,15 @@ public class UITestActivity extends AppCompatActivity {
 
             container.addView(view);
 
-            ObjectAnimator animX = ObjectAnimator.ofFloat(view, "translationX", view.getX(), view.getX() + random.nextInt(400) - 200, view.getX());
-            ObjectAnimator animY = ObjectAnimator.ofFloat(view, "translationY", view.getY(), view.getY() + random.nextInt(400) - 200, view.getY());
+            ObjectAnimator animX = ObjectAnimator.ofFloat(view, "translationX", view.getX(),
+                    view.getX() + random.nextInt(400) - 200, view.getX());
+            ObjectAnimator animY = ObjectAnimator.ofFloat(view, "translationY", view.getY(),
+                    view.getY() + random.nextInt(400) - 200, view.getY());
 
             animX.setRepeatCount(ObjectAnimator.INFINITE);
             animY.setRepeatCount(ObjectAnimator.INFINITE);
-            animX.setDuration(2000L);
-            animY.setDuration(2000L);
+            animX.setDuration(1000L);
+            animY.setDuration(1000L);
 
             animX.start();
             animY.start();
@@ -68,6 +70,6 @@ public class UITestActivity extends AppCompatActivity {
             intent.putExtra(BenchmarkApplication.RESULT, result);
             setResult(RESULT_OK, intent);
             finish();
-        }, 5000);
+        }, 2000);
     }
 }
