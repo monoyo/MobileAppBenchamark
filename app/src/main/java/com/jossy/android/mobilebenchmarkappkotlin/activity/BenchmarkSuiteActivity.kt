@@ -18,8 +18,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestEntry
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestEntry
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale

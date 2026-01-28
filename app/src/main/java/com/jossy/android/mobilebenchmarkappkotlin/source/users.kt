@@ -1,4 +1,4 @@
-package com.jossy.android.mobilebenchmarkappkotlin
+package com.jossy.android.mobilebenchmarkappkotlin.source
 
 val jsonData =
     """

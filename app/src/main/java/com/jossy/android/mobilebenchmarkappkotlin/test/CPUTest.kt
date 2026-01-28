@@ -1,5 +1,6 @@
-package com.jossy.android.mobilebenchmarkappkotlin
+package com.jossy.android.mobilebenchmarkappkotlin.test
 
+import com.jossy.android.mobilebenchmarkappkotlin.model.CpuResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -9,12 +10,6 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 object CPUTest {
-    data class CpuResult(
-        val threads: Int,
-        val durationMs: Long,
-        val iterations: Long,
-        val checksum: Double,
-    )
 
     suspend fun runBenchmarkParallel(
         durationMs: Long = 2500L,

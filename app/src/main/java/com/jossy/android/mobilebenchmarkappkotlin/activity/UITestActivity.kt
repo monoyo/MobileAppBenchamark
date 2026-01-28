@@ -12,7 +12,7 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import java.util.Random
 
 class UITestActivity : AppCompatActivity() {

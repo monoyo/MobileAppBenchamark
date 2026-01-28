@@ -1,6 +1,6 @@
 package com.jossy.android.mobilebenchmarkappkotlin.service
 
-import com.jossy.android.mobilebenchmarkappkotlin.data.Post
+import com.jossy.android.mobilebenchmarkappkotlin.model.Post
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android

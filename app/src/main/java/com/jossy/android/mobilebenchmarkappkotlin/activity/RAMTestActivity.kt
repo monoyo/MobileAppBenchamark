@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
-import com.jossy.android.mobilebenchmarkappkotlin.RAMTest
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.test.RAMTest
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

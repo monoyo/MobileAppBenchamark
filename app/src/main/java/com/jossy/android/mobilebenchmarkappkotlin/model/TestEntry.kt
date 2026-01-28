@@ -1,4 +1,4 @@
-package com.jossy.android.mobilebenchmarkappkotlin.data
+package com.jossy.android.mobilebenchmarkappkotlin.model
 
 data class TestEntry(
     val iteration: Int,

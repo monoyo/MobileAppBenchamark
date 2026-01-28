@@ -1,4 +1,4 @@
-package com.jossy.android.mobilebenchmarkappkotlin
+package com.jossy.android.mobilebenchmarkappkotlin.test
 
 import android.Manifest
 import android.content.Context
@@ -9,11 +9,10 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-
 
 class LocationBenchmarkTest(
     private val context: Context,

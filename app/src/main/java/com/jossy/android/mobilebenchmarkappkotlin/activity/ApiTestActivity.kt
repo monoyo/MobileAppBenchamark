@@ -8,14 +8,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.extensions.onEnd
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import com.jossy.android.mobilebenchmarkappkotlin.service.ApiService
+import com.jossy.android.mobilebenchmarkappkotlin.viewmodel.ApiTestViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class ApiTestActivity : AppCompatActivity() {
     private lateinit var statusTextView: TextView
-    private var startTime: Long = 0
+    private val viewModel = ApiTestViewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,26 +28,14 @@ class ApiTestActivity : AppCompatActivity() {
     }
 
     private fun startApiTest() {
-        Log.d("ApiTestActivity", "Starting API test (Ktor)")
-        startTime = System.currentTimeMillis()
-        statusTextView.text = "Starting API request..."
+        viewModel.runTest( { result ->
+            onEnd(result)
+        }, { error ->
+            onError(error)
+        })
+    }
 
-        lifecycleScope.launch {
-            try {
-                val posts = ApiService.fetchPosts()
-                val totalTime = System.currentTimeMillis() - startTime
-                Log.d("ApiTestActivity", "API test completed in ${totalTime}ms items=${posts.size}")
-                val result = TestResult("API Test", totalTime, "API request completed successfully (count=${posts.size})", true)
-                val intent = Intent()
-                intent.putExtra(BenchmarkApplication.RESULT, result)
-                setResult(RESULT_OK, intent)
-                finish()
-            } catch (ce: CancellationException) {
-                throw ce
-            } catch (t: Throwable) {
-                statusTextView.text = "Error: ${t.message}"
-                Log.e("ApiTestActivity", "API error", t)
-            }
-        }
+    private fun onError(error: String) {
+        statusTextView.text = error
     }
 }

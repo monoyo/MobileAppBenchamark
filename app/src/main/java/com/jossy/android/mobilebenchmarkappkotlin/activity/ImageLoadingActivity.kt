@@ -13,7 +13,7 @@ import coil.load
 import coil.request.ImageRequest
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 
 class ImageLoadingActivity : AppCompatActivity() {
     private lateinit var loadingStatus: TextView

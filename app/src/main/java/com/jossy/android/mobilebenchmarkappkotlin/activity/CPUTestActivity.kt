@@ -6,9 +6,9 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
-import com.jossy.android.mobilebenchmarkappkotlin.CPUTest
+import com.jossy.android.mobilebenchmarkappkotlin.test.CPUTest
 import com.jossy.android.mobilebenchmarkappkotlin.R
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,7 +35,7 @@ class CPUTestActivity : AppCompatActivity() {
                 val result = TestResult(
                     "CPU Test",
                     cpuElapsed,
-                    "threads=${r.threads}, iterations=${r.iterations}",
+                    "threads=${ r.threads}, iterations=${r.iterations}",
                     true,
                 )
                 val intent = Intent()

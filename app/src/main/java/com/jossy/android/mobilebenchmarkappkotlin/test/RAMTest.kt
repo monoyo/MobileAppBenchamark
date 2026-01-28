@@ -1,6 +1,7 @@
-package com.jossy.android.mobilebenchmarkappkotlin
+package com.jossy.android.mobilebenchmarkappkotlin.test
 
-import com.jossy.android.mobilebenchmarkappkotlin.data.User
+import com.jossy.android.mobilebenchmarkappkotlin.model.User
+import com.jossy.android.mobilebenchmarkappkotlin.source.jsonData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.random.Random
@@ -15,7 +16,7 @@ object RAMTest {
         nameCounter.clear()
         surnameCounter.clear()
 
-        val users = Json.decodeFromString<List<User>>(jsonData)
+        val users = Json.Default.decodeFromString<List<User>>(jsonData)
 
         repeat(RUNS) {
             val shuffled = users.shuffled(Random(it))
@@ -28,11 +29,11 @@ object RAMTest {
                     .filter { it.active && it.age > 18 }
                     .map { it.copy(name = it.name.uppercase()) }
 
-            val serialized = Json.encodeToString(filtered)
-            val deserialized: List<User> = Json.decodeFromString(serialized)
+            val serialized = Json.Default.encodeToString(filtered)
+            val deserialized: List<User> = Json.Default.decodeFromString(serialized)
 
             if (deserialized.isNotEmpty()) {
-                val randomUser = deserialized[Random.nextInt(deserialized.size)]
+                val randomUser = deserialized[Random.Default.nextInt(deserialized.size)]
                 val randomUserName = randomUser.name
             }
 

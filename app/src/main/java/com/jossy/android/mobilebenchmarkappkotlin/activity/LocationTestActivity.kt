@@ -5,9 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
-import com.jossy.android.mobilebenchmarkappkotlin.LocationBenchmarkTest
+import com.jossy.android.mobilebenchmarkappkotlin.test.LocationBenchmarkTest
 import com.jossy.android.mobilebenchmarkappkotlin.R
-import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
+import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import kotlinx.coroutines.launch
 
 class LocationTestActivity : ComponentActivity() {
