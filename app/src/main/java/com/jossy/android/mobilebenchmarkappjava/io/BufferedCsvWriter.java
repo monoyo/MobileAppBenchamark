@@ -147,32 +147,53 @@ public class BufferedCsvWriter implements AutoCloseable {
     /**
      * Asynchroniczny flush - nie blokuje wątku wywołującego.
      */
+    /**
+     * Asynchroniczny flush - nie blokuje wątku wywołującego.
+     */
     private void flushAsync() {
+        if (closed)
+            return;
+
         // Kopiujemy bufor i czyścimy go natychmiast
         final List<TestEntry> toWrite = new ArrayList<>(buffer);
         buffer.clear();
         lastFlushTimeMs = System.currentTimeMillis();
 
-        writeExecutor.submit(() -> {
-            lock.lock();
-            try {
-                writeEntries(toWrite);
-                totalWritten.addAndGet(toWrite.size());
+        if (toWrite.isEmpty())
+            return;
 
-                // Zwalniamy pamięć po zapisie
-                toWrite.clear();
+        try {
+            writeExecutor.submit(() -> {
+                lock.lock();
+                try {
+                    if (closed || writer == null)
+                        return; // Zapobiega zapisowi po zamknięciu
 
-                if (writer != null) {
-                    writer.flush();
+                    writeEntries(toWrite);
+                    totalWritten.addAndGet(toWrite.size());
+
+                    // Zwalniamy pamięć po zapisie
+                    toWrite.clear();
+
+                    if (writer != null) {
+                        try {
+                            writer.flush();
+                        } catch (IOException e) {
+                            // Ignoruj błędy flusha przy zamykaniu
+                        }
+                    }
+                } catch (IOException e) {
+                    lastError = e;
+                    Log.e(TAG, "Async write error: " + e.getMessage(), e);
+                    saveCheckpointInternal(toWrite);
+                } finally {
+                    lock.unlock();
                 }
-            } catch (IOException e) {
-                lastError = e;
-                Log.e(TAG, "Async write error: " + e.getMessage(), e);
-                saveCheckpointInternal(toWrite);
-            } finally {
-                lock.unlock();
-            }
-        });
+            });
+        } catch (Exception e) {
+            // Executor może być już zamknięty
+            Log.w(TAG, "Failed to submit async write", e);
+        }
     }
 
     /**
@@ -343,8 +364,9 @@ public class BufferedCsvWriter implements AutoCloseable {
                     writer.close();
                 } catch (IOException e) {
                     Log.e(TAG, "Error closing writer: " + e.getMessage(), e);
+                } finally {
+                    writer = null;
                 }
-                writer = null;
             }
 
             Log.i(TAG, "Closed CSV writer. Total written: " + totalWritten.get() + " records");
