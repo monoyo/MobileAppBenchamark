@@ -10,97 +10,55 @@ export default function CPUTest() {
 
   React.useEffect(() => {
     const run = async () => {
-      const TIME_LIMIT_MS = 3000; // 3s hard limit
+      // Default to 1M iterations if not specified (e.g. run directly)
+      const targetIterations = params.iterations ? parseInt(params.iterations as string, 10) : 500000;
+
       const start = Date.now();
 
-      // Accumulators / counters
-      let primeChecks = 0;
-      let foundPrimes = 0;
-      let matrixRows = 0;
-      let mathIters = 0;
-      let sortIters = 0;
-      let logOps = 0;
+      // Accumulators
+      let x = 0.1;
+      let acc = 0;
 
-      // Pre-create small matrices (we'll rotate values)
-      const SIZE = 48;
-      const A = Array.from({ length: SIZE }, () => Float64Array.from({ length: SIZE }, () => Math.random()));
-      const B = Array.from({ length: SIZE }, () => Float64Array.from({ length: SIZE }, () => Math.random()));
-      const R = Array.from({ length: SIZE }, () => Float64Array.from({ length: SIZE }, () => 0));
+      // Iteration-based loop
+      // We process in chunks to avoid blocking the JS thread completely (keep UI responsive-ish)
+      const CHUNK_SIZE = 5000;
+      let currentIter = 0;
 
-      const now = () => Date.now();
+      const performChunk = async () => {
+        const chunkEnd = Math.min(targetIterations, currentIter + CHUNK_SIZE);
 
-      const doPrimesBatch = () => {
-        const limit = primeChecks + 2000;
-        for (; primeChecks < limit; primeChecks++) {
-          const n = primeChecks + 2; // shift away from 0/1
-          let prime = true;
-            const r = Math.floor(Math.sqrt(n));
-            for (let j = 2; j <= r; j++) { if (n % j === 0) { prime = false; break; } }
-          if (prime) foundPrimes++;
+        for (let i = currentIter; i < chunkEnd; i++) {
+          // Complex math workload
+          x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
+          acc += x;
+        }
+
+        currentIter = chunkEnd;
+
+        if (currentIter < targetIterations) {
+          // Yield to event loop to allow UI updates/FPS counting
+          await new Promise(r => setTimeout(r, 0));
+          await performChunk();
+        } else {
+          finish();
         }
       };
 
-      const doMatrixRows = () => {
-        const rowsPer = 4;
-        const target = Math.min(matrixRows + rowsPer, SIZE);
-        for (; matrixRows < target; matrixRows++) {
-          for (let c = 0; c < SIZE; c++) {
-            let sum = 0;
-            for (let k = 0; k < SIZE; k++) sum += A[matrixRows][k] * B[k][c];
-            R[matrixRows][c] = sum;
-          }
-        }
-        if (matrixRows === SIZE) matrixRows = 0; // wrap to keep continuous work
+      const finish = () => {
+        const elapsed = Date.now() - start;
+        const res: TestResult = {
+          testName: 'CPU Test',
+          group: 'cpu',
+          executionTimeMs: elapsed,
+          details: `iterations=${targetIterations} checksum=${acc.toFixed(2)}`,
+          success: true,
+        };
+        resolveResult(params.key as string, res);
+        router.back();
       };
 
-      const doMathOps = () => {
-        const chunk = 8000;
-        for (let i = 0; i < chunk; i++) {
-          mathIters++;
-          const x = mathIters + Math.random();
-          // a few transcendentals
-          Math.sin(x) + Math.cos(x) + Math.sqrt(x);
-        }
-      };
-
-      const doSortSmall = () => {
-        const arr = Array.from({ length: 4000 }, () => Math.random());
-        arr.sort((a, b) => a - b);
-        sortIters++;
-      };
-
-      const doLogOps = () => {
-        const cap = logOps + 6000;
-        for (; logOps < cap; logOps++) {
-          const v = logOps + 1;
-          Math.log(v) * Math.pow(v, 1.1);
-        }
-      };
-
-      const step = async (): Promise<void> => {
-        // Execute a mixed batch
-        doPrimesBatch();
-        doMatrixRows();
-        doMathOps();
-        doSortSmall();
-        doLogOps();
-        if (now() - start < TIME_LIMIT_MS) {
-          await new Promise(r => setTimeout(r, 0)); // yield
-          return step();
-        }
-      };
-
-      await step();
-      const elapsed = Date.now() - start;
-      const res: TestResult = {
-        testName: 'CPU Test',
-        group: 'cpu',
-        executionTimeMs: elapsed,
-        details: `primesChecked=${primeChecks} found=${foundPrimes} matrixRows=${matrixRows} mathIters=${mathIters} sorts=${sortIters} logOps=${logOps}`,
-        success: true,
-      };
-      resolveResult(params.key as string, res);
-      router.back();
+      // Start processing
+      performChunk();
     };
     run();
   }, []);

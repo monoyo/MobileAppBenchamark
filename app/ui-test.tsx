@@ -1,12 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, View, Animated } from 'react-native';
+import { Animated, Dimensions, View } from 'react-native';
 import type { TestResult } from './types';
 import { resolveResult } from './utils/navResult';
-import { UI_TEST_ITERATIONS } from './constants/testConfig';
 
-const COUNT = 1500;
-const DURATION = 2000; // ms (pełny cykl A->B->A)
+const ANIM_DURATION = 1000; // 1s per cycle
+const TOTAL_DURATION = 2000; // 2s total test time
 const SIZE = 20;       // zmniejszone (wcześniej 40) – bloki 2x mniejsze
 
 function randInt(max: number) { return Math.floor(Math.random() * max); }
@@ -55,8 +54,8 @@ export default function UITest() {
     function loopAbsolute(v: Animated.Value, base: number, delta: number) {
       return Animated.loop(
         Animated.sequence([
-          Animated.timing(v, { toValue: base + delta, duration: DURATION / 2, useNativeDriver: true }),
-          Animated.timing(v, { toValue: base, duration: DURATION / 2, useNativeDriver: true }),
+          Animated.timing(v, { toValue: base + delta, duration: ANIM_DURATION / 2, useNativeDriver: true }),
+          Animated.timing(v, { toValue: base, duration: ANIM_DURATION / 2, useNativeDriver: true }),
         ])
       );
     }
@@ -69,20 +68,19 @@ export default function UITest() {
     });
     anims.forEach(a => a.start());
 
-    // Mierzymy tylko określoną liczbę cykli (UI_TEST_ITERATIONS), same animacje są infinite
-    const totalDuration = UI_TEST_ITERATIONS * DURATION;
+    // Mierzymy przez sztywny czas TOTAL_DURATION (2000ms)
     const timer = setTimeout(() => {
       const elapsed = Date.now() - startTs;
       const res: TestResult = {
         testName: 'UI Test',
         group: 'ui',
         executionTimeMs: elapsed,
-        details: `COUNT=${COUNT} cyclesMeasured=${UI_TEST_ITERATIONS} durationPerCycle=${DURATION}ms absolutePath=true`,
+        details: `COUNT=${COUNT} duration=${TOTAL_DURATION}ms animDuration=${ANIM_DURATION}ms absolutePath=true`,
         success: true,
       };
       resolveResult(params.key as string, res);
       router.back();
-    }, totalDuration);
+    }, TOTAL_DURATION);
 
     return () => {
       clearTimeout(timer);

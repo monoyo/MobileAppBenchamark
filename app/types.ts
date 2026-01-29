@@ -4,6 +4,7 @@ export type TestResult = {
   executionTimeMs: number; // -1 indicates failure or not applicable
   success: boolean;
   details?: string;
+  fps?: number; // Added FPS field
 };
 
 export type GroupAverage = {
@@ -54,7 +55,8 @@ export type Post = {
 };
 
 export function formatResult(r: TestResult): string {
-  return `${r.testName}${r.group ? ' [' + r.group + ']' : ''}: ${r.executionTimeMs}ms${r.details ? ' (' + r.details + ')' : ''}`;
+  const fpsStr = r.fps ? ` [FPS: ${r.fps.toFixed(1)}]` : '';
+  return `${r.testName}${r.group ? ' [' + r.group + ']' : ''}: ${r.executionTimeMs}ms${fpsStr}`;
 }
 
 // Helper: compute median from sorted list
@@ -96,4 +98,3 @@ export function aggregatePerTest(results: TestResult[]): AggregatedStats[] {
     } as AggregatedStats;
   });
 }
-
