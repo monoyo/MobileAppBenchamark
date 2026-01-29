@@ -27,6 +27,7 @@ import com.jossy.android.mobilebenchmarkappjava.config.SampleConfiguration;
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
+import com.jossy.android.mobilebenchmarkappjava.metrics.SystemMetricsCollector;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +55,7 @@ import java.util.Map;
 public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private static final String TAG = "BenchmarkSuiteActivity";
+    private static final String BENCHMARK_TAG = "BENCHMARK"; // Tag dla synchronizacji z Pythonem
     private static final int PERMISSION_REQUEST_CODE = 123;
     private static final int ALL_TESTS = 6;
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
@@ -87,6 +89,9 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     // Statistics
     private int totalSamplesCollected = 0;
     private int errorsEncountered = 0;
+
+    // System Metrics Collector - zbiera CPU, RAM, GPU, FPS do osobnego CSV
+    private SystemMetricsCollector metricsCollector;
 
     private long appStartTime = System.currentTimeMillis();
 
@@ -203,6 +208,13 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         closeWriters();
         csvWriters.clear();
         uiDisplayBuffers.clear();
+
+        // Uruchom kolektor metryk systemowych (CPU, RAM, GPU, FPS)
+        if (metricsCollector != null) {
+            metricsCollector.stop();
+        }
+        metricsCollector = new SystemMetricsCollector(this, outputDir, sessionTimestamp);
+        metricsCollector.start();
 
         // Inicjalizuj writery dla każdego testu
         for (int i = 0; i < ALL_TESTS; i++) {
@@ -342,6 +354,9 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
             saveAllCheckpoints();
         }
 
+        // Marker końca testu dla skryptu Python
+        Log.i(BENCHMARK_TAG, "TEST_END:" + result.getTestName());
+
         // Kontynuuj z następnym testem (z opóźnieniem przy małych próbkach, bez przy
         // dużych)
         int delayMs = selectedConfig.sampleCount >= 10_000 ? 100 : 500;
@@ -356,6 +371,11 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
         // Zamknij wszystkie writery (flush pozostałych danych)
         closeWriters();
+
+        // Zatrzymaj kolektor metryk systemowych
+        if (metricsCollector != null) {
+            metricsCollector.stop();
+        }
 
         long totalTime = System.currentTimeMillis() - testSuiteStartTime;
         String summary = String.format(Locale.US,
@@ -377,6 +397,15 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     public void onTestStarted(String testName) {
+        // Synchronizacja kolektora metryk z aktualnym testem
+        if (metricsCollector != null) {
+            metricsCollector.setCurrentTest(testName, currentIteration);
+        }
+
+        // Marker dla skryptu Python - synchronizacja testów
+        Log.i(BENCHMARK_TAG, "TEST_START:" + testName);
+        Log.i(BENCHMARK_TAG, "ITERATION:" + currentIteration);
+
         String info = String.format(Locale.US,
                 "Running: %s\nIteration %d/%d\nTotal collected: %d",
                 testName,
