@@ -166,7 +166,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
                         frameTimeMs, fps, elapsed));
             }
         } catch (IOException e) {
-            // Ignore
+            Log.e(TAG, "CSV write failed", e);
         }
 
         // Ramp Up Logic - Time Based

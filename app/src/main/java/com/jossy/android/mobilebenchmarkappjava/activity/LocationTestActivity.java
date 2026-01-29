@@ -90,11 +90,7 @@ public class LocationTestActivity extends AppCompatActivity {
     private void processLocation(Location location) {
         try {
             long eventTime = System.currentTimeMillis();
-            long duration = eventTime - startTime; // Duration since 'start updates' or interval
-            // Actually for location, duration is vague. Let's log latency from last update?
-            // Or just timestamp. The Suite expects executionTime.
-            // Let's use 0 or diff from prev.
-            // Simpler: duration = 0 (event based).
+            long duration = eventTime - startTime;
 
             try {
                 com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
