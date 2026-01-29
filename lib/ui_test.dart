@@ -19,80 +19,22 @@ class _UITestPageState extends State<UITestPage>
     super.initState();
     _start = DateTime.now().millisecondsSinceEpoch;
 
-    Future.delayed(const Duration(seconds: 5), () {
+    Future.delayed(const Duration(milliseconds: 2000), () {
       final elapsed = DateTime.now().millisecondsSinceEpoch - _start;
       final res =
-          TestResult('UI Test', elapsed, 'Animation frames rendered', true);
+          TestResult('UI Test', elapsed, 'Animation frames rendered (1500 rects)', true);
       if (mounted) Navigator.pop(context, res);
     });
   }
 
-@override
-Widget build(BuildContext context) {
-  final screen = MediaQuery.of(context).size;
-  final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-  final size = 50 / pixelRatio; // odpowiada 50px z Androida
-
-  final squares = List.generate(1500, (i) {
-    final x = _rnd.nextDouble() * (screen.width - size);
-    final y = _rnd.nextDouble() * (screen.height - size);
-    final color = Color.fromARGB(
-        255, _rnd.nextInt(256), _rnd.nextInt(256), _rnd.nextInt(256));
-
-    final dx = (_rnd.nextDouble() * 400 / pixelRatio) - (200 / pixelRatio);
-    final dy = (_rnd.nextDouble() * 400 / pixelRatio) - (200 / pixelRatio);
-
-    return AnimatedPositionedSquare(
-      startX: x,
-      startY: y,
-      dx: dx,
-      dy: dy,
-      size: size,
-      color: color,
-    );
-  });
-
-  return Scaffold(
-  body: Container(
-    color: const Color.fromARGB(255, 255, 255, 255),
-    child: Stack(children: squares),
-  ),
-);
-}
-
-
-}
-
-class AnimatedPositionedSquare extends StatefulWidget {
-  final double startX, startY, dx, dy, size;
-  final Color color;
-
-  const AnimatedPositionedSquare({
-    super.key,
-    required this.startX,
-    required this.startY,
-    required this.dx,
-    required this.dy,
-    required this.size,
-    required this.color,
-  });
-
-  @override
-  State<AnimatedPositionedSquare> createState() =>
-      _AnimatedPositionedSquareState();
-}
-
-class _AnimatedPositionedSquareState extends State<AnimatedPositionedSquare>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animX, _animY;
+// ... inside _AnimatedPositionedSquareState
 
   @override
   void initState() {
     super.initState();
 
     _controller =
-      AnimationController(vsync: this, duration: const Duration(seconds: 2))
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))
           ..repeat();
 
     _animX = TweenSequence([

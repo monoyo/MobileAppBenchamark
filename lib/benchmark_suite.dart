@@ -8,6 +8,9 @@ import 'ram_test.dart';
 import 'image_loading_test.dart';
 import 'api_test.dart';
 import 'location_test.dart';
+import 'config/sample_configuration.dart';
+import 'utils/buffered_csv_writer.dart';
+import 'utils/fps_counter.dart';
 
 class BenchmarkSuitePage extends StatefulWidget {
   final int appLaunchMs;
@@ -18,17 +21,25 @@ class BenchmarkSuitePage extends StatefulWidget {
 }
 
 class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
-  static const int _iterationsPerTest = 30;
+  // Use config for iterations
+  SampleConfig _selectedConfig = SampleConfig.small;
+  
   late final int _allTests;
   int _currentIteration = 0;
   int _currentTestIndex = 0;
   bool _running = false;
   bool _disposed = false;
   String _currentInfo = '';
-  double _progress = 0.0;
+  double _progress = 0.0; // 0.0 to 1.0
   String? _averagesBlock;
 
   final Map<String, List<_TestEntry>> _perTestResults = {};
+  
+  // Resources
+  final Map<String, BufferedCsvWriter> _writers = {};
+  final FpsCounter _fpsCounter = FpsCounter();
+  Directory? _sessionDir;
+  int _suiteStartTime = 0;
 
   final List<String> _testNames = const [
     'UI Test',
@@ -46,6 +57,32 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     _currentInfo = 'App launched in: ${widget.appLaunchMs}ms.\nReady to start tests';
   }
 
+  Future<void> _initializeSession() async {
+    try {
+      final Directory? base = await _getBenchmarksDir();
+      if (base == null) return;
+      
+      final ts = DateTime.now();
+      final stamp = '${ts.year}${ts.month.toString().padLeft(2,'0')}${ts.day.toString().padLeft(2,'0')}_${ts.hour.toString().padLeft(2,'0')}${ts.minute.toString().padLeft(2,'0')}${ts.second.toString().padLeft(2,'0')}';
+      final dir = Directory('${base.path}/$stamp');
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      _sessionDir = dir;
+      
+      // Init writers
+      _writers.clear();
+      for (final name in _testNames) {
+        final safeName = name.toLowerCase().replaceAll(' ', '_');
+        final writer = BufferedCsvWriter('${dir.path}/$safeName.csv', bufferSize: _selectedConfig.bufferSize);
+        await writer.initialize();
+        _writers[name] = writer;
+      }
+    } catch (e) {
+      print('Session init error: $e');
+    }
+  }
+
   void _startSuite() async {
     setState(() {
       _running = true;
@@ -53,32 +90,59 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       _currentIteration = 0;
       _currentTestIndex = 0;
       _progress = 0.0;
+      _averagesBlock = null;
     });
+    
+    _suiteStartTime = DateTime.now().millisecondsSinceEpoch;
+    await _initializeSession();
+    
     await _runNext();
   }
 
   @override
   void dispose() {
     _disposed = true;
+    _closeWriters();
     super.dispose();
+  }
+  
+  Future<void> _closeWriters() async {
+    for(final w in _writers.values) {
+      await w.close();
+    }
+    _writers.clear();
   }
 
   Future<void> _runNext() async {
     if (!mounted || _disposed) return;
 
     if (_currentTestIndex >= _allTests) {
+      // Finished all tests
+      await _closeWriters();
       _appendAverages();
       setState(() => _running = false);
+      if (_sessionDir != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Saved results to ${_sessionDir!.path}')),
+        );
+      }
       return;
     }
 
-    if (_currentIteration < _iterationsPerTest) {
+    if (_currentIteration < _selectedConfig.sampleCount) {
       final name = _testNames[_currentTestIndex];
       setState(() {
-        _currentInfo = 'Running: $name (Iteration ${_currentIteration + 1}/$_iterationsPerTest)';
+        _currentInfo = 'Running: $name (Iteration ${_currentIteration + 1}/${_selectedConfig.sampleCount})';
       });
 
+      // Start FPS counter
+      _fpsCounter.start();
+      
+      final intervalStart = DateTime.now().millisecondsSinceEpoch;
       TestResult? res;
+      
+      // Navigate to test
+      // Note: We modify CPUTest to accept iterations
       switch (_currentTestIndex) {
         case 0:
           res = await Navigator.of(context).push(
@@ -87,7 +151,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
           break;
         case 1:
           res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const CPUTestPage()),
+            MaterialPageRoute(builder: (_) => CPUTestPage(iterations: _selectedConfig.cpuIterations)),
           );
           break;
         case 2:
@@ -112,23 +176,56 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
           );
           break;
       }
+      
+      final intervalEnd = DateTime.now().millisecondsSinceEpoch;
+      final intervalDuration = intervalEnd - intervalStart;
+      final double currentFps = _fpsCounter.fps;
+      
+      // Stop/Pause FPS counter? Actually persistent callback keeps running, but we grabbed the value.
+      // We can stop it if we want to save resources between tests, but overhead is low.
+      // Let's stop it for cleanliness.
+      _fpsCounter.stop();
 
       if (!mounted) return;
+      
       if (res != null) {
         final iterNum = _currentIteration + 1;
-        final list = _perTestResults.putIfAbsent(res.testName, () => <_TestEntry>[]);
+        
+        // Add to memory results (for UI display)
+        // Only keep last 50 entries in memory to avoid OOM on large datasets
+        List<_TestEntry>? list = _perTestResults[res.testName];
+        if (list == null) {
+            list = <_TestEntry>[];
+            _perTestResults[res.testName] = list;
+        }
+        if (list.length >= 50) list.removeAt(0); // keep window
         list.add(_TestEntry(iterNum, res));
+
+        // Write to CSV immediately
+        final writer = _writers[res.testName];
+        if (writer != null) {
+            writer.write(
+                iterNum, 
+                res.executionTimeMs, 
+                res.details, 
+                fps: currentFps,
+                intervalStartMs: intervalStart, 
+                intervalDurationMs: intervalDuration
+            );
+        }
       }
 
       setState(() {
         _currentIteration++;
-        _progress = ((_currentTestIndex * _iterationsPerTest) + _currentIteration) /
-            (_iterationsPerTest * _allTests);
+        _progress = ((_currentTestIndex * _selectedConfig.sampleCount) + _currentIteration) /
+            (_selectedConfig.sampleCount * _allTests);
       });
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Tiny delay to allow UI to breathe
+      await Future.delayed(const Duration(milliseconds: 10));
       await _runNext();
     } else {
+      // Next test group
       setState(() {
         _currentTestIndex++;
         _currentIteration = 0;
@@ -138,7 +235,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   }
 
   void _appendAverages() {
-    final buffer = StringBuffer('# Averages (ms)\n');
+    final buffer = StringBuffer('# Recent Averages (ms per window)\n');
     for (final entry in _perTestResults.entries) {
       final values = entry.value;
       if (values.isEmpty) continue;
@@ -158,111 +255,24 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         final Directory? ext = await getExternalStorageDirectory();
         final Directory base = ext ?? await getApplicationDocumentsDirectory();
         final Directory docs = Directory('${base.path}/Documents');
-        if (!(await docs.exists())) {
-          await docs.create(recursive: true);
-        }
+        if (!(await docs.exists())) await docs.create(recursive: true);
         final Directory out = Directory('${docs.path}/benchmarks');
-        if (!(await out.exists())) {
-          await out.create(recursive: true);
-        }
+        if (!(await out.exists())) await out.create(recursive: true);
         return out;
       } else {
         final Directory base = await getApplicationDocumentsDirectory();
         final Directory out = Directory('${base.path}/benchmarks');
-        if (!(await out.exists())) {
-          await out.create(recursive: true);
-        }
+        if (!(await out.exists())) await out.create(recursive: true);
         return out;
       }
     } catch (_) {
       return null;
-    }
-  }
-
-  Future<Directory?> _getInternalBenchmarksDir() async {
-    try {
-      final Directory base = await getApplicationDocumentsDirectory();
-      final Directory out = Directory('${base.path}/benchmarks');
-      if (!(await out.exists())) {
-        await out.create(recursive: true);
-      }
-      return out;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<List<String>> _writeCsvFilesToDir(Directory dir, String stamp) async {
-    final List<String> written = <String>[];
-    for (final entry in _perTestResults.entries) {
-      final name = entry.key;
-      final rows = [...entry.value]..sort((a, b) => a.iteration.compareTo(b.iteration));
-      if (rows.isEmpty) continue;
-      final safe = name.toLowerCase().replaceAll(' ', '_');
-      final file = File('${dir.path}/$safe.$stamp.csv');
-      final sb = StringBuffer()..writeln('iteration,executionTimeMs,details');
-      for (final r in rows) {
-        sb.writeln('${r.iteration},${r.result.executionTimeMs},${_csv(r.result.details)},${r.result.success}');
-      }
-      try {
-        await file.writeAsString(sb.toString(), flush: true);
-        final st = await file.stat();
-        if (st.size > 0) {
-          written.add(file.path);
-        }
-      } catch (_) {
-      }
-    }
-    return written;
-  }
-
-  void _exportResults() async {
-    try {
-  final primaryDir = await _getBenchmarksDir();
-  if (primaryDir == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cannot access output directory')),
-        );
-        return;
-      }
-      final ts = DateTime.now();
-      final stamp = '${ts.year.toString().padLeft(4, '0')}${ts.month.toString().padLeft(2, '0')}${ts.day.toString().padLeft(2, '0')}_${ts.hour.toString().padLeft(2, '0')}${ts.minute.toString().padLeft(2, '0')}${ts.second.toString().padLeft(2, '0')}';
-
-      List<String> writtenPrimary = await _writeCsvFilesToDir(primaryDir, stamp);
-      List<String> writtenInternal = <String>[];
-      if (Platform.isAndroid) {
-        final internalDir = await _getInternalBenchmarksDir();
-        if (internalDir != null) {
-          writtenInternal = await _writeCsvFilesToDir(internalDir, stamp);
-        }
-      }
-
-      final int total = writtenPrimary.length + writtenInternal.length;
-      if (total == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Brak wyników do eksportu')),
-        );
-        return;
-      }
-
-      final String where1 = writtenPrimary.isNotEmpty ? '1) ${writtenPrimary.first}' : '';
-      final String where2 = writtenInternal.isNotEmpty ? '\n2) ${writtenInternal.first}' : '';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Zapisano $total CSV:\n$where1$where2')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Export error: $e')),
-      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-  final total = _iterationsPerTest * _testNames.length;
-  final completed = (_currentTestIndex * _iterationsPerTest) + _currentIteration;
-  final progress = total == 0 ? 0.0 : (completed / total).clamp(0.0, 1.0);
-  final csvText = _buildCsvDisplayState();
+    final csvText = _buildCsvDisplayState();
 
     return Scaffold(
       body: Padding(
@@ -279,14 +289,33 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
+            
+            // Config Selector
+            if (!_running) 
+              Center(
+                child: DropdownButton<SampleConfig>(
+                  value: _selectedConfig,
+                  items: SampleConfig.values.map((c) {
+                    return DropdownMenuItem(value: c, child: Text(c.displayName));
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedConfig = val);
+                  },
+                ),
+              ),
 
-            LinearProgressIndicator(value: _running ? progress : 0.0),
+            const SizedBox(height: 16),
+            LinearProgressIndicator(value: _running ? _progress : 0.0),
             const SizedBox(height: 16),
 
             Expanded(
               child: Container(
+                decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
                 child: SingleChildScrollView(
-                  child: SelectableText(csvText, style: const TextStyle(fontSize: 14)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SelectableText(csvText, style: const TextStyle(fontSize: 12, fontFamily: 'monospace')),
+                  ),
                 ),
               ),
             ),
@@ -300,31 +329,14 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
                   onPressed: _running ? null : _startSuite,
                   child: Text(_running ? 'Running...' : 'Start Tests'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    backgroundColor: Color.fromARGB(255, 68, 63, 216),
-                    foregroundColor: _running
-                            ? Color.fromARGB(255, 54, 53, 53) 
-                            : Color.fromARGB(255, 255, 255, 255),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    backgroundColor: const Color.fromARGB(255, 68, 63, 216),
+                    foregroundColor: Colors.white,
                   )
                 ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _perTestResults.isEmpty ? null : _exportResults,
-                  child: const Text('Export Results'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    backgroundColor: Color.fromARGB(255, 68, 63, 216),
-                    foregroundColor: !_running
-                            ? Color.fromARGB(255, 54, 53, 53) 
-                            : Color.fromARGB(255, 255, 255, 255),
-                  )
-                  ),
+                // Export button is now redundant as we save automatically, 
+                // but we can keep it to show path or re-open folder (if feasible).
+                // Let's just show path in snackbar upon completion.
               ],
             ),
           ],
@@ -351,17 +363,18 @@ String _buildCsvDisplayFrom(Map<String, List<_TestEntry>> data, String? averages
   final keys = data.keys.toList();
   for (final testName in keys) {
     final entries = [...data[testName]!];
-    entries.sort((a, b) => a.iteration.compareTo(b.iteration));
-    sb.writeln('# $testName');
-    sb.writeln('iteration,executionTimeMs,details,success');
-    for (final e in entries) {
+    // Show only last 10 for display to avoid lag
+    final displayEntries = entries.length > 10 ? entries.sublist(entries.length - 10) : entries;
+    
+    sb.writeln('# $testName (Last 10 of ${entries.length})');
+    sb.writeln('iter,ms,details');
+    for (final e in displayEntries) {
       sb.writeln('${e.iteration},${e.result.executionTimeMs},${_csv(e.result.details)}');
     }
     sb.writeln();
-    if (averagesBlock != null) {
+  }
+  if (averagesBlock != null) {
       sb.writeln(averagesBlock.trim());
-      sb.writeln();
-    }
   }
   return sb.toString();
 }
@@ -371,3 +384,4 @@ extension on _BenchmarkSuitePageState {
     return _buildCsvDisplayFrom(_perTestResults, _averagesBlock);
   }
 }
+
