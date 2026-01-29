@@ -9,91 +9,196 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
+import com.jossy.android.mobilebenchmarkappkotlin.config.SampleConfiguration
+import com.jossy.android.mobilebenchmarkappkotlin.io.BufferedCsvWriter
+import com.jossy.android.mobilebenchmarkappkotlin.metrics.SystemMetricsCollector
 import com.jossy.android.mobilebenchmarkappkotlin.model.TestEntry
 import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
 
+/**
+ * Aktywność orkiestrująca wykonanie suite'a testów wydajnościowych.
+ * 
+ * Optymalizacje dla dużych zbiorów danych (do 1M próbek):
+ * 1. Buforowany zapis CSV (BufferedCsvWriter) - eliminuje wąskie gardło I/O
+ * 2. Ring buffer dla podglądu w UI - ogranicza zużycie pamięci
+ * 3. Asynchroniczne zapisywanie - nie blokuje pomiarów
+ * 4. Checkpointy - odzyskiwanie danych przy błędach
+ * 5. SystemMetricsCollector - zbiera CPU/RAM/GPU/FPS w tle
+ */
 class BenchmarkSuiteActivity : AppCompatActivity() {
+    
     companion object {
+        private const val TAG = "BenchmarkSuiteActivity"
+        private const val BENCHMARK_TAG = "BENCHMARK"
         private const val PERMISSION_REQUEST_CODE = 123
-        private const val TEST_ITERATIONS = 30
         private const val ALL_TESTS = 6
         private const val TEST_ACTIVITY_REQUEST_CODE = 456
+        private const val UI_DISPLAY_BUFFER_SIZE = 100
     }
 
+    // UI Components
     private lateinit var currentTestInfo: TextView
     private lateinit var testResults: TextView
     private lateinit var testProgress: ProgressBar
     private lateinit var startTestsButton: Button
     private lateinit var exportResultsButton: Button
+    private lateinit var sampleConfigSpinner: Spinner
 
-    private val allResults = mutableListOf<TestResult>()
-    private val perTestResults = linkedMapOf<String, MutableList<TestEntry>>()
+    // Configuration
+    private var selectedConfig = SampleConfiguration.SMALL
+
+    // Test State
     private var currentIteration = 0
     private var currentTestIndex = 0
     private var isRunning = false
+    private var testSuiteStartTime = 0L
+    private var currentIterationStartTime = 0L
+
+    // Data Storage - Optimized for large datasets
+    private val csvWriters = linkedMapOf<String, BufferedCsvWriter>()
+    private val uiDisplayBuffers = linkedMapOf<String, ArrayDeque<TestEntry>>()
     private val handler = Handler(Looper.getMainLooper())
-    private var resultBuilder = StringBuilder()
-    private val testStartTime = System.currentTimeMillis()
+    private var outputDir: File? = null
+    private var sessionTimestamp: String = ""
+
+    // Statistics
+    private var totalSamplesCollected = 0
+    private var errorsEncountered = 0
+
+    // System Metrics Collector
+    private var metricsCollector: SystemMetricsCollector? = null
+
+    private val appStartTime = System.currentTimeMillis()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_benchmark_suite)
 
+        initViews()
+        setupSampleConfigSpinner()
+
+        val launchTime = System.currentTimeMillis() - appStartTime
+        currentTestInfo.text = "App Launched in: ${launchTime}ms\nReady to start tests."
+    }
+
+    private fun initViews() {
         currentTestInfo = findViewById(R.id.currentTestInfo)
         testResults = findViewById(R.id.testResults)
         testProgress = findViewById(R.id.testProgress)
         startTestsButton = findViewById(R.id.startTestsButton)
         exportResultsButton = findViewById(R.id.exportResultsButton)
+        sampleConfigSpinner = findViewById(R.id.sampleConfigSpinner)
 
         startTestsButton.setOnClickListener {
             if (!isRunning) startTestSuite()
         }
 
-        exportResultsButton.setOnClickListener { exportResults() }
+        exportResultsButton.setOnClickListener { 
+            Toast.makeText(this, "Results are saved automatically during tests", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-        testProgress.max = TEST_ITERATIONS * ALL_TESTS
-        Log.d("BenchmarkSuiteActivity", "onCreate completed, UI initialized")
-        val launchTime = System.currentTimeMillis() - testStartTime
-        currentTestInfo.append("App Launched in: ")
-        currentTestInfo.append(launchTime.toString())
-        currentTestInfo.append("ms \nReady to start tests.")
+    private fun setupSampleConfigSpinner() {
+        val configNames = SampleConfiguration.entries.map { it.displayName }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, configNames)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        sampleConfigSpinner.adapter = adapter
+
+        sampleConfigSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedConfig = SampleConfiguration.fromOrdinal(position)
+                updateProgressMax()
+                Log.i(TAG, "Selected config: ${selectedConfig.displayName}")
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun updateProgressMax() {
+        testProgress.max = selectedConfig.sampleCount * ALL_TESTS
+        testProgress.progress = 0
     }
 
     private fun startTestSuite() {
         if (checkPermissions()) {
-            isRunning = true
-            currentIteration = 0
-            currentTestIndex = 0
-            allResults.clear()
-            resultBuilder = StringBuilder()
-            testResults.text = ""
-            startTestsButton.text = "Running..."
-            startTestsButton.isEnabled = false
-            runNextTest()
+            try {
+                initializeSession()
+                isRunning = true
+                currentIteration = 0
+                currentTestIndex = 0
+                totalSamplesCollected = 0
+                errorsEncountered = 0
+                testSuiteStartTime = System.currentTimeMillis()
+
+                startTestsButton.text = "Running..."
+                startTestsButton.isEnabled = false
+                sampleConfigSpinner.isEnabled = false
+                testResults.text = ""
+
+                runNextTest()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start test suite", e)
+                Toast.makeText(this, "Failed to start: ${e.message}", Toast.LENGTH_LONG).show()
+            }
         } else {
             requestPermissions()
         }
     }
 
+    private fun initializeSession() {
+        sessionTimestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+
+        val baseDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+        outputDir = File(baseDir, "benchmarks/$sessionTimestamp").apply { mkdirs() }
+
+        // Close previous writers
+        closeWriters()
+        csvWriters.clear()
+        uiDisplayBuffers.clear()
+
+        // Start system metrics collector
+        metricsCollector?.stop()
+        metricsCollector = SystemMetricsCollector(this, outputDir!!, sessionTimestamp)
+        metricsCollector?.start()
+
+        // Initialize writers for each test
+        for (i in 0 until ALL_TESTS) {
+            val testName = getTestName(i)
+            val safeName = testName.lowercase(Locale.US).replace(" ", "_")
+            val csvFile = File(outputDir, "$safeName.csv")
+
+            val writer = BufferedCsvWriter(
+                csvFile,
+                selectedConfig.bufferSize,
+                selectedConfig.optimalWriteBufferBytes
+            )
+            writer.initialize()
+            csvWriters[testName] = writer
+
+            uiDisplayBuffers[testName] = ArrayDeque(UI_DISPLAY_BUFFER_SIZE)
+        }
+
+        Log.i(TAG, "Session initialized: ${outputDir?.absolutePath}")
+    }
+
     private fun runNextTest() {
         if (currentTestIndex < ALL_TESTS) {
-            if (currentIteration < TEST_ITERATIONS) {
+            if (currentIteration < selectedConfig.sampleCount) {
                 val testName = getTestName(currentTestIndex)
+                currentIterationStartTime = System.currentTimeMillis()
                 onTestStarted(testName)
                 startSpecificTest(currentTestIndex)
-                currentIteration++
             } else {
                 currentTestIndex++
                 currentIteration = 0
@@ -108,143 +213,168 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         }
     }
 
-    private fun getTestName(index: Int): String =
-        when (index) {
-            0 -> "UI Test"
-            1 -> "CPU Test"
-            2 -> "RAM Test"
-            3 -> "Image Loading Test"
-            4 -> "API Test"
-            5 -> "Location Test"
-            else -> "Unknown Test"
-        }
+    private fun getTestName(index: Int): String = when (index) {
+        0 -> "UI Test"
+        1 -> "CPU Test"
+        2 -> "RAM Test"
+        3 -> "Image Loading Test"
+        4 -> "API Test"
+        5 -> "Location Test"
+        else -> "Unknown Test"
+    }
 
     private fun startSpecificTest(index: Int) {
-        val intent =
-            when (index) {
-                0 -> Intent(this, UITestActivity::class.java)
-                1 -> Intent(this, CPUTestActivity::class.java)
-                2 -> Intent(this, RAMTestActivity::class.java)
-                3 -> Intent(this, ImageLoadingActivity::class.java)
-                4 -> Intent(this, ApiTestActivity::class.java)
-                5 -> Intent(this, LocationTestActivity::class.java)
-                else -> return
+        val intent = when (index) {
+            0 -> Intent(this, UITestActivity::class.java)
+            1 -> Intent(this, CPUTestActivity::class.java).apply {
+                putExtra("cpu_iterations", selectedConfig.cpuIterationsPerThread)
             }
+            2 -> Intent(this, RAMTestActivity::class.java)
+            3 -> Intent(this, ImageLoadingActivity::class.java)
+            4 -> Intent(this, ApiTestActivity::class.java)
+            5 -> Intent(this, LocationTestActivity::class.java)
+            else -> return
+        }
         intent.putExtra("auto_mode", true)
         intent.putExtra("callback_activity", BenchmarkSuiteActivity::class.java.name)
         startActivityForResult(intent, TEST_ACTIVITY_REQUEST_CODE)
     }
 
     private fun onTestCompleted(result: TestResult) {
-        allResults.add(result)
-        val iterationNum = currentIteration
-        val entry = TestEntry(iteration = iterationNum, result = result)
-        val list = perTestResults.getOrPut(result.testName) { mutableListOf() }
-        list.add(entry)
-        updateProgress()
-        updateCsvDisplay()
-        handler.postDelayed({ runNextTest() }, 1000)
+        try {
+            val iterationEndTime = System.currentTimeMillis()
+            val intervalDuration = iterationEndTime - currentIterationStartTime
+            val cumulativeTime = iterationEndTime - testSuiteStartTime
+
+            val entry = TestEntry(
+                iteration = currentIteration,
+                result = result,
+                intervalStartMs = currentIterationStartTime,
+                intervalDurationMs = intervalDuration,
+                cumulativeTimeMs = cumulativeTime
+            )
+
+            // Write to buffered CSV
+            csvWriters[result.testName]?.write(
+                iteration = currentIteration,
+                executionTimeMs = result.executionTime,
+                details = result.details,
+                intervalStartMs = currentIterationStartTime,
+                intervalDurationMs = intervalDuration,
+                cumulativeTimeMs = cumulativeTime
+            )
+
+            // Update UI display buffer (ring buffer)
+            uiDisplayBuffers[result.testName]?.let { buffer ->
+                if (buffer.size >= UI_DISPLAY_BUFFER_SIZE) {
+                    buffer.removeFirst()
+                }
+                buffer.addLast(entry)
+            }
+
+            totalSamplesCollected++
+            currentIteration++
+            updateProgress()
+            updateCsvDisplay()
+
+            // Log end marker
+            Log.i(BENCHMARK_TAG, "TEST_END:${result.testName}")
+
+        } catch (e: Exception) {
+            errorsEncountered++
+            Log.e(TAG, "Error processing result: ${e.message}", e)
+            saveAllCheckpoints()
+        }
+
+        // Continue with next test
+        handler.postDelayed({ runNextTest() }, selectedConfig.testDelayMs)
     }
 
     private fun onAllTestsCompleted() {
         isRunning = false
         startTestsButton.text = "Start Tests"
         startTestsButton.isEnabled = true
-        currentTestInfo.text = "All tests completed!"
+        sampleConfigSpinner.isEnabled = true
+
+        closeWriters()
+        metricsCollector?.stop()
+
+        val totalTime = System.currentTimeMillis() - testSuiteStartTime
+        val summary = String.format(Locale.US,
+            "All tests completed!\n" +
+                    "Total samples: %d\n" +
+                    "Errors: %d\n" +
+                    "Total time: %.2fs\n" +
+                    "Output: %s",
+            totalSamplesCollected,
+            errorsEncountered,
+            totalTime / 1000.0,
+            outputDir?.absolutePath ?: "N/A")
+        currentTestInfo.text = summary
+
         calculateAndDisplayAverages()
     }
 
     private fun onTestStarted(testName: String) {
-        currentTestInfo.text = "Running: $testName (Iteration ${currentIteration + 1}/$TEST_ITERATIONS)"
+        // Sync metrics collector
+        metricsCollector?.setCurrentTest(testName, currentIteration)
+
+        // Log markers
+        Log.i(BENCHMARK_TAG, "TEST_START:$testName")
+        Log.i(BENCHMARK_TAG, "ITERATION:$currentIteration")
+
+        currentTestInfo.text = "Running: $testName\n" +
+                "Iteration ${currentIteration + 1}/${selectedConfig.sampleCount}\n" +
+                "Total collected: $totalSamplesCollected"
     }
 
     private fun updateProgress() {
-        val progress = (currentTestIndex * TEST_ITERATIONS) + currentIteration
+        val progress = (currentTestIndex * selectedConfig.sampleCount) + currentIteration
         testProgress.progress = progress
     }
 
     private fun updateCsvDisplay() {
         val sb = StringBuilder()
-        perTestResults.forEach { (testName, entries) ->
-            sb.appendLine("# $testName")
-            sb.appendLine("iteration,executionTimeMs,details")
-            entries.sortedBy { it.iteration }.forEach { e ->
-                sb.appendLine(
-                    listOf(
-                        e.iteration.toString(),
-                        e.result.executionTime.toString(),
-                        csv(e.result.details),
-                    ).joinToString(","),
-                )
+        uiDisplayBuffers.forEach { (testName, entries) ->
+            if (entries.isNotEmpty()) {
+                sb.appendLine("# $testName (last ${entries.size})")
+                entries.toList().takeLast(5).forEach { e ->
+                    sb.appendLine("  [${e.iteration}] ${e.result.executionTime}ms")
+                }
             }
-            sb.appendLine()
         }
         testResults.text = sb.toString()
-        resultBuilder = sb
     }
 
     private fun calculateAndDisplayAverages() {
         val averages = StringBuilder("\nAverages:\n")
-        perTestResults.forEach { (testName, entries) ->
+        uiDisplayBuffers.forEach { (testName, entries) ->
             if (entries.isNotEmpty()) {
                 val avg = entries.map { it.result.executionTime }.average()
                 averages.append("$testName: ${"%.2f".format(Locale.US, avg)}ms\n")
             }
         }
-        resultBuilder.append(averages)
-        testResults.text = resultBuilder.toString()
+        testResults.append(averages.toString())
     }
 
-    private fun exportResults() {
-        try {
-            val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(java.util.Date())
-            val baseDir: File? = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-            val outDir = File(baseDir, "benchmarks").apply { mkdirs() }
-
-            if (!outDir.exists()) {
-                Toast.makeText(this, "Cannot access output directory", Toast.LENGTH_SHORT).show()
-                return
+    private fun closeWriters() {
+        csvWriters.values.forEach { writer ->
+            try {
+                writer.close()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error closing writer: ${e.message}")
             }
-
-            var filesCount = 0
-            perTestResults.forEach { (testName, entries) ->
-                if (entries.isEmpty()) return@forEach
-                val safeName = testName.lowercase(Locale.US).replace(" ", "_")
-                val file = File(outDir, "${safeName}_$time.csv")
-                val content = buildCsv(entries)
-                file.writeText(content)
-                filesCount++
-            }
-
-            if (filesCount > 0) {
-                Toast.makeText(this, "Saved $filesCount CSV files to ${outDir.absolutePath}", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(this, "No results to export yet", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this, "Export error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun buildCsv(entries: List<TestEntry>): String {
-        val sb = StringBuilder()
-        sb.appendLine("iteration,executionTimeMs,details")
-        entries.sortedBy { it.iteration }.forEach { e ->
-            sb.appendLine(
-                listOf(
-                    e.iteration.toString(),
-                    e.result.executionTime.toString(),
-                    csv(e.result.details),
-                ).joinToString(","),
-            )
+    private fun saveAllCheckpoints() {
+        csvWriters.values.forEach { writer ->
+            try {
+                writer.flush()
+            } catch (e: Exception) {
+                Log.e(TAG, "Checkpoint save error: ${e.message}")
+            }
         }
-        return sb.toString()
-    }
-
-    private fun csv(value: String): String {
-        val needsQuote = value.contains(',') || value.contains('"') || value.contains('\n') || value.contains('\r')
-        val escaped = value.replace("\"", "\"\"")
-        return if (needsQuote) "\"$escaped\"" else escaped
     }
 
     private fun checkPermissions(): Boolean =
@@ -254,28 +384,37 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_REQUEST_CODE)
     }
 
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?,
-    ) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (Environment.isExternalStorageManager()) {
-                    startTestSuite()
-                } else {
-                    Toast
-                        .makeText(
-                            this,
-                            "Permissions required to run tests",
-                            Toast.LENGTH_SHORT,
-                        ).show()
+        when (requestCode) {
+            PERMISSION_REQUEST_CODE -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if (Environment.isExternalStorageManager()) {
+                        startTestSuite()
+                    } else {
+                        Toast.makeText(this, "Permissions required", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
-        } else if (requestCode == TEST_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            val result = data?.getSerializableExtra(BenchmarkApplication.RESULT) as? TestResult
-            if (result != null) onTestCompleted(result) else Log.e("BenchmarkSuiteActivity", "No TestResult received from test activity")
+            TEST_ACTIVITY_REQUEST_CODE -> {
+                if (resultCode == RESULT_OK) {
+                    @Suppress("DEPRECATION")
+                    val result = data?.getSerializableExtra(BenchmarkApplication.RESULT) as? TestResult
+                    if (result != null) {
+                        onTestCompleted(result)
+                    } else {
+                        Log.e(TAG, "No TestResult received")
+                        errorsEncountered++
+                        handler.postDelayed({ runNextTest() }, 100)
+                    }
+                }
+            }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        metricsCollector?.stop()
+        closeWriters()
     }
 }

@@ -50,8 +50,8 @@ class UITestActivity : AppCompatActivity() {
 
             animX.repeatCount = ObjectAnimator.INFINITE
             animY.repeatCount = ObjectAnimator.INFINITE
-            animX.duration = 2000L
-            animY.duration = 2000L
+            animX.duration = 1000L
+            animY.duration = 1000L
 
             animX.start()
             animY.start()
@@ -65,6 +65,6 @@ class UITestActivity : AppCompatActivity() {
             intent.putExtra(BenchmarkApplication.RESULT, result)
             setResult(RESULT_OK, intent)
             finish()
-        }, 5000)
+        }, 2000)
     }
 }

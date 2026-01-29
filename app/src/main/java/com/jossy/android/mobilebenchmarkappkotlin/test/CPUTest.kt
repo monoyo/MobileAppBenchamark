@@ -11,6 +11,52 @@ import kotlin.math.sqrt
 
 object CPUTest {
 
+    /**
+     * Test CPU oparty na ITERACJACH (zalecany dla benchmarków).
+     * Deterministyczne obciążenie - niezależne od throttlingu CPU.
+     *
+     * @param totalIterations Całkowita liczba iteracji do wykonania
+     * @param threads Liczba wątków (domyślnie = liczba rdzeni)
+     */
+    suspend fun runBenchmarkIterations(
+        totalIterations: Long,
+        threads: Int = maxOf(1, Runtime.getRuntime().availableProcessors())
+    ): CpuResult = withContext(Dispatchers.Default) {
+        val startTime = System.nanoTime()
+        val iterationsPerThread = totalIterations / threads
+        val counters = LongArray(threads)
+        val sums = DoubleArray(threads)
+
+        val jobs = (0 until threads).map { idx ->
+            async(Dispatchers.Default) {
+                var acc = 0.0
+                var x = (idx + 1).toDouble()
+                
+                for (i in 0 until iterationsPerThread) {
+                    x = sin(x) * cos(x) + sqrt(x * x + 1.234567)
+                    acc += x
+                }
+                
+                counters[idx] = iterationsPerThread
+                sums[idx] = acc
+            }
+        }
+
+        jobs.awaitAll()
+        val durationMs = (System.nanoTime() - startTime) / 1_000_000
+        
+        CpuResult(
+            threads = threads,
+            durationMs = durationMs,
+            iterations = counters.sum(),
+            checksum = sums.sum()
+        )
+    }
+
+    /**
+     * Test CPU oparty na CZASIE (zachowany dla kompatybilności).
+     * Wykonuje obliczenia przez określony czas.
+     */
     suspend fun runBenchmarkParallel(
         durationMs: Long = 2500L,
         threads: Int = maxOf(1, Runtime.getRuntime().availableProcessors()),

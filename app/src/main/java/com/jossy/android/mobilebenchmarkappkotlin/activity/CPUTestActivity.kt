@@ -14,6 +14,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CPUTestActivity : AppCompatActivity() {
+    
+    companion object {
+        private const val DEFAULT_DURATION_MS = 3000L
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,9 +28,20 @@ class CPUTestActivity : AppCompatActivity() {
     }
 
     private fun startCPUTest() {
+        val cpuIterations = intent.getLongExtra("cpu_iterations", 0)
+        val useIterationMode = cpuIterations > 0
+        
         lifecycleScope.launch(Dispatchers.Default) {
             val cpuStart = System.currentTimeMillis()
-            val r = CPUTest.runBenchmarkParallel(durationMs = 3000L)
+            
+            val r = if (useIterationMode) {
+                Log.d("CPUTestActivity", "Using iteration mode: $cpuIterations iterations")
+                CPUTest.runBenchmarkIterations(totalIterations = cpuIterations)
+            } else {
+                Log.d("CPUTestActivity", "Using time mode: ${DEFAULT_DURATION_MS}ms")
+                CPUTest.runBenchmarkParallel(durationMs = DEFAULT_DURATION_MS)
+            }
+            
             val cpuElapsed = System.currentTimeMillis() - cpuStart
 
             Log.i("CPUTestActivity", "CPU test time: ${cpuElapsed}ms, threads=${r.threads}, iters=${r.iterations}")
@@ -35,8 +50,8 @@ class CPUTestActivity : AppCompatActivity() {
                 val result = TestResult(
                     "CPU Test",
                     cpuElapsed,
-                    "threads=${ r.threads}, iterations=${r.iterations}",
-                    true,
+                    "threads=${r.threads}, iterations=${r.iterations}",
+                    true
                 )
                 val intent = Intent()
                 intent.putExtra(BenchmarkApplication.RESULT, result)
@@ -46,3 +61,4 @@ class CPUTestActivity : AppCompatActivity() {
         }
     }
 }
+
