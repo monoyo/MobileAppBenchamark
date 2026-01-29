@@ -97,14 +97,14 @@ public class ImageLoadingActivity extends AppCompatActivity {
                 .listener(new RequestListener<>() {
                     @Override
                     public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model,
-                                                Target<Drawable> target, boolean isFirstResource) {
+                            Target<Drawable> target, boolean isFirstResource) {
                         recordResult(start, false, "Failed");
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
-                                                   DataSource dataSource, boolean isFirstResource) {
+                            DataSource dataSource, boolean isFirstResource) {
                         recordResult(start, true, "Success");
                         return false;
                     }
@@ -133,7 +133,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
 
         // Update UI occasionally
         if (loadedImagesCount % 50 == 0) {
-            runOnUiThread(() -> loadingStatus.setText("Loaded: " + loadedImagesCount + "/" + targetSamples));
+            runOnUiThread(() -> loadingStatus.setText("Image Test: " + loadedImagesCount + " / " + targetSamples));
         }
 
         // Recursive call for next (on main thread handled by Glide listener usually)
@@ -152,7 +152,8 @@ public class ImageLoadingActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        TestResult result = new TestResult("Image Loading Test", totalTime, "Batch completed: " + loadedImagesCount, true);
+        TestResult result = new TestResult("Image Loading Test", totalTime, "Batch completed: " + loadedImagesCount,
+                true);
         Intent intent = new Intent();
         intent.putExtra(BenchmarkApplication.RESULT, result);
         setResult(RESULT_OK, intent);

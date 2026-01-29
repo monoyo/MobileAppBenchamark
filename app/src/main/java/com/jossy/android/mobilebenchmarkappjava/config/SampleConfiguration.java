@@ -12,22 +12,24 @@ package com.jossy.android.mobilebenchmarkappjava.config;
  */
 public enum SampleConfiguration {
 
-    SMALL(100, "100 samples", 50, 5_000),
-    MEDIUM(1_000, "1K samples", 200, 10_000),
-    LARGE(10_000, "10K samples", 1_000, 15_000),
-    VERY_LARGE(100_000, "100K samples", 5_000, 30_000),
-    EXTREME(1_000_000, "1M samples", 10_000, 60_000);
+    SMALL(100, "100 samples", 50, 5_000, 1_000), // 100 * 1000ms = 100s
+    MEDIUM(1_000, "1K samples", 200, 10_000, 100), // 1000 * 100ms = 100s
+    LARGE(10_000, "10K samples", 1_000, 15_000, 10), // 10000 * 10ms = 100s
+    VERY_LARGE(100_000, "100K samples", 5_000, 30_000, 1);
 
     public final int sampleCount;
     public final String displayName;
     public final int bufferSize;
     public final long flushIntervalMs;
+    public final int samplingIntervalMs;
 
-    SampleConfiguration(int sampleCount, String displayName, int bufferSize, long flushIntervalMs) {
+    SampleConfiguration(int sampleCount, String displayName, int bufferSize, long flushIntervalMs,
+            int samplingIntervalMs) {
         this.sampleCount = sampleCount;
         this.displayName = displayName;
         this.bufferSize = bufferSize;
         this.flushIntervalMs = flushIntervalMs;
+        this.samplingIntervalMs = samplingIntervalMs;
     }
 
     /**
@@ -77,7 +79,6 @@ public enum SampleConfiguration {
             case MEDIUM -> 1_000_000L;
             case LARGE -> 2_000_000L;
             case VERY_LARGE -> 5_000_000L;
-            case EXTREME -> 10_000_000L;
         };
     }
 }

@@ -123,9 +123,7 @@ public class ApiTestActivity extends AppCompatActivity {
 
         requestCount++;
 
-        if (requestCount % 10 == 0) {
-            runOnUiThread(() -> statusTextView.setText("Requests: " + requestCount + "/" + targetSamples));
-        }
+        runOnUiThread(() -> statusTextView.setText("API Test: " + requestCount + " / " + targetSamples));
 
         // Recursive call
         makeApiRequest();

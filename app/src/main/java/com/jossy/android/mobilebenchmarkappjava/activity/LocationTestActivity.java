@@ -38,12 +38,16 @@ public class LocationTestActivity extends AppCompatActivity {
     private String csvPath;
     private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
 
+    private android.widget.TextView statusText;
+
     @RequiresPermission(allOf = { Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION })
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_test);
+
+        statusText = findViewById(R.id.locationStatus);
 
         targetSamples = getIntent().getIntExtra("iterations", 5);
         csvPath = getIntent().getStringExtra("csv_path");
@@ -84,30 +88,43 @@ public class LocationTestActivity extends AppCompatActivity {
     }
 
     private void processLocation(Location location) {
-        long eventTime = System.currentTimeMillis();
-        long duration = eventTime - startTime; // Duration since 'start updates' or interval
-        // Actually for location, duration is vague. Let's log latency from last update?
-        // Or just timestamp. The Suite expects executionTime.
-        // Let's use 0 or diff from prev.
-        // Simpler: duration = 0 (event based).
-
         try {
-            com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
-                    "Location Test", 0, "Lat: " + location.getLatitude(), true);
-            com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
-                    sampleCount, tr, eventTime, 0, eventTime - suiteStartTime);
+            long eventTime = System.currentTimeMillis();
+            long duration = eventTime - startTime; // Duration since 'start updates' or interval
+            // Actually for location, duration is vague. Let's log latency from last update?
+            // Or just timestamp. The Suite expects executionTime.
+            // Let's use 0 or diff from prev.
+            // Simpler: duration = 0 (event based).
 
-            if (csvWriter != null)
-                csvWriter.write(entry);
+            try {
+                com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
+                        "Location Test", 0, "Lat: " + location.getLatitude(), true);
+                com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
+                        sampleCount, tr, eventTime, 0, eventTime - suiteStartTime);
+
+                if (csvWriter != null)
+                    csvWriter.write(entry);
+
+            } catch (Exception e) {
+                Log.e("LocationTestActivity", "Log failed", e);
+            }
+
+            sampleCount++;
+
+            if (statusText != null) {
+                runOnUiThread(() -> statusText.setText("Location Test: " + sampleCount + " / " + targetSamples));
+            }
+
+            if (sampleCount >= targetSamples) {
+                finishBatch();
+            }
+
+            // Watchdog: Reset timeout timer because we got a valid update
+            timeoutHandler.removeCallbacksAndMessages(null);
+            timeoutHandler.postDelayed(timeoutRunnable, TEST_TIMEOUT_MS);
 
         } catch (Exception e) {
-            Log.e("LocationTestActivity", "Log failed", e);
-        }
-
-        sampleCount++;
-
-        if (sampleCount >= targetSamples) {
-            finishBatch();
+            Log.e("LocationTestActivity", "Critical error in processLocation", e);
         }
     }
 
@@ -125,28 +142,32 @@ public class LocationTestActivity extends AppCompatActivity {
         startTime = System.currentTimeMillis();
 
         // Safety timeout - prevents hanging forever if no GPS signal
-        timeoutHandler.postDelayed(() -> {
-            if (!isFinished) {
-                Log.e("LocationTestActivity", "Test Timed Out - No location updates received.");
-                try {
-                    if (csvWriter != null) {
-                        com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
-                                "Location Test", 0, "Error: Timeout (No GPS Signal)", false);
-                        com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
-                                sampleCount, tr, System.currentTimeMillis(), 0,
-                                System.currentTimeMillis() - suiteStartTime);
-                        csvWriter.write(entry);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                finishBatch();
-            }
-        }, TEST_TIMEOUT_MS);
+        // Safety timeout - watchdog
+        timeoutHandler.postDelayed(timeoutRunnable, TEST_TIMEOUT_MS);
 
         fusedLocationClient.requestLocationUpdates(locationRequest,
                 locationCallback, Looper.getMainLooper());
     }
+
+    private final Runnable timeoutRunnable = () -> {
+        if (!isFinished) {
+            Log.e("LocationTestActivity",
+                    "Test Timed Out - No location updates received for " + TEST_TIMEOUT_MS + "ms.");
+            try {
+                if (csvWriter != null) {
+                    com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
+                            "Location Test", 0, "Error: Timeout (No GPS Signal)", false);
+                    com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
+                            sampleCount, tr, System.currentTimeMillis(), 0,
+                            System.currentTimeMillis() - suiteStartTime);
+                    csvWriter.write(entry);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            finishBatch();
+        }
+    };
 
     private void stopLocationUpdates() {
         timeoutHandler.removeCallbacksAndMessages(null);

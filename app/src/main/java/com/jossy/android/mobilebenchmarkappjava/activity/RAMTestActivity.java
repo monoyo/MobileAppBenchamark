@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 public class RAMTestActivity extends AppCompatActivity {
 
     private android.widget.TextView statusText;
+    private long lastUiUpdate = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +62,10 @@ public class RAMTestActivity extends AppCompatActivity {
                             i, tr, start, duration, System.currentTimeMillis() - suiteStart);
                     writer.write(entry);
 
-                    if (i % 10 == 0 || i == targetSamples - 1) {
+                    if (i == 0 || i == targetSamples - 1 || System.currentTimeMillis() - lastUiUpdate > 100) {
+                        lastUiUpdate = System.currentTimeMillis();
                         int finalI = i;
-                        runOnUiThread(() -> statusText.setText("Iteration: " + (finalI + 1) + " / " + targetSamples));
+                        runOnUiThread(() -> statusText.setText("RAM Test: " + (finalI + 1) + " / " + targetSamples));
                     }
                 }
                 writer.flush();

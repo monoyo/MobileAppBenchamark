@@ -27,14 +27,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class StressTestActivity extends AppCompatActivity implements Choreographer.FrameCallback {
+public class GPUTestActivity extends AppCompatActivity implements Choreographer.FrameCallback {
 
     private static final String TAG = "StressTestActivity";
     private static final int INITIAL_OBJECT_COUNT = 100;
-    private static final int OBJECTS_PER_SECOND = 100;
-    private static final int FPS_THRESHOLD = 1;
-    private static final int CONSECUTIVE_FRAMES_BELOW_THRESHOLD = 10;
-    private static final long MAX_TEST_DURATION_MS = 60_000; // 1 minute safety cap
 
     private StressTestView stressTestView;
     private TextView infoText;
@@ -43,9 +39,6 @@ public class StressTestActivity extends AppCompatActivity implements Choreograph
     private boolean isRunning = false;
     private long startTime;
     private long lastFrameTimeNanos;
-    private long lastScaleTime;
-
-    private int framesBelowThreshold = 0;
     private int currentObjectCount = INITIAL_OBJECT_COUNT;
 
     // Data for rendering
@@ -127,11 +120,6 @@ public class StressTestActivity extends AppCompatActivity implements Choreograph
     private void addObjects(int count) {
         if (count <= 0)
             return;
-
-        // Use container dimensions if available, else placeholders (will be updated in
-        // bounce logic)
-        // If width/height are 0 (init phase), random positions might be 0,0.
-        // That's fine, updatePositions will move them.
         float maxW = width > 0 ? width : 1000;
         float maxH = height > 0 ? height : 2000;
 
@@ -181,17 +169,18 @@ public class StressTestActivity extends AppCompatActivity implements Choreograph
             // Ignore
         }
 
-        // Ramp Up Logic
-        // Determine desired object count for this frame index
-        // frameCount goes from 0 to targetFrames
-        float progress = (float) frameCount / (float) targetFrames;
-        if (progress > 1.0f)
-            progress = 1.0f;
+        // Ramp Up Logic - Time Based
+        // Animation duration: 100 seconds
+        // Logic: 1000 objects start + 1000 new every second
+        long elapsed = System.currentTimeMillis() - startTime;
 
-        int desiredObjects = (int) (START_OBJECTS + (END_OBJECTS - START_OBJECTS) * progress);
-        int objectsToAdd = desiredObjects - currentObjectCount;
-        if (objectsToAdd > 0) {
-            addObjects(objectsToAdd);
+        int secondsElapsed = (int) (elapsed / 1000);
+        int desiredObjects = 1000 + (secondsElapsed * 1000);
+
+        // Ensure strictly adding
+        if (desiredObjects > currentObjectCount) {
+            int toAdd = desiredObjects - currentObjectCount;
+            addObjects(toAdd);
         }
 
         // Render & Update
@@ -199,13 +188,13 @@ public class StressTestActivity extends AppCompatActivity implements Choreograph
         stressTestView.setObjects(objects, colors);
 
         // Update UI
-        infoText.setText(String.format(Locale.US, "Frame: %d/%d\nObjects: %d\nFPS: %.1f",
-                frameCount, targetFrames, currentObjectCount, fps));
+        infoText.setText(String.format(Locale.US, "Time: %ds / 100s\nObjects: %d\nFPS: %.1f",
+                secondsElapsed, currentObjectCount, fps));
 
         frameCount++;
 
-        // Stop Condition
-        if (frameCount >= targetFrames) {
+        // Stop Condition - 100 seconds
+        if (elapsed >= 100_000) {
             finishTest(true);
         } else {
             Choreographer.getInstance().postFrameCallback(this);

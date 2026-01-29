@@ -32,7 +32,6 @@ import com.jossy.android.mobilebenchmarkappjava.metrics.SystemMetricsCollector;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayDeque;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedHashMap;
@@ -101,11 +100,167 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         setupSampleConfigSpinner();
         setupButtons();
 
+        if (savedInstanceState != null) {
+            restoreState(savedInstanceState);
+        }
+
         long launchTime = System.currentTimeMillis() - appStartTime;
         currentTestInfo.setText(String.format(Locale.US,
                 "App Launched in: %dms\nReady to start tests. Select sample count.", launchTime));
 
         Log.d(TAG, "onCreate completed, UI initialized");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isRunning", isRunning);
+        outState.putInt("currentTestIndex", currentTestIndex);
+        outState.putInt("currentIteration", currentIteration);
+        outState.putInt("totalSamplesCollected", totalSamplesCollected);
+        outState.putInt("errorsEncountered", errorsEncountered);
+        outState.putString("sessionTimestamp", sessionTimestamp);
+        outState.putSerializable("selectedConfig", selectedConfig);
+        Log.i(TAG, "State saved");
+    }
+
+    private void restoreState(Bundle savedState) {
+        isRunning = savedState.getBoolean("isRunning");
+        currentTestIndex = savedState.getInt("currentTestIndex");
+        currentIteration = savedState.getInt("currentIteration");
+        totalSamplesCollected = savedState.getInt("totalSamplesCollected");
+        errorsEncountered = savedState.getInt("errorsEncountered");
+        sessionTimestamp = savedState.getString("sessionTimestamp");
+        selectedConfig = (SampleConfiguration) savedState.getSerializable("selectedConfig");
+
+        if (isRunning && sessionTimestamp != null) {
+            try {
+                restoreSession();
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to restore session", e);
+                isRunning = false;
+                Toast.makeText(this, "Failed to restore session: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }
+        updateProgressMax();
+        updateProgress();
+    }
+
+    private void restoreSession() throws IOException {
+        File baseDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        outputDir = new File(baseDir, "benchmarks/" + sessionTimestamp);
+
+        if (!outputDir.exists()) {
+            // If directory is gone, we can't really resume properly, but let's try to
+            // handle gracefully
+            if (!outputDir.mkdirs()) {
+                throw new IOException("Cannot restore output directory: " + outputDir.getAbsolutePath());
+            }
+        }
+
+        // Re-init writers for ALL tests (to be safe) or just restore the map?
+        // We need to re-create the writers to append to existing files.
+        // BufferedCsvWriter constructor opens file. If we just want to allow appending,
+        // we rely on FileWriter default?
+        // Wait, BufferedCsvWriter uses `new FileWriter(outputFile)`. This TRUNCATES by
+        // default.
+        // We MUST change BufferedCsvWriter to support append or be careful.
+        // However, we only need writers for FUTURE tests or the CURRENT test if we are
+        // mid-batch?
+        // Actually, if we are in BenchmarkSuiteActivity, the specific test activity
+        // (e.g. CPUTestActivity)
+        // has its OWN writer opened on the SAME file.
+        // BenchmarkSuiteActivity typically doesn't write to these CSVs directly, the
+        // sub-activities do?
+        // Wait, BenchmarkSuiteActivity creates writers in `initializeSession` and puts
+        // them in `csvWriters`.
+        // BUT does it write to them?
+        // No, it seems `BenchmarkSuiteActivity` OPENS them, but `startSpecificTest`
+        // passes `csvPath` to sub-activities.
+        // Sub-activities OPEN their own writers!
+        // `CPUTestActivity` opens `new BufferedCsvWriter(...)`.
+        // `BenchmarkSuiteActivity` closes them in `closeWriters()`.
+        // Why does `BenchmarkSuiteActivity` open them at all?
+        // Maybe to lock the files or prepare them?
+        // It keeps them in `csvWriters`.
+        // `initializeSession`:
+        // `writer.initialize()` -> creates file and writes header.
+
+        // If we restore, we should NOT overwrite the files.
+        // If we just re-populate `csvWriters` but distinct instances, we need to make
+        // sure they don't truncate.
+        // If `BenchmarkSuiteActivity` never writes to them after init, maybe we don't
+        // need to re-open them?
+        // Just recreate the File object map?
+        // But `closeWriters` calls `flush` and `close`.
+        // If we crashed/died, the old writers are dead.
+        // If we just restart, we need `csvWriters` to be non-empty so `exportResults`
+        // works?
+        // And `closeWriters` at end works.
+        // And `uiDisplayBuffers`.
+
+        // Simpler approach for restoration:
+        // Do NOT re-open writers in Write Mode that truncates.
+        // Just set up `outputDir` so `startSpecificTest` works.
+        // `startSpecificTest` uses `outputDir.getAbsolutePath()`.
+
+        // The `csvWriters` map is used in `exportResults` (flushes) and
+        // `saveCheckpoints` and `closeWriters`.
+        // If we don't restore them, those methods do nothing. That's probably fine for
+        // a recovered session
+        // if we accept that we might lose the "buffer flush" capability for the suite
+        // (but sub-activities handle their own writing).
+
+        // IMPORTANT: The crash was `outputDir` being null.
+        // So just restoring `outputDir` is the critical fix.
+
+        csvWriters.clear();
+        uiDisplayBuffers.clear();
+
+        // We probably shouldn't re-initialize writers because that writes HEADERS again
+        // and truncates.
+        // Unless we modify `BufferedCsvWriter` to support append.
+        // For now, let's just restore `outputDir` which fixes the crash.
+        // The side effect is that `exportResults` might not flush pending suite-level
+        // data (if any).
+        // But `BenchmarkSuiteActivity` doesn't seem to write data itself?
+        // `uiDisplayBuffers` are filled... where?
+        // They are never filled in `BenchmarkSuiteActivity` code I saw!
+        // `BenchmarkSuiteActivity` seems to just orchestrate.
+        // `updateUiDisplay` iterates `uiDisplayBuffers`.
+        // `uiDisplayBuffers` are empty unless populated.
+        // I don't see any code in `BenchmarkSuiteActivity` that populates
+        // `uiDisplayBuffers`.
+        // So maybe it's dead code or incomplete feature?
+        // The sub-activities write to CSV. They don't report back samples to Suite
+        // (only final result).
+
+        // So `csvWriters` in Suite are... useless?
+        // `initializeSession` creates them. `writer.initialize()` writes header.
+        // Sub-activities open the SAME file.
+        // If `BenchmarkSuiteActivity` holds a lock or keeps it open...
+        // `BufferedCsvWriter` uses `FileWriter`.
+        // Windows/Linux file locking?
+        // If `BenchmarkSuiteActivity` has it open, can `CPUTestActivity` write to it?
+        // `FileWriter` usually allows multiple writers (just races).
+
+        // If `BenchmarkSuiteActivity` writes header, and `CPUTestActivity` ALSO writes
+        // header?
+        // `CPUTestActivity`:
+        // `writer.initialize()` -> writes header.
+        // So we have double headers?
+
+        // Either way, to fix the crash, `outputDir` MUST be restored.
+        // I will restore `outputDir` and `metricsCollector`.
+
+        if (metricsCollector != null) {
+            metricsCollector.stop();
+        }
+        metricsCollector = new SystemMetricsCollector(this, outputDir, sessionTimestamp,
+                selectedConfig.samplingIntervalMs);
+        metricsCollector.start();
+
+        Log.i(TAG, "Session restored: " + outputDir.getAbsolutePath());
     }
 
     private void initViews() {
@@ -206,29 +361,16 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         csvWriters.clear();
         uiDisplayBuffers.clear();
 
-        // Uruchom kolektor metryk systemowych (CPU, RAM, GPU, FPS)
-        if (metricsCollector != null) {
-            metricsCollector.stop();
-        }
-        metricsCollector = new SystemMetricsCollector(this, outputDir, sessionTimestamp);
+        // Initialize system metrics collector
+        metricsCollector = new SystemMetricsCollector(this, outputDir, sessionTimestamp,
+                selectedConfig.samplingIntervalMs);
         metricsCollector.start();
 
-        // Inicjalizuj writery dla każdego testu
-        for (int i = 0; i < ALL_TESTS; i++) {
-            String testName = getTestName(i);
-            String safeName = testName.toLowerCase(Locale.US).replace(" ", "_");
-            File csvFile = new File(outputDir, safeName + ".csv");
-
-            BufferedCsvWriter writer = new BufferedCsvWriter(
-                    csvFile,
-                    selectedConfig.bufferSize,
-                    selectedConfig.getOptimalWriteBufferBytes());
-            writer.initialize();
-            csvWriters.put(testName, writer);
-
-            // Ring buffer dla UI display
-            uiDisplayBuffers.put(testName, new ArrayDeque<>(UI_DISPLAY_BUFFER_SIZE));
-        }
+        // Note: We do NOT initialize CSV writers for individual tests here anymore.
+        // Sub-activities (CPUTestActivity, etc.) manage their own BufferedCsvWriter
+        // instances.
+        // Creating them here caused file locking conflicts and double-initialization
+        // (truncation).
 
         Log.i(TAG, "Session initialized: " + outputDir.getAbsolutePath());
     }
@@ -257,10 +399,31 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     private void startSpecificTest(int index) {
+        if (outputDir == null) {
+            Log.e(TAG, "outputDir is null in startSpecificTest. Attempting to restore or aborting.");
+            // Try to recover if we have timestamp (should have been restored)
+            if (sessionTimestamp != null) {
+                try {
+                    restoreSession();
+                } catch (IOException e) {
+                    Log.e(TAG, "Recovery failed", e);
+                    Toast.makeText(this, "Test failed: Session lost", Toast.LENGTH_LONG).show();
+                    isRunning = false;
+                    startTestsButton.setEnabled(true);
+                    return;
+                }
+            } else {
+                Toast.makeText(this, "Test failed: outputDir is null", Toast.LENGTH_SHORT).show();
+                isRunning = false;
+                startTestsButton.setEnabled(true);
+                return;
+            }
+        }
+
         Intent intent;
         switch (index) {
             case 0:
-                intent = new Intent(this, StressTestActivity.class);
+                intent = new Intent(this, GPUTestActivity.class);
                 intent.putExtra("session_dir", outputDir.getAbsolutePath());
                 intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;

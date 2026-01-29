@@ -26,11 +26,16 @@ public class CPUTestActivity extends AppCompatActivity {
     private static final String TAG = "CPUTestActivity";
     private static final long DEFAULT_CPU_ITERATIONS = 1_000_000L;
     private static final long DEFAULT_DURATION_MS = 3000L;
+    private long lastUiUpdate = 0;
+
+    private android.widget.TextView statusText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cpu_test);
+
+        statusText = findViewById(R.id.cpuStatus);
 
         Log.d(TAG, "Starting CPU test");
         startCPUTest();
@@ -66,6 +71,12 @@ public class CPUTestActivity extends AppCompatActivity {
                     TestResult tr = new TestResult("CPU Test", duration, "threads=" + r.threads, true);
                     TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
                     writer.write(entry);
+
+                    if (i == 0 || i == targetSamples - 1 || System.currentTimeMillis() - lastUiUpdate > 100) {
+                        lastUiUpdate = System.currentTimeMillis();
+                        int finalI = i;
+                        runOnUiThread(() -> statusText.setText("CPU Test: " + (finalI + 1) + " / " + targetSamples));
+                    }
                 }
                 writer.flush();
 

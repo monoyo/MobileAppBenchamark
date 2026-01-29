@@ -55,8 +55,7 @@
             android:name=".activity.LocationTestActivity"
             android:exported="true" />
         <activity android:name=".activity.RAMTestActivity" android:exported="true" />
-        <activity android:name=".activity.UITestActivity" android:exported="true" />
-        <activity android:name=".activity.StressTestActivity" android:exported="true" />
+        <activity android:name=".activity.GPUTestActivity" android:exported="true" />
         <activity android:name=".activity.CPUTestActivity" android:exported="true" />
     </application>
 

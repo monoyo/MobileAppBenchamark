@@ -38,7 +38,7 @@ public class SystemMetricsCollector {
     private static final String TAG = "SystemMetricsCollector";
 
     // Konfiguracja
-    private static final int SAMPLING_INTERVAL_MS = 100; // Co 100ms
+    private final int samplingIntervalMs;
     private static final int BUFFER_SIZE = 50; // Flush co 50 próbek
 
     private final Context context;
@@ -68,9 +68,10 @@ public class SystemMetricsCollector {
     // Choreographer callback dla FPS
     private Choreographer.FrameCallback frameCallback;
 
-    public SystemMetricsCollector(Context context, File outputDir, String sessionId) {
+    public SystemMetricsCollector(Context context, File outputDir, String sessionId, int samplingIntervalMs) {
         this.context = context.getApplicationContext();
         this.outputFile = new File(outputDir, "system_metrics_" + sessionId + ".csv");
+        this.samplingIntervalMs = samplingIntervalMs;
         this.executor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "metrics-collector");
             t.setPriority(Thread.MIN_PRIORITY);
@@ -168,7 +169,7 @@ public class SystemMetricsCollector {
 
             // Czekaj do następnego interwału
             long elapsed = System.currentTimeMillis() - loopStart;
-            long sleepMs = Math.max(0, SAMPLING_INTERVAL_MS - elapsed);
+            long sleepMs = Math.max(0, samplingIntervalMs - elapsed);
             if (sleepMs > 0) {
                 try {
                     Thread.sleep(sleepMs);
