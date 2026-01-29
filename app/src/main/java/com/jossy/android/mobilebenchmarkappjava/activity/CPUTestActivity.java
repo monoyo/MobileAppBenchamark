@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.jossy.android.mobilebenchmarkappjava.CPUTest;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.CpuResult;
+import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import android.content.Intent;
@@ -36,50 +37,53 @@ public class CPUTestActivity extends AppCompatActivity {
     }
 
     private void startCPUTest() {
-        // Pobierz parametr iteracji z intenta (jeśli przekazany)
-        final long cpuIterations = getIntent().getLongExtra("cpu_iterations", 0);
-        final boolean useIterationMode = cpuIterations > 0;
+        final long cpuIterations = getIntent().getLongExtra("cpu_iterations", 1000);
+        final int targetSamples = getIntent().getIntExtra("iterations", 1);
+        final String csvPath = getIntent().getStringExtra("csv_path");
+
+        Log.i(TAG, "Starting CPU Batch Test: samples=" + targetSamples + ", cpu_iters=" + cpuIterations);
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            long cpuStart = System.currentTimeMillis();
-            CpuResult r;
+            long suiteStart = System.currentTimeMillis();
 
-            try {
-                if (useIterationMode) {
-                    // Nowy tryb: iteration-based
-                    Log.i(TAG, "Running iteration-based CPU test: " + cpuIterations + " iterations");
-                    r = CPUTest.runBenchmarkIterations(cpuIterations, null);
-                } else {
-                    // Tryb kompatybilności: time-based
-                    Log.i(TAG, "Running time-based CPU test: " + DEFAULT_DURATION_MS + "ms");
-                    r = CPUTest.runBenchmarkParallel(DEFAULT_DURATION_MS, null);
+            // Initializing CSV Writer
+            try (com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter writer = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(
+                    new java.io.File(csvPath), 1000, 64 * 1024)) {
+
+                writer.initialize();
+
+                for (int i = 0; i < targetSamples; i++) {
+                    long start = System.currentTimeMillis();
+                    CpuResult r = CPUTest.runBenchmarkIterations(cpuIterations, null);
+                    long duration = System.currentTimeMillis() - start;
+
+                    // Manually creating TestEntry-like CSV line or using shared objects?
+                    // Better to re-use TestEntry structure logic or write directly.
+                    // For speed in batch, let's write directly if possible, or use the writer's
+                    // method.
+                    // The BufferedCsvWriter expects TestEntry. Let's create it.
+
+                    TestResult tr = new TestResult("CPU Test", duration, "threads=" + r.threads, true);
+                    TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
+                    writer.write(entry);
                 }
+                writer.flush();
+
             } catch (Exception e) {
-                Log.e(TAG, "CPU test failed: " + e.getMessage(), e);
+                Log.e(TAG, "Batch CPU Test failed", e);
                 runOnUiThread(() -> {
-                    TestResult result = new TestResult(
-                            "CPU Test",
-                            System.currentTimeMillis() - cpuStart,
-                            "error=" + e.getMessage(),
-                            false);
+                    TestResult result = new TestResult("CPU Test", 0, "Error: " + e.getMessage(), false);
                     returnResult(result);
                 });
                 return;
             }
 
-            long cpuElapsed = System.currentTimeMillis() - cpuStart;
-            Log.i(TAG, String.format("CPU test completed: %dms, threads=%d, iters=%d",
-                    cpuElapsed, r.threads, r.iterations));
+            long totalTime = System.currentTimeMillis() - suiteStart;
+            Log.i(TAG, "CPU Batch completed in " + totalTime + "ms");
 
             runOnUiThread(() -> {
-                String details = String.format("threads=%d, iterations=%d, mode=%s",
-                        r.threads, r.iterations, useIterationMode ? "iteration" : "time");
-
-                TestResult result = new TestResult(
-                        "CPU Test",
-                        cpuElapsed,
-                        details,
-                        true);
+                TestResult result = new TestResult("CPU Test", totalTime,
+                        "Batch completed: " + targetSamples + " samples", true);
                 returnResult(result);
             });
         });

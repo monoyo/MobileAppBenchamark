@@ -12,11 +12,11 @@ package com.jossy.android.mobilebenchmarkappjava.config;
  */
 public enum SampleConfiguration {
 
-    SMALL(100, "100 próbek", 50, 5_000),
-    MEDIUM(1_000, "1K próbek", 200, 10_000),
-    LARGE(10_000, "10K próbek", 1_000, 15_000),
-    VERY_LARGE(100_000, "100K próbek", 5_000, 30_000),
-    EXTREME(1_000_000, "1M próbek", 10_000, 60_000);
+    SMALL(100, "100 samples", 50, 5_000),
+    MEDIUM(1_000, "1K samples", 200, 10_000),
+    LARGE(10_000, "10K samples", 1_000, 15_000),
+    VERY_LARGE(100_000, "100K samples", 5_000, 30_000),
+    EXTREME(1_000_000, "1M samples", 10_000, 60_000);
 
     public final int sampleCount;
     public final String displayName;

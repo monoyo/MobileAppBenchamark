@@ -33,12 +33,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -238,21 +235,10 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private void runNextTest() {
         if (currentTestIndex < ALL_TESTS) {
-            if (currentIteration < selectedConfig.sampleCount) {
-                String testName = getTestName(currentTestIndex);
-                onTestStarted(testName);
-                currentIterationStartTime = System.currentTimeMillis();
-                startSpecificTest(currentTestIndex);
-            } else {
-                // Przejdź do następnego testu
-                currentTestIndex++;
-                currentIteration = 0;
-                if (currentTestIndex < ALL_TESTS) {
-                    runNextTest();
-                } else {
-                    onAllTestsCompleted();
-                }
-            }
+            String testName = getTestName(currentTestIndex);
+            onTestStarted(testName);
+            currentIterationStartTime = System.currentTimeMillis();
+            startSpecificTest(currentTestIndex);
         } else {
             onAllTestsCompleted();
         }
@@ -260,7 +246,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private String getTestName(int index) {
         return switch (index) {
-            case 0 -> "UI Test";
+            case 0 -> "UI Stress Test"; // Changed from "UI Test"
             case 1 -> "CPU Test";
             case 2 -> "RAM Test";
             case 3 -> "Image Loading Test";
@@ -274,31 +260,46 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         Intent intent;
         switch (index) {
             case 0:
-                intent = new Intent(this, UITestActivity.class);
+                intent = new Intent(this, StressTestActivity.class);
+                intent.putExtra("session_dir", outputDir.getAbsolutePath());
+                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             case 1:
                 intent = new Intent(this, CPUTestActivity.class);
-                // Przekaż konfigurację iteracji CPU
+                intent.putExtra("iterations", selectedConfig.sampleCount); // Pass total sample count
                 intent.putExtra("cpu_iterations", selectedConfig.getCpuIterationsPerThread());
                 break;
             case 2:
                 intent = new Intent(this, RAMTestActivity.class);
+                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             case 3:
                 intent = new Intent(this, ImageLoadingActivity.class);
+                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             case 4:
                 intent = new Intent(this, ApiTestActivity.class);
+                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             case 5:
                 intent = new Intent(this, LocationTestActivity.class);
+                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             default:
                 Log.w(TAG, "Invalid test index: " + index);
                 return;
         }
+
+        // Pass common simplified args
         intent.putExtra("auto_mode", true);
-        intent.putExtra("callback_activity", BenchmarkSuiteActivity.class.getName());
+
+        // Pass CSV path for Batch Mode tests
+        // (Stress Test manages its own file, but others might use this)
+        String testName = getTestName(index);
+        String safeName = testName.toLowerCase(Locale.US).replace(" ", "_");
+        File csvFile = new File(outputDir, safeName + ".csv");
+        intent.putExtra("csv_path", csvFile.getAbsolutePath());
+
         startActivityForResult(intent, TEST_ACTIVITY_REQUEST_CODE);
     }
 
@@ -307,60 +308,19 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
      * Stosuje try-catch dla odporności na błędy.
      */
     public void onTestCompleted(TestResult result) {
-        try {
-            long iterationEndTime = System.currentTimeMillis();
-            long intervalDuration = iterationEndTime - currentIterationStartTime;
-            long cumulativeTime = iterationEndTime - testSuiteStartTime;
+        // Log completion
+        long duration = System.currentTimeMillis() - currentIterationStartTime;
+        Log.i(TAG, "Test " + result.getTestName() + " completed in " + duration + "ms");
 
-            // Utwórz wpis z pełnymi danymi czasowymi
-            TestEntry entry = new TestEntry(
-                    currentIteration,
-                    result,
-                    currentIterationStartTime,
-                    intervalDuration,
-                    cumulativeTime);
-
-            // Zapisz do buforowanego writera (async)
-            BufferedCsvWriter writer = csvWriters.get(result.getTestName());
-            if (writer != null) {
-                writer.write(entry);
-            }
-
-            // Dodaj do UI ring buffer (ograniczone do ostatnich N wpisów)
-            Deque<TestEntry> uiBuffer = uiDisplayBuffers.get(result.getTestName());
-            if (uiBuffer != null) {
-                if (uiBuffer.size() >= UI_DISPLAY_BUFFER_SIZE) {
-                    uiBuffer.pollFirst(); // Usuń najstarszy
-                }
-                uiBuffer.addLast(entry);
-            }
-
-            totalSamplesCollected++;
-            currentIteration++;
-            updateProgress();
-            updateUiDisplay();
-
-            // Sprawdź błędy writera
-            if (writer != null && writer.hasError()) {
-                errorsEncountered++;
-                Log.w(TAG, "Writer error for " + result.getTestName() + ": " +
-                        writer.getLastError().getMessage());
-            }
-
-        } catch (Exception e) {
-            errorsEncountered++;
-            Log.e(TAG, "Error processing test result: " + e.getMessage(), e);
-            // Zapisz checkpoint na wypadek poważnego błędu
-            saveAllCheckpoints();
+        if (result.isSuccess()) {
+            totalSamplesCollected += selectedConfig.sampleCount;
         }
 
-        // Marker końca testu dla skryptu Python
-        Log.i(BENCHMARK_TAG, "TEST_END:" + result.getTestName());
+        // Advance to next test
+        currentTestIndex++;
 
-        // Kontynuuj z następnym testem (z opóźnieniem przy małych próbkach, bez przy
-        // dużych)
-        int delayMs = selectedConfig.sampleCount >= 10_000 ? 100 : 500;
-        handler.postDelayed(this::runNextTest, delayMs);
+        // Continue with next test
+        handler.postDelayed(this::runNextTest, 500);
     }
 
     public void onAllTestsCompleted() {
@@ -397,26 +357,17 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     public void onTestStarted(String testName) {
-        // Synchronizacja kolektora metryk z aktualnym testem
-        if (metricsCollector != null) {
-            metricsCollector.setCurrentTest(testName, currentIteration);
-        }
-
-        // Marker dla skryptu Python - synchronizacja testów
         Log.i(BENCHMARK_TAG, "TEST_START:" + testName);
-        Log.i(BENCHMARK_TAG, "ITERATION:" + currentIteration);
-
-        String info = String.format(Locale.US,
-                "Running: %s\nIteration %d/%d\nTotal collected: %d",
-                testName,
-                currentIteration + 1,
-                selectedConfig.sampleCount,
-                totalSamplesCollected);
+        String info = String.format(Locale.US, "Running: %s\nConfiguration: %s",
+                testName, selectedConfig.displayName);
         currentTestInfo.setText(info);
     }
 
     private void updateProgress() {
-        int progress = (currentTestIndex * selectedConfig.sampleCount) + currentIteration;
+        // Simplified progress: just showing which test we are on
+        int progress = (currentTestIndex + 1) * selectedConfig.sampleCount;
+        // Note: Progress bar logic in layout might need adjustment or we just max it
+        // out per test
         testProgress.setProgress(progress);
     }
 
@@ -434,28 +385,8 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         sb.append("=== Live Preview (last ").append(UI_DISPLAY_BUFFER_SIZE).append(" per test) ===\n\n");
 
-        for (Map.Entry<String, Deque<TestEntry>> e : uiDisplayBuffers.entrySet()) {
-            String testName = e.getKey();
-            Deque<TestEntry> entries = e.getValue();
-
-            if (entries.isEmpty()) {
-                continue;
-            }
-
-            sb.append("# ").append(testName).append(" (").append(entries.size()).append(" shown)\n");
-            sb.append("iter,timeMs,interval\n");
-
-            // Pokaż ostatnich 5 dla zwięzłości
-            int shown = 0;
-            for (TestEntry te : entries) {
-                if (shown >= entries.size() - 5) {
-                    sb.append(te.iteration).append(',')
-                            .append(te.result.getExecutionTime()).append(',')
-                            .append(te.intervalDurationMs).append('\n');
-                }
-                shown++;
-            }
-            sb.append("...\n\n");
+        for (String testName : uiDisplayBuffers.keySet()) {
+            sb.append("# ").append(testName).append(" (Batch Mode Running...)\n\n");
         }
 
         testResults.setText(sb.toString());

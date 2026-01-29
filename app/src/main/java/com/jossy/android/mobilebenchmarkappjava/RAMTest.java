@@ -13,16 +13,22 @@ public class RAMTest {
     private static final Map<String, Integer> nameCounter = new HashMap<>();
     private static final Map<String, Integer> surnameCounter = new HashMap<>();
     private static final Gson GSON = new Gson();
-    private static final Type USER_LIST_TYPE = new TypeToken<List<User>>() {}.getType();
+    private static final Type USER_LIST_TYPE = new TypeToken<List<User>>() {
+    }.getType();
     private static String JSON_DATA = new Users().list;
 
     public static void runBenchmark() {
+        runBenchmark(RUNS);
+    }
+
+    public static void runBenchmark(int runs) {
         List<User> bigList = new ArrayList<>();
         nameCounter.clear();
         surnameCounter.clear();
         List<User> users = GSON.fromJson(JSON_DATA, USER_LIST_TYPE);
-        if (users == null) users = Collections.emptyList();
-        for (int i = 0; i < RUNS; i++) {
+        if (users == null)
+            users = Collections.emptyList();
+        for (int i = 0; i < runs; i++) {
             List<User> shuffled = new ArrayList<>(users);
             Collections.shuffle(shuffled, new Random(i));
             bigList.addAll(shuffled);
@@ -40,13 +46,15 @@ public class RAMTest {
             }
             String serialized = GSON.toJson(filtered);
             List<User> deserialized = GSON.fromJson(serialized, USER_LIST_TYPE);
-            if (deserialized == null) deserialized = Collections.emptyList();
+            if (deserialized == null)
+                deserialized = Collections.emptyList();
             if (!deserialized.isEmpty()) {
                 User randomUser = deserialized.get(new Random().nextInt(deserialized.size()));
                 String randomUserName = randomUser.name;
             }
             for (User u : users) {
-                if (u.name == null) continue;
+                if (u.name == null)
+                    continue;
                 String[] parts = u.name.split(" ");
                 if (parts.length > 0 && !parts[0].isEmpty()) {
                     nameCounter.put(parts[0], nameCounter.getOrDefault(parts[0], 0) + 1);
