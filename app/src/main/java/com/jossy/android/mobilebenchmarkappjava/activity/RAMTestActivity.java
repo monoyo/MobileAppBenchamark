@@ -16,6 +16,7 @@ import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Executors;
 
 public class RAMTestActivity extends AppCompatActivity {
@@ -32,9 +33,8 @@ public class RAMTestActivity extends AppCompatActivity {
 
         statusText = findViewById(R.id.cpuStatus);
 
-        // Obserwowanie zmian w LiveData i aktualizacja UI (podobnie jak w CPUTestActivity)
-        progressLiveData.observe(this, currentIteration -> 
-                statusText.setText("RAM Test: " + currentIteration + " / " + TARGET_SAMPLES));
+        progressLiveData.observe(this, currentIteration ->
+                statusText.setText(getString(R.string.ram_test_progress, currentIteration, TARGET_SAMPLES)));
 
         Log.d(TAG, "Starting RAM test activity");
         startRAMTest();
@@ -42,39 +42,39 @@ public class RAMTestActivity extends AppCompatActivity {
 
     private void startRAMTest() {
         String csvPath = getIntent().getStringExtra("csv_path");
-        int runsPerSample = calculateRunsPerSample(TARGET_SAMPLES);
+        int runsPerSample = calculateRunsPerSample();
 
         Log.i(TAG, "Starting RAM Batch: samples=" + TARGET_SAMPLES + ", runs/sample=" + runsPerSample);
-        statusText.setText("Initializing RAM Batch...");
+        statusText.setText(R.string.initializing_ram_batch);
 
         Executors.newSingleThreadExecutor().execute(() ->
-                performBenchmarkTask(TARGET_SAMPLES, csvPath, runsPerSample)
+                performBenchmarkTask(csvPath, runsPerSample)
         );
     }
 
-    private int calculateRunsPerSample(int targetSamples) {
-        return targetSamples > 1000 ? 50 : 500;
+    private int calculateRunsPerSample() {
+        return 50;
     }
 
-    private void performBenchmarkTask(int targetSamples, String csvPath, int runsPerSample) {
+    private void performBenchmarkTask(String csvPath, int runsPerSample) {
         long suiteStart = System.currentTimeMillis();
         File logFile = new File(csvPath != null ? csvPath : getFilesDir() + "/temp_ram.csv");
 
         try (BufferedCsvWriter writer = new BufferedCsvWriter(logFile, 1000, 64 * 1024)) {
             writer.initialize();
 
-            runBenchmarkLoop(writer, targetSamples, runsPerSample, suiteStart);
+            runBenchmarkLoop(writer, runsPerSample, suiteStart);
 
             writer.flush();
-            handleBenchmarkSuccess(suiteStart, targetSamples);
+            handleBenchmarkSuccess(suiteStart);
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             handleBenchmarkError(e);
         }
     }
 
-    private void runBenchmarkLoop(BufferedCsvWriter writer, int targetSamples, int runsPerSample, long suiteStart) throws Exception {
-        for (int i = 0; i < targetSamples; i++) {
+    private void runBenchmarkLoop(BufferedCsvWriter writer, int runsPerSample, long suiteStart) {
+        for (int i = 0; i < TARGET_SAMPLES; i++) {
             long start = System.currentTimeMillis();
             RAMTest.runBenchmark(runsPerSample);
             long duration = System.currentTimeMillis() - start;
@@ -83,18 +83,17 @@ public class RAMTestActivity extends AppCompatActivity {
             TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
             writer.write(entry);
 
-            // Aktualizacja postępu przez LiveData
             progressLiveData.postValue(i + 1);
         }
     }
 
-    private void handleBenchmarkSuccess(long suiteStartTime, int targetSamples) {
+    private void handleBenchmarkSuccess(long suiteStartTime) {
         long totalTime = System.currentTimeMillis() - suiteStartTime;
         Log.i(TAG, "RAM Batch completed in " + totalTime + "ms");
 
         runOnUiThread(() -> {
             TestResult result = new TestResult(
-                    "RAM Test", totalTime, "Batch completed: " + targetSamples + " samples", true);
+                    "RAM Test", totalTime, "Batch completed: " + TARGET_SAMPLES + " samples", true);
             returnResult(result);
         });
     }
@@ -102,7 +101,7 @@ public class RAMTestActivity extends AppCompatActivity {
     private void handleBenchmarkError(Exception e) {
         Log.e(TAG, "Batch RAM Test failed", e);
         runOnUiThread(() -> {
-            statusText.setText("Error: " + e.getMessage());
+            statusText.setText(getString(R.string.error_message, e.getMessage()));
             TestResult result = new TestResult(
                     "RAM Test", 0, "Error: " + e.getMessage(), false);
             returnResult(result);
