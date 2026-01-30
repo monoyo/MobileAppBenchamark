@@ -24,9 +24,6 @@ import java.util.concurrent.Executors;
 public class CPUTestActivity extends AppCompatActivity {
 
     private static final String TAG = "CPUTestActivity";
-    private static final long DEFAULT_CPU_ITERATIONS = 1_000_000L;
-    private static final long DEFAULT_DURATION_MS = 3000L;
-    private long lastUiUpdate = 0;
 
     private android.widget.TextView statusText;
 
@@ -51,7 +48,6 @@ public class CPUTestActivity extends AppCompatActivity {
         Executors.newSingleThreadExecutor().execute(() -> {
             long suiteStart = System.currentTimeMillis();
 
-            // Initializing CSV Writer
             try (com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter writer = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(
                     new java.io.File(csvPath), 1000, 64 * 1024)) {
 
@@ -61,12 +57,6 @@ public class CPUTestActivity extends AppCompatActivity {
                     long start = System.currentTimeMillis();
                     CpuResult r = CPUTest.runBenchmarkIterations(cpuIterations, null);
                     long duration = System.currentTimeMillis() - start;
-
-                    // Manually creating TestEntry-like CSV line or using shared objects?
-                    // Better to re-use TestEntry structure logic or write directly.
-                    // For speed in batch, let's write directly if possible, or use the writer's
-                    // method.
-                    // The BufferedCsvWriter expects TestEntry. Let's create it.
 
                     TestResult tr = new TestResult("CPU Test", duration, "threads=" + r.threads, true);
                     TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
