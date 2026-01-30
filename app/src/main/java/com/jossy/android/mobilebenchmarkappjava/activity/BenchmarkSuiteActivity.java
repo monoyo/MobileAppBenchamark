@@ -323,19 +323,15 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
                 break;
             case 2:
                 intent = new Intent(this, RAMTestActivity.class);
-                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             case 3:
                 intent = new Intent(this, ImageLoadingActivity.class);
-                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             case 4:
                 intent = new Intent(this, ApiTestActivity.class);
-                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             default:
                 intent = new Intent(this, LocationTestActivity.class);
-                intent.putExtra("iterations", selectedConfig.sampleCount);
                 intent.putExtra("interval", selectedConfig.samplingIntervalMs);
                 break;
         }
