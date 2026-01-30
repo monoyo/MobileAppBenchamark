@@ -63,7 +63,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
 
     private void initUI() {
         loadingStatus = findViewById(R.id.loadingStatus);
-        loadingStatus.setText("Initializing Batch...");
+        loadingStatus.setText(R.string.initializing_image_batch);
     }
 
     private void parseIntentData() {
@@ -154,7 +154,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
 
     private void updateProgressUI() {
         if (loadedImagesCount % 50 == 0) {
-            runOnUiThread(() -> loadingStatus.setText("Image Test: " + loadedImagesCount + " / " + CONSTANT_SAMPLES));
+            runOnUiThread(() -> loadingStatus.setText(getString(R.string.image_test_progress, loadedImagesCount, CONSTANT_SAMPLES)));
         }
     }
 
