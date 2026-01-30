@@ -20,11 +20,17 @@ import com.bumptech.glide.request.target.Target;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
+import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
+import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 public class ImageLoadingActivity extends AppCompatActivity {
+    private static final String TAG = "ImageLoadingActivity";
+    private static final int CONSTANT_SAMPLES = 10000;
+
     private TextView loadingStatus;
 
     private static final List<String> IMAGE_URLS = Arrays.asList(
@@ -40,10 +46,9 @@ public class ImageLoadingActivity extends AppCompatActivity {
             "https://fastly.picsum.photos/id/764/300/200.jpg?hmac=1sBuxBDUdVzEEnIKB5S4cXJ_sQ5Tp3ZSnjrHOWF_E20");
 
     private int loadedImagesCount = 0;
-    private int targetSamples = 0;
     private long suiteStartTime;
     private String csvPath;
-    private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
+    private BufferedCsvWriter csvWriter;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
@@ -51,103 +56,133 @@ public class ImageLoadingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_loading);
 
-        loadingStatus = findViewById(R.id.loadingStatus);
-
-        targetSamples = getIntent().getIntExtra("iterations", 10);
-        csvPath = getIntent().getStringExtra("csv_path");
-
-        Log.i("ImageLoadingActivity", "Starting Image Batch: " + targetSamples);
-        loadingStatus.setText("Initializing Batch...");
-
+        initUI();
+        parseIntentData();
         startBatchTest();
+    }
+
+    private void initUI() {
+        loadingStatus = findViewById(R.id.loadingStatus);
+        loadingStatus.setText("Initializing Batch...");
+    }
+
+    private void parseIntentData() {
+        csvPath = getIntent().getStringExtra("csv_path");
+        Log.i(TAG, "Starting Image Batch: " + CONSTANT_SAMPLES);
     }
 
     private void startBatchTest() {
         suiteStartTime = System.currentTimeMillis();
-
-        try {
-            csvWriter = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(
-                    new java.io.File(csvPath != null ? csvPath : getFilesDir() + "/temp_image.csv"), 1000, 64 * 1024);
-            csvWriter.initialize();
-        } catch (Exception e) {
-            Log.e("ImageLoadingActivity", "Writer init failed", e);
+        if (initCsvWriter()) {
+            loadNextImage();
+        } else {
             finish();
-            return;
         }
+    }
 
-        loadNextImage();
+    private boolean initCsvWriter() {
+        try {
+            File file = new File(csvPath != null ? csvPath : getFilesDir() + "/temp_image.csv");
+            csvWriter = new BufferedCsvWriter(file, 1000, 64 * 1024);
+            csvWriter.initialize();
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Writer init failed", e);
+            return false;
+        }
     }
 
     private void loadNextImage() {
-        if (loadedImagesCount >= targetSamples) {
+        if (loadedImagesCount >= CONSTANT_SAMPLES) {
             finishBatch();
             return;
         }
+        performImageLoad();
+    }
 
+    private void performImageLoad() {
         String url = IMAGE_URLS.get(loadedImagesCount % IMAGE_URLS.size());
-        long start = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
         Glide.with(this)
                 .load(url)
-                .listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model,
-                                               @NonNull Target<Drawable> target, boolean isFirstResource) {
-                        recordResult(start, false, "Failed");
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model,
-                                                 @NonNull Target<Drawable> target, @NonNull DataSource dataSource,
-                                                 boolean isFirstResource) {
-                        recordResult(start, true, "Success");
-                        return false;
-                    }
-                })
+                .listener(createRequestListener(startTime))
                 .preload();
     }
 
-    private void recordResult(long startTime, boolean success, String details) {
+    private RequestListener<Drawable> createRequestListener(long startTime) {
+        return new RequestListener<>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model,
+                                        @NonNull Target<Drawable> target, boolean isFirstResource) {
+                handleLoadResult(startTime, false, "Failed");
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model,
+                                           @NonNull Target<Drawable> target, @NonNull DataSource dataSource,
+                                           boolean isFirstResource) {
+                handleLoadResult(startTime, true, "Success");
+                return false;
+            }
+        };
+    }
+
+    private void handleLoadResult(long startTime, boolean success, String details) {
         long duration = System.currentTimeMillis() - startTime;
-
-        try {
-            com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
-                    "Image Loading", duration, details, success);
-            com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
-                    loadedImagesCount, tr, startTime, duration, System.currentTimeMillis() - suiteStartTime);
-
-            if (csvWriter != null)
-                csvWriter.write(entry);
-
-        } catch (Exception e) {
-            Log.e("ImageLoadingActivity", "Log failed", e);
-        }
+        logResult(startTime, duration, success, details);
 
         loadedImagesCount++;
+        updateProgressUI();
+        scheduleNextLoad();
+    }
 
-        // Update UI occasionally
-        if (loadedImagesCount % 50 == 0) {
-            runOnUiThread(() -> loadingStatus.setText("Image Test: " + loadedImagesCount + " / " + targetSamples));
+    private void logResult(long startTime, long duration, boolean success, String details) {
+        try {
+            TestResult tr = new TestResult("Image Loading", duration, details, success);
+            TestEntry entry = new TestEntry(loadedImagesCount, tr, startTime, duration,
+                    System.currentTimeMillis() - suiteStartTime);
+
+            if (csvWriter != null) {
+                csvWriter.write(entry);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Log failed", e);
         }
+    }
 
-        // Break the recursion by posting to the handler
+    private void updateProgressUI() {
+        if (loadedImagesCount % 50 == 0) {
+            runOnUiThread(() -> loadingStatus.setText("Image Test: " + loadedImagesCount + " / " + CONSTANT_SAMPLES));
+        }
+    }
+
+    private void scheduleNextLoad() {
         mainHandler.post(this::loadNextImage);
     }
 
     private void finishBatch() {
-        long totalTime = System.currentTimeMillis() - suiteStartTime;
+        closeWriter();
+        sendResultAndFinish();
+    }
+
+    private void closeWriter() {
         try {
             if (csvWriter != null) {
                 csvWriter.flush();
                 csvWriter.close();
             }
         } catch (Exception e) {
-            Log.e("ImageLoadingActivity", "Error closing writer", e);
+            Log.e(TAG, "Error closing writer", e);
         }
+    }
 
-        TestResult result = new TestResult("Image Loading Test", totalTime, "Batch completed: " + loadedImagesCount,
-                true);
+    private void sendResultAndFinish() {
+        long totalTime = System.currentTimeMillis() - suiteStartTime;
+        TestResult result = new TestResult("Image Loading Test", totalTime,
+                "Batch completed: " + loadedImagesCount, true);
+
         Intent intent = new Intent();
         intent.putExtra(BenchmarkApplication.RESULT, result);
         setResult(RESULT_OK, intent);
