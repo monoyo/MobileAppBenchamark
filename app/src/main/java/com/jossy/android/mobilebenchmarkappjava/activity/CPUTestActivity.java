@@ -1,31 +1,28 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.CPUTest;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.CpuResult;
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
-import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
-import android.content.Intent;
+import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
 
+import java.io.File;
 import java.util.concurrent.Executors;
 
-/**
- * Aktywność wykonująca test CPU.
- * 
- * Obsługuje dwa tryby:
- * 1. Iteration-based (gdy przekazano cpu_iterations) - nowa metoda
- * 2. Time-based (fallback) - kompatybilność wsteczna
- */
 public class CPUTestActivity extends AppCompatActivity {
 
     private static final String TAG = "CPUTestActivity";
 
-    private android.widget.TextView statusText;
+    private TextView statusText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,58 +31,75 @@ public class CPUTestActivity extends AppCompatActivity {
 
         statusText = findViewById(R.id.cpuStatus);
 
-        Log.d(TAG, "Starting CPU test");
+        Log.d(TAG, "Starting CPU test activity");
         startCPUTest();
     }
 
     private void startCPUTest() {
-        final long cpuIterations = getIntent().getLongExtra("cpu_iterations", 1000);
-        final int targetSamples = getIntent().getIntExtra("iterations", 1);
-        final String csvPath = getIntent().getStringExtra("csv_path");
+        long cpuIterations = getIntent().getLongExtra("cpu_iterations", 1000);
+        int targetSamples = getIntent().getIntExtra("iterations", 1);
+        String csvPath = getIntent().getStringExtra("csv_path");
 
         Log.i(TAG, "Starting CPU Batch Test: samples=" + targetSamples + ", cpu_iters=" + cpuIterations);
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            long suiteStart = System.currentTimeMillis();
+        Executors.newSingleThreadExecutor().execute(() ->
+                runBenchmarkTask(cpuIterations, targetSamples, csvPath)
+        );
+    }
 
-            try (com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter writer = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(
-                    new java.io.File(csvPath), 1000, 64 * 1024)) {
+    private void runBenchmarkTask(long cpuIterations, int targetSamples, String csvPath) {
+        long suiteStart = System.currentTimeMillis();
+        try {
+            performBatchTest(cpuIterations, targetSamples, csvPath, suiteStart);
+            handleSuccess(System.currentTimeMillis() - suiteStart, targetSamples);
+        } catch (Exception e) {
+            handleError(e);
+        }
+    }
 
-                writer.initialize();
-
-                for (int i = 0; i < targetSamples; i++) {
-                    long start = System.currentTimeMillis();
-                    CpuResult r = CPUTest.runBenchmarkIterations(cpuIterations, null);
-                    long duration = System.currentTimeMillis() - start;
-
-                    TestResult tr = new TestResult("CPU Test", duration, "threads=" + r.threads, true);
-                    TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
-                    writer.write(entry);
-
-                    if (targetSamples <= 1000 || i % (targetSamples / 100) == 0) {
-                        int finalI = i;
-                        runOnUiThread(() -> statusText.setText("CPU Test: " + (finalI + 1) + " / " + targetSamples));
-                    }
-                }
-                writer.flush();
-
-            } catch (Exception e) {
-                Log.e(TAG, "Batch CPU Test failed", e);
-                runOnUiThread(() -> {
-                    TestResult result = new TestResult("CPU Test", 0, "Error: " + e.getMessage(), false);
-                    returnResult(result);
-                });
-                return;
+    private void performBatchTest(long cpuIterations, int targetSamples, String csvPath, long suiteStart) throws Exception {
+        try (BufferedCsvWriter writer = new BufferedCsvWriter(new File(csvPath), 1000, 64 * 1024)) {
+            writer.initialize();
+            for (int i = 0; i < targetSamples; i++) {
+                runSingleIteration(i, cpuIterations, targetSamples, suiteStart, writer);
             }
+            writer.flush();
+        }
+    }
 
-            long totalTime = System.currentTimeMillis() - suiteStart;
-            Log.i(TAG, "CPU Batch completed in " + totalTime + "ms");
+    private void runSingleIteration(int index, long cpuIterations, int targetSamples, long suiteStart, BufferedCsvWriter writer) throws Exception {
+        long start = System.currentTimeMillis();
+        CpuResult r = CPUTest.runBenchmarkIterations(cpuIterations, null);
+        long duration = System.currentTimeMillis() - start;
 
-            runOnUiThread(() -> {
-                TestResult result = new TestResult("CPU Test", totalTime,
-                        "Batch completed: " + targetSamples + " samples", true);
-                returnResult(result);
-            });
+        TestResult tr = new TestResult("CPU Test", duration, "threads=" + r.threads, true);
+        TestEntry entry = new TestEntry(index, tr, start, duration, System.currentTimeMillis() - suiteStart);
+        writer.write(entry);
+
+        updateProgressUI(index, targetSamples);
+    }
+
+    private void updateProgressUI(int index, int total) {
+        if (total <= 1000 || index % (total / 100) == 0) {
+            int current = index + 1;
+            runOnUiThread(() -> statusText.setText("CPU Test: " + current + " / " + total));
+        }
+    }
+
+    private void handleSuccess(long totalTime, int targetSamples) {
+        Log.i(TAG, "CPU Batch completed in " + totalTime + "ms");
+        runOnUiThread(() -> {
+            TestResult result = new TestResult("CPU Test", totalTime,
+                    "Batch completed: " + targetSamples + " samples", true);
+            returnResult(result);
+        });
+    }
+
+    private void handleError(Exception e) {
+        Log.e(TAG, "Batch CPU Test failed", e);
+        runOnUiThread(() -> {
+            TestResult result = new TestResult("CPU Test", 0, "Error: " + e.getMessage(), false);
+            returnResult(result);
         });
     }
 
