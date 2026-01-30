@@ -320,8 +320,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
                 break;
             case 1:
                 intent = new Intent(this, CPUTestActivity.class);
-                intent.putExtra("iterations", selectedConfig.sampleCount); // Pass total sample count
-                intent.putExtra("cpu_iterations", selectedConfig.getCpuIterationsPerThread());
                 break;
             case 2:
                 intent = new Intent(this, RAMTestActivity.class);

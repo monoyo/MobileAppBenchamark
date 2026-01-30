@@ -54,31 +54,4 @@ public enum SampleConfiguration {
         }
         return names;
     }
-
-    /**
-     * Oblicza optymalny rozmiar bufora I/O dla zapisu plików.
-     * Dla dużych zbiorów danych używamy większych buforów.
-     */
-    public int getOptimalWriteBufferBytes() {
-        if (sampleCount >= 100_000) {
-            return 128 * 1024; // 128KB dla bardzo dużych zbiorów
-        } else if (sampleCount >= 10_000) {
-            return 64 * 1024; // 64KB dla dużych zbiorów
-        } else {
-            return 16 * 1024; // 16KB dla małych zbiorów
-        }
-    }
-
-    /**
-     * Określa liczbę iteracji CPU per wątek dla testu CPU.
-     * Skalowane proporcjonalnie do wielkości próbki.
-     */
-    public long getCpuIterationsPerThread() {
-        return switch (this) {
-            case SMALL -> 10_000_000L; // 10M
-            case MEDIUM -> 20_000_000L; // 20M
-            case LARGE -> 50_000_000L; // 50M
-            case VERY_LARGE -> 100_000_000L; // 100M per thread is meaningful
-        };
-    }
 }
