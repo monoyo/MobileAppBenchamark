@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -50,6 +51,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
     private String csvPath;
     private BufferedCsvWriter csvWriter;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final MutableLiveData<Integer> progressLiveData = new MutableLiveData<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,9 @@ public class ImageLoadingActivity extends AppCompatActivity {
     private void initUI() {
         loadingStatus = findViewById(R.id.loadingStatus);
         loadingStatus.setText(R.string.initializing_image_batch);
+
+        progressLiveData.observe(this, currentIteration ->
+                loadingStatus.setText(getString(R.string.image_test_progress, currentIteration, CONSTANT_SAMPLES)));
     }
 
     private void parseIntentData() {
@@ -134,7 +139,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
         logResult(startTime, duration, success, details);
 
         loadedImagesCount++;
-        updateProgressUI();
+        progressLiveData.postValue(loadedImagesCount);
         scheduleNextLoad();
     }
 
@@ -149,12 +154,6 @@ public class ImageLoadingActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             Log.e(TAG, "Log failed", e);
-        }
-    }
-
-    private void updateProgressUI() {
-        if (loadedImagesCount % 50 == 0) {
-            runOnUiThread(() -> loadingStatus.setText(getString(R.string.image_test_progress, loadedImagesCount, CONSTANT_SAMPLES)));
         }
     }
 
