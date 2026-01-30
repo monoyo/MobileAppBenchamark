@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
 
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
@@ -22,6 +23,7 @@ public class RAMTestActivity extends AppCompatActivity {
 
     private static final String TAG = "RAMTestActivity";
     private TextView statusText;
+    private final MutableLiveData<Integer> progressLiveData = new MutableLiveData<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,10 @@ public class RAMTestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_ram_test);
 
         statusText = findViewById(R.id.cpuStatus);
+
+        // Obserwowanie zmian w LiveData i aktualizacja UI (podobnie jak w CPUTestActivity)
+        progressLiveData.observe(this, currentIteration -> 
+                statusText.setText("RAM Test: " + currentIteration + " / " + TARGET_SAMPLES));
 
         Log.d(TAG, "Starting RAM test activity");
         startRAMTest();
@@ -77,14 +83,8 @@ public class RAMTestActivity extends AppCompatActivity {
             TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
             writer.write(entry);
 
-            updateUIProgress(i, targetSamples);
-        }
-    }
-
-    private void updateUIProgress(int currentIndex, int totalSamples) {
-        if (totalSamples <= 1000 || currentIndex % (totalSamples / 100) == 0) {
-            int progress = currentIndex + 1;
-            runOnUiThread(() -> statusText.setText("RAM Test: " + progress + " / " + totalSamples));
+            // Aktualizacja postępu przez LiveData
+            progressLiveData.postValue(i + 1);
         }
     }
 
