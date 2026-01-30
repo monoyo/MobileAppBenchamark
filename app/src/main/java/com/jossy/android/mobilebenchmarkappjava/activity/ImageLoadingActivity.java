@@ -3,16 +3,18 @@ package com.jossy.android.mobilebenchmarkappjava.activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
@@ -24,8 +26,6 @@ import java.util.List;
 
 public class ImageLoadingActivity extends AppCompatActivity {
     private TextView loadingStatus;
-    private RecyclerView recyclerView;
-    private long startTime;
 
     private static final List<String> IMAGE_URLS = Arrays.asList(
             "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
@@ -44,6 +44,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
     private long suiteStartTime;
     private String csvPath;
     private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +52,6 @@ public class ImageLoadingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_loading);
 
         loadingStatus = findViewById(R.id.loadingStatus);
-        // We reuse the first ImageView from the layout or just finding one if
-        // available,
-        // but the original layout has a RecyclerView.
-        // For Batch Mode, we don't need the RecyclerView overhead.
-        // We can just add a hidden ImageView or reuse the layout.
-        // Let's assume we can just load into a target or a dummy view.
 
         targetSamples = getIntent().getIntExtra("iterations", 10);
         csvPath = getIntent().getStringExtra("csv_path");
@@ -94,23 +89,23 @@ public class ImageLoadingActivity extends AppCompatActivity {
 
         Glide.with(this)
                 .load(url)
-                .listener(new RequestListener<>() {
+                .listener(new RequestListener<Drawable>() {
                     @Override
-                    public boolean onLoadFailed(com.bumptech.glide.load.engine.GlideException e, Object model,
-                            Target<Drawable> target, boolean isFirstResource) {
+                    public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model,
+                                               @NonNull Target<Drawable> target, boolean isFirstResource) {
                         recordResult(start, false, "Failed");
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
-                            DataSource dataSource, boolean isFirstResource) {
+                    public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model,
+                                                 @NonNull Target<Drawable> target, @NonNull DataSource dataSource,
+                                                 boolean isFirstResource) {
                         recordResult(start, true, "Success");
                         return false;
                     }
                 })
-                .preload(); // Just preload to measure network/decoding, no View overhead needed for pure
-        // throughput
+                .preload();
     }
 
     private void recordResult(long startTime, boolean success, String details) {
@@ -136,9 +131,8 @@ public class ImageLoadingActivity extends AppCompatActivity {
             runOnUiThread(() -> loadingStatus.setText("Image Test: " + loadedImagesCount + " / " + targetSamples));
         }
 
-        // Recursive call for next (on main thread handled by Glide listener usually)
-        // Glide callbacks are on main thread usually.
-        loadNextImage();
+        // Break the recursion by posting to the handler
+        mainHandler.post(this::loadNextImage);
     }
 
     private void finishBatch() {
@@ -149,7 +143,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
                 csvWriter.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("ImageLoadingActivity", "Error closing writer", e);
         }
 
         TestResult result = new TestResult("Image Loading Test", totalTime, "Batch completed: " + loadedImagesCount,

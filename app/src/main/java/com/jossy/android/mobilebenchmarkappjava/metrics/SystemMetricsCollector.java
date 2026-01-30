@@ -169,7 +169,7 @@ public class SystemMetricsCollector {
 
             // Czekaj do następnego interwału
             long elapsed = System.currentTimeMillis() - loopStart;
-            long sleepMs = Math.max(0, samplingIntervalMs - elapsed);
+            long sleepMs = Math.max(1, samplingIntervalMs - elapsed);
             if (sleepMs > 0) {
                 try {
                     Thread.sleep(sleepMs);
