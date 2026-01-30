@@ -31,7 +31,9 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
     private static final String TAG = "StressTestActivity";
     private static final int INITIAL_OBJECT_COUNT = 1000;
-    float SIZE = 50f;
+    private static final int START_OBJECTS = 1000;
+    private static final long TEST_DURATION_MS = 100_000;
+    private static final float OBJECT_SIZE = 50f;
 
     private StressTestView stressTestView;
     private TextView infoText;
@@ -56,12 +58,23 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
     // Logging
     private BufferedWriter csvWriter;
     private long frameCount = 0;
-    private static final int START_OBJECTS = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        initUI();
+        initObjects(START_OBJECTS);
+        setupCsv();
+
+        container.post(() -> {
+            width = container.getWidth();
+            height = container.getHeight();
+            startTest();
+        });
+    }
+
+    private void initUI() {
         container = new FrameLayout(this);
         stressTestView = new StressTestView(this);
         infoText = new TextView(this);
@@ -73,34 +86,31 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
         container.addView(stressTestView);
         container.addView(infoText);
         setContentView(container);
-
-        initObjects(START_OBJECTS);
-        setupCsv();
-
-        container.post(() -> {
-            width = container.getWidth();
-            height = container.getHeight();
-            startTest();
-        });
     }
 
     private void setupCsv() {
         try {
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-            File dir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "benchmarks/" + timestamp);
-            String sessionPath = getIntent().getStringExtra("session_dir");
-            if (sessionPath != null) {
-                dir = new File(sessionPath);
-            } else {
-                if (!dir.exists())
-                    dir.mkdirs();
-            }
+            File dir = getBenchmarkDirectory(timestamp);
 
             File file = new File(dir, "stress_test_java_" + timestamp + ".csv");
             csvWriter = new BufferedWriter(new FileWriter(file));
             csvWriter.write("Frame,ObjectCount,FrameTimeMs,FPS,ElapsedMs\n");
         } catch (IOException e) {
             Log.e(TAG, "Failed to create CSV writer", e);
+        }
+    }
+
+    private File getBenchmarkDirectory(String timestamp) {
+        String sessionPath = getIntent().getStringExtra("session_dir");
+        if (sessionPath != null) {
+            return new File(sessionPath);
+        } else {
+            File dir = new File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "benchmarks/" + timestamp);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            return dir;
         }
     }
 
@@ -114,16 +124,16 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
     }
 
     private void addObjects(int count) {
-        if (count <= 0)
-            return;
+        if (count <= 0) return;
+
         float maxW = width > 0 ? width : 1000;
         float maxH = height > 0 ? height : 2000;
+
         for (int i = 0; i < count; i++) {
+            float x = random.nextFloat() * (maxW - OBJECT_SIZE);
+            float y = random.nextFloat() * (maxH - OBJECT_SIZE);
 
-            float x = random.nextFloat() * (maxW - SIZE);
-            float y = random.nextFloat() * (maxH - SIZE);
-
-            objects.add(new RectF(x, y, x + SIZE, y + SIZE));
+            objects.add(new RectF(x, y, x + OBJECT_SIZE, y + OBJECT_SIZE));
             colors.add(Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256)));
             velocitiesX.add((random.nextFloat() - 0.5f) * 20);
             velocitiesY.add((random.nextFloat() - 0.5f) * 20);
@@ -142,53 +152,58 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
     @Override
     public void doFrame(long frameTimeNanos) {
-        if (!isRunning)
-            return;
+        if (!isRunning) return;
 
         long currentNano = System.nanoTime();
-        long diffNanos = currentNano - lastFrameTimeNanos;
+        double frameTimeMs = (currentNano - lastFrameTimeNanos) / 1_000_000.0;
         lastFrameTimeNanos = currentNano;
-
-        double frameTimeMs = diffNanos / 1_000_000.0;
         double fps = frameTimeMs > 0 ? 1000.0 / frameTimeMs : 0;
 
-        try {
-            if (csvWriter != null) {
-                long elapsed = System.currentTimeMillis() - startTime;
-                csvWriter.write(String.format(Locale.US, "%d,%d,%.2f,%.2f,%d\n", frameCount, currentObjectCount,
-                        frameTimeMs, fps, elapsed));
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "CSV write failed", e);
-        }
-        long elapsed = System.currentTimeMillis() - startTime;
+        long elapsedMs = System.currentTimeMillis() - startTime;
 
-        int secondsElapsed = (int) (elapsed / 1000);
-        int desiredObjects = 1000 + (secondsElapsed * 1000);
-
-        if (desiredObjects > currentObjectCount) {
-            int toAdd = desiredObjects - currentObjectCount;
-            addObjects(toAdd);
-        }
-
+        logFrameData(frameTimeMs, fps, elapsedMs);
+        manageObjectCount(elapsedMs);
         updatePositions();
-        stressTestView.setObjects(objects, colors);
-
-        infoText.setText(String.format(Locale.US, "Time: %ds / 100s\nObjects: %d\nFPS: %.1f",
-                secondsElapsed, currentObjectCount, fps));
+        updateUI(fps, elapsedMs);
 
         frameCount++;
 
-        if (elapsed >= 100_000) {
+        if (elapsedMs >= TEST_DURATION_MS) {
             finishTest(true);
         } else {
             Choreographer.getInstance().postFrameCallback(this);
         }
     }
 
+    private void logFrameData(double frameTimeMs, double fps, long elapsedMs) {
+        try {
+            if (csvWriter != null) {
+                csvWriter.write(String.format(Locale.US, "%d,%d,%.2f,%.2f,%d\n",
+                        frameCount, currentObjectCount, frameTimeMs, fps, elapsedMs));
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "CSV write failed", e);
+        }
+    }
+
+    private void manageObjectCount(long elapsedMs) {
+        int secondsElapsed = (int) (elapsedMs / 1000);
+        int desiredObjects = 1000 + (secondsElapsed * 1000);
+
+        if (desiredObjects > currentObjectCount) {
+            addObjects(desiredObjects - currentObjectCount);
+        }
+    }
+
+    private void updateUI(double fps, long elapsedMs) {
+        stressTestView.setObjects(objects, colors);
+        int secondsElapsed = (int) (elapsedMs / 1000);
+        infoText.setText(String.format(Locale.US, "Time: %ds / 100s\nObjects: %d\nFPS: %.1f",
+                secondsElapsed, currentObjectCount, fps));
+    }
+
     private void updatePositions() {
-        if (width == 0)
-            return;
+        if (width == 0) return;
 
         for (int i = 0; i < objects.size(); i++) {
             RectF rect = objects.get(i);
@@ -197,14 +212,18 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
             rect.offset(vx, vy);
 
-            if (rect.left < 0 || rect.right > width) {
-                velocitiesX.set(i, -vx);
-                rect.offset(-vx * 2, 0);
-            }
-            if (rect.top < 0 || rect.bottom > height) {
-                velocitiesY.set(i, -vy);
-                rect.offset(0, -vy * 2);
-            }
+            handleBoundsCollision(i, rect, vx, vy);
+        }
+    }
+
+    private void handleBoundsCollision(int index, RectF rect, float vx, float vy) {
+        if (rect.left < 0 || rect.right > width) {
+            velocitiesX.set(index, -vx);
+            rect.offset(-vx * 2, 0);
+        }
+        if (rect.top < 0 || rect.bottom > height) {
+            velocitiesY.set(index, -vy);
+            rect.offset(0, -vy * 2);
         }
     }
 
@@ -212,13 +231,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
         isRunning = false;
         long duration = System.currentTimeMillis() - startTime;
 
-        try {
-            if (csvWriter != null) {
-                csvWriter.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        closeCsvWriter();
 
         TestResult result = new TestResult(
                 "UI Stress Test",
@@ -230,5 +243,15 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
         intent.putExtra(BenchmarkApplication.RESULT, result);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private void closeCsvWriter() {
+        try {
+            if (csvWriter != null) {
+                csvWriter.close();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to close CSV writer", e);
+        }
     }
 }
