@@ -30,7 +30,8 @@ import java.util.Random;
 public class GPUTestActivity extends AppCompatActivity implements Choreographer.FrameCallback {
 
     private static final String TAG = "StressTestActivity";
-    private static final int INITIAL_OBJECT_COUNT = 100;
+    private static final int INITIAL_OBJECT_COUNT = 1000;
+    float SIZE = 50f;
 
     private StressTestView stressTestView;
     private TextView infoText;
@@ -55,16 +56,11 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
     // Logging
     private BufferedWriter csvWriter;
     private long frameCount = 0;
-
-    private int targetFrames = 100; // Default
     private static final int START_OBJECTS = 1000;
-    private static final int END_OBJECTS = 50000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        targetFrames = getIntent().getIntExtra("iterations", 100);
 
         container = new FrameLayout(this);
         stressTestView = new StressTestView(this);
@@ -122,13 +118,12 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
             return;
         float maxW = width > 0 ? width : 1000;
         float maxH = height > 0 ? height : 2000;
-
         for (int i = 0; i < count; i++) {
-            float size = 50f;
-            float x = random.nextFloat() * (maxW - size);
-            float y = random.nextFloat() * (maxH - size);
 
-            objects.add(new RectF(x, y, x + size, y + size));
+            float x = random.nextFloat() * (maxW - SIZE);
+            float y = random.nextFloat() * (maxH - SIZE);
+
+            objects.add(new RectF(x, y, x + SIZE, y + SIZE));
             colors.add(Color.rgb(random.nextInt(256), random.nextInt(256), random.nextInt(256)));
             velocitiesX.add((random.nextFloat() - 0.5f) * 20);
             velocitiesY.add((random.nextFloat() - 0.5f) * 20);
@@ -157,10 +152,8 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
         double frameTimeMs = diffNanos / 1_000_000.0;
         double fps = frameTimeMs > 0 ? 1000.0 / frameTimeMs : 0;
 
-        // Log frame
         try {
             if (csvWriter != null) {
-                // Time from start in ms
                 long elapsed = System.currentTimeMillis() - startTime;
                 csvWriter.write(String.format(Locale.US, "%d,%d,%.2f,%.2f,%d\n", frameCount, currentObjectCount,
                         frameTimeMs, fps, elapsed));
@@ -168,32 +161,24 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
         } catch (IOException e) {
             Log.e(TAG, "CSV write failed", e);
         }
-
-        // Ramp Up Logic - Time Based
-        // Animation duration: 100 seconds
-        // Logic: 1000 objects start + 1000 new every second
         long elapsed = System.currentTimeMillis() - startTime;
 
         int secondsElapsed = (int) (elapsed / 1000);
         int desiredObjects = 1000 + (secondsElapsed * 1000);
 
-        // Ensure strictly adding
         if (desiredObjects > currentObjectCount) {
             int toAdd = desiredObjects - currentObjectCount;
             addObjects(toAdd);
         }
 
-        // Render & Update
         updatePositions();
         stressTestView.setObjects(objects, colors);
 
-        // Update UI
         infoText.setText(String.format(Locale.US, "Time: %ds / 100s\nObjects: %d\nFPS: %.1f",
                 secondsElapsed, currentObjectCount, fps));
 
         frameCount++;
 
-        // Stop Condition - 100 seconds
         if (elapsed >= 100_000) {
             finishTest(true);
         } else {
@@ -212,7 +197,6 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
             rect.offset(vx, vy);
 
-            // Bounce
             if (rect.left < 0 || rect.right > width) {
                 velocitiesX.set(i, -vx);
                 rect.offset(-vx * 2, 0);
