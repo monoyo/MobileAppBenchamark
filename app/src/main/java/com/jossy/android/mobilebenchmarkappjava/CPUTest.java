@@ -44,10 +44,14 @@ public class CPUTest {
                 double x = (threadIndex + 1);
 
                 // Pętla iteracyjna zamiast czasowej
-                for (long i = 0; i < iterationsPerThread; i++) {
-                    x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
-                    acc += x;
-                    iter++;
+                try {
+                    for (long i = 0; i < iterationsPerThread; i++) {
+                        x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
+                        acc += x;
+                        iter++;
+                    }
+                } catch (Exception e) {
+                    System.err.println("Thread " + threadIndex + " crashed: " + e);
                 }
 
                 counters[threadIndex] = iter;

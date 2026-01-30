@@ -75,10 +75,10 @@ public enum SampleConfiguration {
      */
     public long getCpuIterationsPerThread() {
         return switch (this) {
-            case SMALL -> 500_000L;
-            case MEDIUM -> 1_000_000L;
-            case LARGE -> 2_000_000L;
-            case VERY_LARGE -> 5_000_000L;
+            case SMALL -> 10_000_000L; // 10M
+            case MEDIUM -> 20_000_000L; // 20M
+            case LARGE -> 50_000_000L; // 50M
+            case VERY_LARGE -> 100_000_000L; // 100M per thread is meaningful
         };
     }
 }

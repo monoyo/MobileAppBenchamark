@@ -34,11 +34,8 @@ public class RAMTestActivity extends AppCompatActivity {
         final int targetSamples = getIntent().getIntExtra("iterations", 1);
         final String csvPath = getIntent().getStringExtra("csv_path");
 
-        // Adaptive runs per sample:
-        // If single shot (legacy), use default heavy load.
-        // If batch (many samples), use lighter load per sample to allow collecting many
-        // samples.
-        final int runsPerSample = targetSamples > 50 ? 5 : 100; // Drastically reduced for batch speed
+        // Adaptive runs per sample: increased load
+        final int runsPerSample = targetSamples > 1000 ? 50 : 500;
 
         Log.i("RAMTestActivity", "Starting RAM Batch: samples=" + targetSamples + ", runs/sample=" + runsPerSample);
         statusText.setText("Initializing RAM Batch...");
@@ -62,8 +59,7 @@ public class RAMTestActivity extends AppCompatActivity {
                             i, tr, start, duration, System.currentTimeMillis() - suiteStart);
                     writer.write(entry);
 
-                    if (i == 0 || i == targetSamples - 1 || System.currentTimeMillis() - lastUiUpdate > 100) {
-                        lastUiUpdate = System.currentTimeMillis();
+                    if (targetSamples <= 1000 || i % (targetSamples / 100) == 0) {
                         int finalI = i;
                         runOnUiThread(() -> statusText.setText("RAM Test: " + (finalI + 1) + " / " + targetSamples));
                     }

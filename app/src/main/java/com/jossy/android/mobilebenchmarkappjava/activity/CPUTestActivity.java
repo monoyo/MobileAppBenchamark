@@ -72,8 +72,7 @@ public class CPUTestActivity extends AppCompatActivity {
                     TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
                     writer.write(entry);
 
-                    if (i == 0 || i == targetSamples - 1 || System.currentTimeMillis() - lastUiUpdate > 100) {
-                        lastUiUpdate = System.currentTimeMillis();
+                    if (targetSamples <= 1000 || i % (targetSamples / 100) == 0) {
                         int finalI = i;
                         runOnUiThread(() -> statusText.setText("CPU Test: " + (finalI + 1) + " / " + targetSamples));
                     }

@@ -336,13 +336,11 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
                 intent = new Intent(this, ApiTestActivity.class);
                 intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
-            case 5:
+            default:
                 intent = new Intent(this, LocationTestActivity.class);
                 intent.putExtra("iterations", selectedConfig.sampleCount);
+                intent.putExtra("interval", selectedConfig.samplingIntervalMs);
                 break;
-            default:
-                Log.w(TAG, "Invalid test index: " + index);
-                return;
         }
 
         // Pass common simplified args

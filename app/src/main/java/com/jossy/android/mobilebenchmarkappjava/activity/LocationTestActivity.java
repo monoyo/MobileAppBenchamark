@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
@@ -39,6 +40,18 @@ public class LocationTestActivity extends AppCompatActivity {
     private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
 
     private android.widget.TextView statusText;
+    private long intervalMs = 1000L;
+    private Location lastKnownLocation;
+    private final Handler samplingHandler = new Handler(Looper.getMainLooper());
+    private final Runnable samplingRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isFinished)
+                return;
+            sampleLocation();
+            samplingHandler.postDelayed(this, intervalMs);
+        }
+    };
 
     @RequiresPermission(allOf = { Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION })
@@ -50,14 +63,18 @@ public class LocationTestActivity extends AppCompatActivity {
         statusText = findViewById(R.id.locationStatus);
 
         targetSamples = getIntent().getIntExtra("iterations", 5);
+        intervalMs = getIntent().getIntExtra("interval", 1000); // Default 1s
         csvPath = getIntent().getStringExtra("csv_path");
 
-        Log.i("LocationTestActivity", "Starting Location Batch: " + targetSamples);
+        Log.i("LocationTestActivity", "Starting Location Batch: " + targetSamples + " @ " + intervalMs + "ms");
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setupCsv();
         setupLocationCallback();
         startLocationUpdates();
+
+        // Start sampling loop
+        samplingHandler.postDelayed(samplingRunnable, intervalMs);
     }
 
     private void setupCsv() {
@@ -81,20 +98,26 @@ public class LocationTestActivity extends AppCompatActivity {
 
                 Location location = locationResult.getLastLocation();
                 if (location != null) {
-                    processLocation(location);
+                    lastKnownLocation = location;
+
+                    // Reset watchdog on valid update
+                    timeoutHandler.removeCallbacksAndMessages(null);
+                    timeoutHandler.postDelayed(timeoutRunnable, TEST_TIMEOUT_MS);
                 }
             }
         };
     }
 
-    private void processLocation(Location location) {
+    private void sampleLocation() {
         try {
             long eventTime = System.currentTimeMillis();
             long duration = eventTime - startTime;
 
             try {
+                String details = (lastKnownLocation != null) ? "Lat: " + lastKnownLocation.getLatitude() : "No Signal";
                 com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
-                        "Location Test", 0, "Lat: " + location.getLatitude(), true);
+                        "Location Test", 0, details, lastKnownLocation != null);
+
                 com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
                         sampleCount, tr, eventTime, 0, eventTime - suiteStartTime);
 
@@ -115,14 +138,13 @@ public class LocationTestActivity extends AppCompatActivity {
                 finishBatch();
             }
 
-            // Watchdog: Reset timeout timer because we got a valid update
-            timeoutHandler.removeCallbacksAndMessages(null);
-            timeoutHandler.postDelayed(timeoutRunnable, TEST_TIMEOUT_MS);
-
         } catch (Exception e) {
-            Log.e("LocationTestActivity", "Critical error in processLocation", e);
+            Log.e("LocationTestActivity", "Critical error in sampleLocation", e);
         }
     }
+
+    // Unused now but kept for compatibility logic if needed
+    // private void processLocation(Location location) { ... }
 
     private final android.os.Handler timeoutHandler = new android.os.Handler(Looper.getMainLooper());
     private static final long TEST_TIMEOUT_MS = 15_000; // 15 seconds timeout if stuck
@@ -130,14 +152,13 @@ public class LocationTestActivity extends AppCompatActivity {
     @RequiresPermission(allOf = { Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION })
     private void startLocationUpdates() {
-        LocationRequest locationRequest = new LocationRequest.Builder(UPDATE_INTERVAL)
+        LocationRequest locationRequest = new LocationRequest.Builder(1000) // Request 1Hz updates from GPS
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                .setMinUpdateIntervalMillis(FASTEST_UPDATE_INTERVAL)
+                .setMinUpdateIntervalMillis(500)
                 .build();
 
         startTime = System.currentTimeMillis();
 
-        // Safety timeout - prevents hanging forever if no GPS signal
         // Safety timeout - watchdog
         timeoutHandler.postDelayed(timeoutRunnable, TEST_TIMEOUT_MS);
 
@@ -167,6 +188,8 @@ public class LocationTestActivity extends AppCompatActivity {
 
     private void stopLocationUpdates() {
         timeoutHandler.removeCallbacksAndMessages(null);
+        samplingHandler.removeCallbacksAndMessages(null); // Stop sampling
+
         if (fusedLocationClient != null && locationCallback != null) {
             fusedLocationClient.removeLocationUpdates(locationCallback);
         }
@@ -178,6 +201,7 @@ public class LocationTestActivity extends AppCompatActivity {
         isFinished = true;
 
         timeoutHandler.removeCallbacksAndMessages(null);
+        samplingHandler.removeCallbacksAndMessages(null);
 
         stopLocationUpdates();
 
@@ -202,7 +226,9 @@ public class LocationTestActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (!isFinished)
+        if (!isFinished) {
             stopLocationUpdates();
+            finish(); // Kill if paused mid-test
+        }
     }
 }
