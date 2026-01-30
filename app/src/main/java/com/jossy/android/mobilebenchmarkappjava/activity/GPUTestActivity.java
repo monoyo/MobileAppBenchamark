@@ -32,7 +32,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
     private static final String TAG = "StressTestActivity";
     private static final int INITIAL_OBJECT_COUNT = 1000;
     private static final int START_OBJECTS = 1000;
-    private static final long TEST_DURATION_MS = 100_000;
+    private static final int TARGET_SAMPLES = 10000;
     private static final float OBJECT_SIZE = 50f;
 
     private StressTestView stressTestView;
@@ -168,7 +168,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
         frameCount++;
 
-        if (elapsedMs >= TEST_DURATION_MS) {
+        if (frameCount >= TARGET_SAMPLES) {
             finishTest(true);
         } else {
             Choreographer.getInstance().postFrameCallback(this);
@@ -197,9 +197,8 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
     private void updateUI(double fps, long elapsedMs) {
         stressTestView.setObjects(objects, colors);
-        int secondsElapsed = (int) (elapsedMs / 1000);
-        infoText.setText(String.format(Locale.US, "Time: %ds / 100s\nObjects: %d\nFPS: %.1f",
-                secondsElapsed, currentObjectCount, fps));
+        infoText.setText(String.format(Locale.US, "Samples: %d / %d\nObjects: %d\nFPS: %.1f",
+                frameCount, TARGET_SAMPLES, currentObjectCount, fps));
     }
 
     private void updatePositions() {
@@ -236,7 +235,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
         TestResult result = new TestResult(
                 "UI Stress Test",
                 duration,
-                String.format(Locale.US, "Max Objects: %d, Frames: %d", currentObjectCount, frameCount),
+                String.format(Locale.US, "Max Objects: %d, Samples: %d", currentObjectCount, frameCount),
                 success);
 
         Intent intent = new Intent();

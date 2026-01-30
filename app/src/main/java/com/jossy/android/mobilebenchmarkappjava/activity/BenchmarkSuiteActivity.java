@@ -317,7 +317,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
             case 0:
                 intent = new Intent(this, GPUTestActivity.class);
                 intent.putExtra("session_dir", outputDir.getAbsolutePath());
-                intent.putExtra("iterations", selectedConfig.sampleCount);
                 break;
             case 1:
                 intent = new Intent(this, CPUTestActivity.class);
