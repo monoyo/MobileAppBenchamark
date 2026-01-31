@@ -1,12 +1,15 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
@@ -20,215 +23,247 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
+import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
+import com.jossy.android.mobilebenchmarkappjava.metrics.SystemMetricsCollector;
+
+import java.io.File;
+import java.util.Locale;
 
 public class LocationTestActivity extends AppCompatActivity {
-    private static final long UPDATE_INTERVAL = 1000L;
-    private static final long FASTEST_UPDATE_INTERVAL = 500L;
+    private static final String TAG = "LocationTestActivity";
+    private static final long WATCHDOG_TIMEOUT_MS = 15_000;
+    private static final int UI_UPDATE_FREQUENCY = 50; // Update UI every 50 samples
 
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-    private long startTime;
+    private SystemMetricsCollector metricsCollector;
+    private BufferedCsvWriter csvWriter;
 
-    @RequiresPermission(allOf = { Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION })
+    private TextView statusText;
+    private TextView metricsText;
+    private ProgressBar progressBar;
+
     private int sampleCount = 0;
     private int targetSamples = 0;
+    private long intervalMs = 1000L;
+    private String csvPath;
+    
     private long suiteStartTime;
     private boolean isFinished = false;
-    private String csvPath;
-    private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
-
-    private android.widget.TextView statusText;
-    private long intervalMs = 1000L;
     private Location lastKnownLocation;
-    private final Handler samplingHandler = new Handler(Looper.getMainLooper());
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final Handler watchdogHandler = new Handler(Looper.getMainLooper());
+
     private final Runnable samplingRunnable = new Runnable() {
         @Override
         public void run() {
-            if (isFinished)
-                return;
-            sampleLocation();
-            samplingHandler.postDelayed(this, intervalMs);
+            if (isFinished) return;
+            performSample();
+            mainHandler.postDelayed(this, intervalMs);
         }
     };
 
-    @RequiresPermission(allOf = { Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION })
+    private final Runnable watchdogRunnable = () -> {
+        if (!isFinished) {
+            Log.e(TAG, "Watchdog: No location updates received for " + WATCHDOG_TIMEOUT_MS + "ms");
+            logErrorToCsv("Error: Watchdog Timeout (No GPS Signal)");
+            finishBenchmark();
+        }
+    };
+
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_test);
 
-        statusText = findViewById(R.id.locationStatus);
-
-        targetSamples = getIntent().getIntExtra("iterations", 5);
-        intervalMs = getIntent().getIntExtra("interval", 1000); // Default 1s
-        csvPath = getIntent().getStringExtra("csv_path");
-
-        Log.i("LocationTestActivity", "Starting Location Batch: " + targetSamples + " @ " + intervalMs + "ms");
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        setupCsv();
-        setupLocationCallback();
-        startLocationUpdates();
-
-        // Start sampling loop
-        samplingHandler.postDelayed(samplingRunnable, intervalMs);
+        initViews();
+        parseIntent();
+        initMetrics();
+        initCsv();
+        initLocationClient();
+        
+        startBenchmark();
     }
 
-    private void setupCsv() {
-        suiteStartTime = System.currentTimeMillis();
-        try {
-            csvWriter = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(
-                    new java.io.File(csvPath != null ? csvPath : getFilesDir() + "/temp_location.csv"), 1000,
-                    64 * 1024);
-            csvWriter.initialize();
-        } catch (Exception e) {
-            Log.e("LocationTestActivity", "Writer init failed", e);
+    private void initViews() {
+        statusText = findViewById(R.id.locationStatus);
+        metricsText = findViewById(R.id.metricsText);
+        progressBar = findViewById(R.id.testProgress);
+    }
+
+    private void parseIntent() {
+        targetSamples = getIntent().getIntExtra("iterations", 100);
+        intervalMs = getIntent().getIntExtra("interval", 1000);
+        csvPath = getIntent().getStringExtra("csv_path");
+        if (progressBar != null) {
+            progressBar.setMax(targetSamples);
         }
     }
 
-    private void setupLocationCallback() {
+    private void initMetrics() {
+        File outputDir = getExternalFilesDir(null);
+        metricsCollector = new SystemMetricsCollector(this, outputDir, "location_test_" + System.currentTimeMillis(), 500);
+        try {
+            metricsCollector.start();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start metrics collector", e);
+        }
+    }
+
+    private void initCsv() {
+        suiteStartTime = System.currentTimeMillis();
+        String path = csvPath != null ? csvPath : getFilesDir() + "/location_benchmark_" + suiteStartTime + ".csv";
+        try {
+            // Buffer capacity 500 for high volume
+            csvWriter = new BufferedCsvWriter(new File(path), 500, 128 * 1024);
+            csvWriter.initialize();
+        } catch (Exception e) {
+            Log.e(TAG, "CSV Writer initialization failed", e);
+        }
+    }
+
+    private void initLocationClient() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
-                if (isFinished)
-                    return;
-
+                if (isFinished) return;
                 Location location = locationResult.getLastLocation();
                 if (location != null) {
                     lastKnownLocation = location;
-
-                    // Reset watchdog on valid update
-                    timeoutHandler.removeCallbacksAndMessages(null);
-                    timeoutHandler.postDelayed(timeoutRunnable, TEST_TIMEOUT_MS);
+                    resetWatchdog();
                 }
             }
         };
     }
 
-    private void sampleLocation() {
-        try {
-            long eventTime = System.currentTimeMillis();
-            long duration = eventTime - startTime;
-
-            try {
-                String details = (lastKnownLocation != null) ? "Lat: " + lastKnownLocation.getLatitude() : "No Signal";
-                com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
-                        "Location Test", 0, details, lastKnownLocation != null);
-
-                com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
-                        sampleCount, tr, eventTime, 0, eventTime - suiteStartTime);
-
-                if (csvWriter != null)
-                    csvWriter.write(entry);
-
-            } catch (Exception e) {
-                Log.e("LocationTestActivity", "Log failed", e);
-            }
-
-            sampleCount++;
-
-            if (statusText != null) {
-                runOnUiThread(() -> statusText.setText("Location Test: " + sampleCount + " / " + targetSamples));
-            }
-
-            if (sampleCount >= targetSamples) {
-                finishBatch();
-            }
-
-        } catch (Exception e) {
-            Log.e("LocationTestActivity", "Critical error in sampleLocation", e);
-        }
-    }
-
-    // Unused now but kept for compatibility logic if needed
-    // private void processLocation(Location location) { ... }
-
-    private final android.os.Handler timeoutHandler = new android.os.Handler(Looper.getMainLooper());
-    private static final long TEST_TIMEOUT_MS = 15_000; // 15 seconds timeout if stuck
-
-    @RequiresPermission(allOf = { Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION })
-    private void startLocationUpdates() {
-        LocationRequest locationRequest = new LocationRequest.Builder(1000) // Request 1Hz updates from GPS
+    @SuppressLint("MissingPermission")
+    private void startBenchmark() {
+        Log.i(TAG, "Starting Benchmark: " + targetSamples + " samples @ " + intervalMs + "ms");
+        
+        LocationRequest locationRequest = new LocationRequest.Builder(1000)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setMinUpdateIntervalMillis(500)
                 .build();
 
-        startTime = System.currentTimeMillis();
-
-        // Safety timeout - watchdog
-        timeoutHandler.postDelayed(timeoutRunnable, TEST_TIMEOUT_MS);
-
-        fusedLocationClient.requestLocationUpdates(locationRequest,
-                locationCallback, Looper.getMainLooper());
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        mainHandler.postDelayed(samplingRunnable, intervalMs);
+        resetWatchdog();
     }
 
-    private final Runnable timeoutRunnable = () -> {
-        if (!isFinished) {
-            Log.e("LocationTestActivity",
-                    "Test Timed Out - No location updates received for " + TEST_TIMEOUT_MS + "ms.");
-            try {
-                if (csvWriter != null) {
-                    com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
-                            "Location Test", 0, "Error: Timeout (No GPS Signal)", false);
-                    com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
-                            sampleCount, tr, System.currentTimeMillis(), 0,
-                            System.currentTimeMillis() - suiteStartTime);
-                    csvWriter.write(entry);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            finishBatch();
-        }
-    };
-
-    private void stopLocationUpdates() {
-        timeoutHandler.removeCallbacksAndMessages(null);
-        samplingHandler.removeCallbacksAndMessages(null); // Stop sampling
-
-        if (fusedLocationClient != null && locationCallback != null) {
-            fusedLocationClient.removeLocationUpdates(locationCallback);
-        }
-    }
-
-    private void finishBatch() {
-        if (isFinished)
-            return;
-        isFinished = true;
-
-        timeoutHandler.removeCallbacksAndMessages(null);
-        samplingHandler.removeCallbacksAndMessages(null);
-
-        stopLocationUpdates();
-
-        long totalTime = System.currentTimeMillis() - suiteStartTime;
+    private void performSample() {
         try {
+            long now = System.currentTimeMillis();
+            TestEntry entry = createTestEntry(now);
+            
             if (csvWriter != null) {
-                csvWriter.flush();
-                csvWriter.close();
+                csvWriter.write(entry);
+            }
+
+            sampleCount++;
+            
+            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= targetSamples) {
+                updateUI();
+            }
+
+            if (sampleCount >= targetSamples) {
+                finishBenchmark();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error during sampling", e);
         }
+    }
 
-        TestResult result = new TestResult("Location Test", totalTime, "Batch completed: " + sampleCount,
-                sampleCount > 0);
+    private TestEntry createTestEntry(long timestamp) {
+        String details = (lastKnownLocation != null) 
+                ? String.format(Locale.US, "Lat:%.6f,Lon:%.6f,Acc:%.1f", 
+                    lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), lastKnownLocation.getAccuracy())
+                : "No Signal";
+        
+        TestResult result = new TestResult("Location Test", 0, details, lastKnownLocation != null);
+        return new TestEntry(sampleCount, result, timestamp, 0, timestamp - suiteStartTime);
+    }
+
+    private void updateUI() {
+        runOnUiThread(() -> {
+            if (statusText != null) {
+                statusText.setText(String.format(Locale.US, "Progress: %d / %d", sampleCount, targetSamples));
+            }
+            if (progressBar != null) {
+                progressBar.setProgress(sampleCount);
+            }
+            if (metricsText != null && metricsCollector != null) {
+                metricsText.setText(String.format(Locale.US, "CPU: %.1f%% | RAM: %.1f MB", 
+                        metricsCollector.getLastCpuUsage(), metricsCollector.getLastMemoryUsage()));
+            }
+        });
+        
+        if (metricsCollector != null) {
+            metricsCollector.setCurrentTest("Location", sampleCount);
+        }
+    }
+
+    private void logErrorToCsv(String errorMessage) {
+        if (csvWriter != null) {
+            long now = System.currentTimeMillis();
+            TestResult tr = new TestResult("Location Test", 0, errorMessage, false);
+            csvWriter.write(new TestEntry(sampleCount, tr, now, 0, now - suiteStartTime));
+        }
+    }
+
+    private void resetWatchdog() {
+        watchdogHandler.removeCallbacks(watchdogRunnable);
+        watchdogHandler.postDelayed(watchdogRunnable, WATCHDOG_TIMEOUT_MS);
+    }
+
+    private void finishBenchmark() {
+        if (isFinished) return;
+        isFinished = true;
+
+        cleanup();
+
+        long totalTime = System.currentTimeMillis() - suiteStartTime;
+        TestResult result = new TestResult("Location Test", totalTime, 
+                "Completed " + sampleCount + " samples", sampleCount > 0);
+        
         Intent intent = new Intent();
         intent.putExtra(BenchmarkApplication.RESULT, result);
         setResult(RESULT_OK, intent);
         finish();
     }
 
+    private void cleanup() {
+        watchdogHandler.removeCallbacksAndMessages(null);
+        mainHandler.removeCallbacksAndMessages(null);
+
+        if (fusedLocationClient != null && locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+
+        if (metricsCollector != null) {
+            metricsCollector.stop();
+        }
+
+        if (csvWriter != null) {
+            csvWriter.close();
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
-        if (!isFinished) {
-            stopLocationUpdates();
-            finish(); // Kill if paused mid-test
+        if (!isFinished && !isChangingConfigurations()) {
+            finishBenchmark();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        cleanup();
+        super.onDestroy();
     }
 }
