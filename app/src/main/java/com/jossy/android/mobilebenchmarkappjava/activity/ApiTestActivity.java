@@ -24,10 +24,8 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class ApiTestActivity extends AppCompatActivity {
     private TextView statusTextView;
-    private long startTime;
-
     private int requestCount = 0;
-    private int targetSamples = 0;
+    private final int TARGET_SAMPLES = 10000;
     private long suiteStartTime;
     private String csvPath;
     private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
@@ -39,11 +37,9 @@ public class ApiTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_api_test);
         statusTextView = findViewById(R.id.apiStatus);
-
-        targetSamples = getIntent().getIntExtra("iterations", 10);
         csvPath = getIntent().getStringExtra("csv_path");
 
-        Log.i("ApiTestActivity", "Starting API Batch: " + targetSamples);
+        Log.i("ApiTestActivity", "Starting API Batch: " + TARGET_SAMPLES);
         statusTextView.setText("Initializing API Batch...");
 
         setupRetrofit();
@@ -84,7 +80,7 @@ public class ApiTestActivity extends AppCompatActivity {
     }
 
     private void makeApiRequest() {
-        if (requestCount >= targetSamples) {
+        if (requestCount >= TARGET_SAMPLES) {
             finishBatch();
             return;
         }
@@ -123,7 +119,7 @@ public class ApiTestActivity extends AppCompatActivity {
 
         requestCount++;
 
-        runOnUiThread(() -> statusTextView.setText("API Test: " + requestCount + " / " + targetSamples));
+        runOnUiThread(() -> statusTextView.setText("API Test: " + requestCount + " / " + TARGET_SAMPLES));
 
         // Recursive call
         makeApiRequest();

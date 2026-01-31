@@ -1,6 +1,5 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
@@ -12,7 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -46,7 +44,7 @@ public class LocationTestActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private int sampleCount = 0;
-    private int targetSamples = 0;
+    private final int TARGET_SAMPLES = 10000;
     private long intervalMs = 1000L;
     private String csvPath;
     
@@ -69,7 +67,7 @@ public class LocationTestActivity extends AppCompatActivity {
     private final Runnable watchdogRunnable = () -> {
         if (!isFinished) {
             Log.e(TAG, "Watchdog: No location updates received for " + WATCHDOG_TIMEOUT_MS + "ms");
-            logErrorToCsv("Error: Watchdog Timeout (No GPS Signal)");
+            logErrorToCsv();
             finishBenchmark();
         }
     };
@@ -96,11 +94,10 @@ public class LocationTestActivity extends AppCompatActivity {
     }
 
     private void parseIntent() {
-        targetSamples = getIntent().getIntExtra("iterations", 100);
         intervalMs = getIntent().getIntExtra("interval", 1000);
         csvPath = getIntent().getStringExtra("csv_path");
         if (progressBar != null) {
-            progressBar.setMax(targetSamples);
+            progressBar.setMax(TARGET_SAMPLES);
         }
     }
 
@@ -143,7 +140,7 @@ public class LocationTestActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void startBenchmark() {
-        Log.i(TAG, "Starting Benchmark: " + targetSamples + " samples @ " + intervalMs + "ms");
+        Log.i(TAG, "Starting Benchmark: " + TARGET_SAMPLES + " samples @ " + intervalMs + "ms");
         
         LocationRequest locationRequest = new LocationRequest.Builder(1000)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
@@ -166,11 +163,11 @@ public class LocationTestActivity extends AppCompatActivity {
 
             sampleCount++;
             
-            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= targetSamples) {
+            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= TARGET_SAMPLES) {
                 updateUI();
             }
 
-            if (sampleCount >= targetSamples) {
+            if (sampleCount >= TARGET_SAMPLES) {
                 finishBenchmark();
             }
         } catch (Exception e) {
@@ -191,7 +188,7 @@ public class LocationTestActivity extends AppCompatActivity {
     private void updateUI() {
         runOnUiThread(() -> {
             if (statusText != null) {
-                statusText.setText(String.format(Locale.US, "Progress: %d / %d", sampleCount, targetSamples));
+                statusText.setText(String.format(Locale.US, "Progress: %d / %d", sampleCount, TARGET_SAMPLES));
             }
             if (progressBar != null) {
                 progressBar.setProgress(sampleCount);
@@ -207,10 +204,10 @@ public class LocationTestActivity extends AppCompatActivity {
         }
     }
 
-    private void logErrorToCsv(String errorMessage) {
+    private void logErrorToCsv() {
         if (csvWriter != null) {
             long now = System.currentTimeMillis();
-            TestResult tr = new TestResult("Location Test", 0, errorMessage, false);
+            TestResult tr = new TestResult("Location Test", 0, "Error: Watchdog Timeout (No GPS Signal)", false);
             csvWriter.write(new TestEntry(sampleCount, tr, now, 0, now - suiteStartTime));
         }
     }
