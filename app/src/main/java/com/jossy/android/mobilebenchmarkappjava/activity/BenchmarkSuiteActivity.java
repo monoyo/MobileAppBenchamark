@@ -21,7 +21,6 @@ import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.config.SampleConfiguration;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
-import com.jossy.android.mobilebenchmarkappjava.metrics.SystemMetricsCollector;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,9 +71,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     // Statistics
     private int totalSamplesCollected = 0;
     private int errorsEncountered = 0;
-
-    // System Metrics Collector - zbiera CPU, RAM, GPU, FPS do osobnego CSV
-    private SystemMetricsCollector metricsCollector;
 
     private long appStartTime = System.currentTimeMillis();
 
@@ -141,13 +137,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
                 throw new IOException("Cannot restore output directory: " + outputDir.getAbsolutePath());
             }
         }
-
-        if (metricsCollector != null) {
-            metricsCollector.stop();
-        }
-        metricsCollector = new SystemMetricsCollector(this, outputDir, sessionTimestamp,
-                selectedConfig.samplingIntervalMs);
-        metricsCollector.start();
 
         Log.i(TAG, "Session restored: " + outputDir.getAbsolutePath());
     }
@@ -219,11 +208,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         if (!outputDir.exists() && !outputDir.mkdirs()) {
             throw new IOException("Cannot create output directory: " + outputDir.getAbsolutePath());
         }
-
-        // Initialize system metrics collector
-        metricsCollector = new SystemMetricsCollector(this, outputDir, sessionTimestamp,
-                selectedConfig.samplingIntervalMs);
-        metricsCollector.start();
 
         Log.i(TAG, "Session initialized: " + outputDir.getAbsolutePath());
     }
@@ -335,11 +319,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         startTestsButton.setText("Start Tests");
         startTestsButton.setEnabled(true);
 
-        // Zatrzymaj kolektor metryk systemowych
-        if (metricsCollector != null) {
-            metricsCollector.stop();
-        }
-
         long totalTime = System.currentTimeMillis() - testSuiteStartTime;
         String summary = String.format(Locale.US,
                 "All tests completed!\n" +
@@ -437,9 +416,5 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Check if metrics collector needs to be stopped
-        if (metricsCollector != null) {
-            metricsCollector.stop();
-        }
     }
 }

@@ -74,7 +74,7 @@ public class RAMTestActivity extends AppCompatActivity {
     }
 
     private void runBenchmarkLoop(BufferedCsvWriter writer, int runsPerSample, long suiteStart) {
-        for (int i = 0; i < TARGET_SAMPLES; i++) {
+for (int i = 0; i < TARGET_SAMPLES; i++) {
             long start = System.currentTimeMillis();
             RAMTest.runBenchmark(runsPerSample);
             long duration = System.currentTimeMillis() - start;

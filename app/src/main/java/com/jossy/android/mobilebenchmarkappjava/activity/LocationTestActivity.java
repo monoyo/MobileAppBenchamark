@@ -24,7 +24,6 @@ import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
-import com.jossy.android.mobilebenchmarkappjava.metrics.SystemMetricsCollector;
 
 import java.io.File;
 import java.util.Locale;
@@ -36,7 +35,6 @@ public class LocationTestActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-    private SystemMetricsCollector metricsCollector;
     private BufferedCsvWriter csvWriter;
 
     private TextView statusText;
@@ -49,6 +47,7 @@ public class LocationTestActivity extends AppCompatActivity {
     private String csvPath;
     
     private long suiteStartTime;
+    private long lastSampleTime;
     private boolean isFinished = false;
     private Location lastKnownLocation;
 
@@ -80,7 +79,6 @@ public class LocationTestActivity extends AppCompatActivity {
 
         initViews();
         parseIntent();
-        initMetrics();
         initCsv();
         initLocationClient();
         
@@ -101,18 +99,9 @@ public class LocationTestActivity extends AppCompatActivity {
         }
     }
 
-    private void initMetrics() {
-        File outputDir = getExternalFilesDir(null);
-        metricsCollector = new SystemMetricsCollector(this, outputDir, "location_test_" + System.currentTimeMillis(), 500);
-        try {
-            metricsCollector.start();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to start metrics collector", e);
-        }
-    }
-
     private void initCsv() {
         suiteStartTime = System.currentTimeMillis();
+        lastSampleTime = suiteStartTime;
         String path = csvPath != null ? csvPath : getFilesDir() + "/location_benchmark_" + suiteStartTime + ".csv";
         try {
             // Buffer capacity 500 for high volume
@@ -176,13 +165,16 @@ public class LocationTestActivity extends AppCompatActivity {
     }
 
     private TestEntry createTestEntry(long timestamp) {
+        long duration = timestamp - lastSampleTime;
+        lastSampleTime = timestamp;
+
         String details = (lastKnownLocation != null) 
                 ? String.format(Locale.US, "Lat:%.6f,Lon:%.6f,Acc:%.1f", 
                     lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), lastKnownLocation.getAccuracy())
                 : "No Signal";
         
-        TestResult result = new TestResult("Location Test", 0, details, lastKnownLocation != null);
-        return new TestEntry(sampleCount, result, timestamp, 0, timestamp - suiteStartTime);
+        TestResult result = new TestResult("Location Test", duration, details, lastKnownLocation != null);
+        return new TestEntry(sampleCount, result, timestamp, duration, timestamp - suiteStartTime);
     }
 
     private void updateUI() {
@@ -193,22 +185,20 @@ public class LocationTestActivity extends AppCompatActivity {
             if (progressBar != null) {
                 progressBar.setProgress(sampleCount);
             }
-            if (metricsText != null && metricsCollector != null) {
-                metricsText.setText(String.format(Locale.US, "CPU: %.1f%% | RAM: %.1f MB", 
-                        metricsCollector.getLastCpuUsage(), metricsCollector.getLastMemoryUsage()));
+            if (metricsText != null) {
+                metricsText.setText("System metrics disabled");
             }
         });
-        
-        if (metricsCollector != null) {
-            metricsCollector.setCurrentTest("Location", sampleCount);
-        }
     }
 
     private void logErrorToCsv() {
         if (csvWriter != null) {
             long now = System.currentTimeMillis();
-            TestResult tr = new TestResult("Location Test", 0, "Error: Watchdog Timeout (No GPS Signal)", false);
-            csvWriter.write(new TestEntry(sampleCount, tr, now, 0, now - suiteStartTime));
+            long duration = now - lastSampleTime;
+            lastSampleTime = now;
+            
+            TestResult tr = new TestResult("Location Test", duration, "Error: Watchdog Timeout (No GPS Signal)", false);
+            csvWriter.write(new TestEntry(sampleCount, tr, now, duration, now - suiteStartTime));
         }
     }
 
@@ -239,10 +229,6 @@ public class LocationTestActivity extends AppCompatActivity {
 
         if (fusedLocationClient != null && locationCallback != null) {
             fusedLocationClient.removeLocationUpdates(locationCallback);
-        }
-
-        if (metricsCollector != null) {
-            metricsCollector.stop();
         }
 
         if (csvWriter != null) {
