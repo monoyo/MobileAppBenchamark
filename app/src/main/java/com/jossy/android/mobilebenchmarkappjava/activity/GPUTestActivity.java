@@ -30,8 +30,8 @@ import java.util.Random;
 public class GPUTestActivity extends AppCompatActivity implements Choreographer.FrameCallback {
 
     private static final String TAG = "StressTestActivity";
-    private static final int INITIAL_OBJECT_COUNT = 1000;
-    private static final int START_OBJECTS = 1000;
+    private static final int INITIAL_OBJECT_COUNT = 250;
+    private static final int OBJECT_INCREMENT_PER_SECOND = 250;
     private static final int TARGET_SAMPLES = 10000;
     private static final float OBJECT_SIZE = 50f;
 
@@ -64,7 +64,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
         super.onCreate(savedInstanceState);
 
         initUI();
-        initObjects(START_OBJECTS);
+        initObjects(INITIAL_OBJECT_COUNT);
         setupCsv();
 
         container.post(() -> {
@@ -188,7 +188,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
     private void manageObjectCount(long elapsedMs) {
         int secondsElapsed = (int) (elapsedMs / 1000);
-        int desiredObjects = 1000 + (secondsElapsed * 1000);
+        int desiredObjects = INITIAL_OBJECT_COUNT + (secondsElapsed * OBJECT_INCREMENT_PER_SECOND);
 
         if (desiredObjects > currentObjectCount) {
             addObjects(desiredObjects - currentObjectCount);

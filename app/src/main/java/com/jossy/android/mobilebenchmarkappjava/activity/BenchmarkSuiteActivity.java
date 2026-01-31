@@ -8,12 +8,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,19 +20,14 @@ import androidx.core.content.ContextCompat;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.config.SampleConfiguration;
-import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
-import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
 import com.jossy.android.mobilebenchmarkappjava.metrics.SystemMetricsCollector;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Deque;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * Aktywność orkiestrująca wykonanie suite'a testów wydajnościowych.
@@ -55,7 +46,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 123;
     private static final int ALL_TESTS = 6;
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
-    private static final int UI_DISPLAY_BUFFER_SIZE = 100; // Max entries shown in UI
 
     // UI Components
     private TextView currentTestInfo;
@@ -63,10 +53,9 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     private ProgressBar testProgress;
     private Button startTestsButton;
     private Button exportResultsButton;
-    private Spinner sampleConfigSpinner;
 
-    // Configuration
-    private SampleConfiguration selectedConfig = SampleConfiguration.SMALL;
+    // Configuration - Fixed to LARGE (10,000 samples)
+    private SampleConfiguration selectedConfig = SampleConfiguration.LARGE;
 
     // Test State
     private int currentIteration = 0;
@@ -95,7 +84,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_benchmark_suite);
 
         initViews();
-        setupSampleConfigSpinner();
         setupButtons();
 
         if (savedInstanceState != null) {
@@ -104,7 +92,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
         long launchTime = System.currentTimeMillis() - appStartTime;
         currentTestInfo.setText(String.format(Locale.US,
-                "App Launched in: %dms\nReady to start tests. Select sample count.", launchTime));
+                "App Launched in: %dms\nReady to start tests.", launchTime));
 
         Log.d(TAG, "onCreate completed, UI initialized");
     }
@@ -118,7 +106,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         outState.putInt("totalSamplesCollected", totalSamplesCollected);
         outState.putInt("errorsEncountered", errorsEncountered);
         outState.putString("sessionTimestamp", sessionTimestamp);
-        outState.putSerializable("selectedConfig", selectedConfig);
         Log.i(TAG, "State saved");
     }
 
@@ -129,7 +116,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         totalSamplesCollected = savedState.getInt("totalSamplesCollected");
         errorsEncountered = savedState.getInt("errorsEncountered");
         sessionTimestamp = savedState.getString("sessionTimestamp");
-        selectedConfig = (SampleConfiguration) savedState.getSerializable("selectedConfig");
 
         if (isRunning && sessionTimestamp != null) {
             try {
@@ -172,30 +158,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         testProgress = findViewById(R.id.testProgress);
         startTestsButton = findViewById(R.id.startTestsButton);
         exportResultsButton = findViewById(R.id.exportResultsButton);
-        sampleConfigSpinner = findViewById(R.id.sampleConfigSpinner);
-    }
-
-    private void setupSampleConfigSpinner() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                SampleConfiguration.getDisplayNames());
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        sampleConfigSpinner.setAdapter(adapter);
-
-        sampleConfigSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedConfig = SampleConfiguration.fromIndex(position);
-                updateProgressMax();
-                Log.i(TAG, "Selected configuration: " + selectedConfig.displayName);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                selectedConfig = SampleConfiguration.SMALL;
-            }
-        });
     }
 
     private void setupButtons() {
@@ -237,7 +199,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         testResults.setText("");
         startTestsButton.setText("Uruchamianie...");
         startTestsButton.setEnabled(false);
-        sampleConfigSpinner.setEnabled(false);
         updateProgressMax();
 
         Log.i(TAG, "Starting test suite: " + selectedConfig.displayName +
@@ -373,7 +334,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         isRunning = false;
         startTestsButton.setText("Start Tests");
         startTestsButton.setEnabled(true);
-        sampleConfigSpinner.setEnabled(true);
 
         // Zatrzymaj kolektor metryk systemowych
         if (metricsCollector != null) {
@@ -398,8 +358,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     public void onTestStarted(String testName) {
         Log.i(BENCHMARK_TAG, "TEST_START:" + testName);
-        String info = String.format(Locale.US, "Running: %s\nConfiguration: %s",
-                testName, selectedConfig.displayName);
+        String info = String.format(Locale.US, "Running: %s", testName);
         currentTestInfo.setText(info);
     }
 
