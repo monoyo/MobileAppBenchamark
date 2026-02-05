@@ -1,21 +1,28 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Kotlin Serialization
+-keepattributes *Annotation*
+-keepclassmembers class ** {
+    @org.jetbrains.kotlinx.serialization.Serializable *;
+}
+-keepclassmembers class **$serializer {
+    public static ** INSTANCE;
+}
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Ktor
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class io.ktor.** { *; }
+-dontwarn java.lang.management.**
+-dontwarn kotlinx.coroutines.debug.DebugProbesImpl
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# SLF4J
+-dontwarn org.slf4j.impl.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Coil
+-keep class coil.** { *; }
+
+# AndroidX Lifecycle (for LiveData/ViewModel if used)
+-keep class androidx.lifecycle.** { *; }
+
+# Keep model classes used in benchmarks to prevent stripping
+-keep class com.jossy.android.mobilebenchmarkappkotlin.model.** { *; }
+-keep class com.jossy.android.mobilebenchmarkappjava.data.** { *; }

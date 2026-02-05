@@ -52,7 +52,6 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     private lateinit var testProgress: ProgressBar
     private lateinit var startTestsButton: Button
     private lateinit var exportResultsButton: Button
-    private lateinit var sampleConfigSpinner: Spinner
 
     // Configuration
     private var selectedConfig = SampleConfiguration.SMALL
@@ -85,7 +84,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         setContentView(R.layout.activity_benchmark_suite)
 
         initViews()
-        setupSampleConfigSpinner()
+        updateProgressMax()
 
         val launchTime = System.currentTimeMillis() - appStartTime
         currentTestInfo.text = "App Launched in: ${launchTime}ms\nReady to start tests."
@@ -97,7 +96,6 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         testProgress = findViewById(R.id.testProgress)
         startTestsButton = findViewById(R.id.startTestsButton)
         exportResultsButton = findViewById(R.id.exportResultsButton)
-        sampleConfigSpinner = findViewById(R.id.sampleConfigSpinner)
 
         startTestsButton.setOnClickListener {
             if (!isRunning) startTestSuite()
@@ -105,23 +103,6 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
         exportResultsButton.setOnClickListener { 
             Toast.makeText(this, "Results are saved automatically during tests", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun setupSampleConfigSpinner() {
-        val configNames = SampleConfiguration.entries.map { it.displayName }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, configNames)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        sampleConfigSpinner.adapter = adapter
-
-        sampleConfigSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedConfig = SampleConfiguration.fromOrdinal(position)
-                updateProgressMax()
-                Log.i(TAG, "Selected config: ${selectedConfig.displayName}")
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
@@ -143,7 +124,6 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
                 startTestsButton.text = "Running..."
                 startTestsButton.isEnabled = false
-                sampleConfigSpinner.isEnabled = false
                 testResults.text = ""
 
                 runNextTest()
@@ -172,20 +152,12 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         metricsCollector = SystemMetricsCollector(this, outputDir!!, sessionTimestamp)
         metricsCollector?.start()
 
-        // Initialize writers for each test
+        // Initialize writers for each test - DELEGATED TO ACTIVITIES
+        // We only prepare the directory here
+        
+        // uiDisplayBuffers for simple summary if needed
         for (i in 0 until ALL_TESTS) {
             val testName = getTestName(i)
-            val safeName = testName.lowercase(Locale.US).replace(" ", "_")
-            val csvFile = File(outputDir, "$safeName.csv")
-
-            val writer = BufferedCsvWriter(
-                csvFile,
-                selectedConfig.bufferSize,
-                selectedConfig.optimalWriteBufferBytes
-            )
-            writer.initialize()
-            csvWriters[testName] = writer
-
             uiDisplayBuffers[testName] = ArrayDeque(UI_DISPLAY_BUFFER_SIZE)
         }
 
@@ -194,27 +166,16 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
     private fun runNextTest() {
         if (currentTestIndex < ALL_TESTS) {
-            if (currentIteration < selectedConfig.sampleCount) {
-                val testName = getTestName(currentTestIndex)
-                currentIterationStartTime = System.currentTimeMillis()
-                onTestStarted(testName)
-                startSpecificTest(currentTestIndex)
-            } else {
-                currentTestIndex++
-                currentIteration = 0
-                if (currentTestIndex < ALL_TESTS) {
-                    runNextTest()
-                } else {
-                    onAllTestsCompleted()
-                }
-            }
+            val testName = getTestName(currentTestIndex)
+            onTestStarted(testName)
+            startSpecificTest(currentTestIndex)
         } else {
             onAllTestsCompleted()
         }
     }
 
     private fun getTestName(index: Int): String = when (index) {
-        0 -> "UI Test"
+        0 -> "UI Stress Test"
         1 -> "CPU Test"
         2 -> "RAM Test"
         3 -> "Image Loading Test"
@@ -224,66 +185,67 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun startSpecificTest(index: Int) {
+        // Ensure output dir exists
+        if (outputDir == null) {
+            val baseDir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            outputDir = File(baseDir, "benchmarks/$sessionTimestamp").apply { mkdirs() }
+        }
+
+        val testName = getTestName(index)
+        val safeName = testName.lowercase(Locale.US).replace(" ", "_")
+        val csvPath = File(outputDir, "$safeName.csv").absolutePath
+
         val intent = when (index) {
             0 -> Intent(this, UITestActivity::class.java)
-            1 -> Intent(this, CPUTestActivity::class.java).apply {
-                putExtra("cpu_iterations", selectedConfig.cpuIterationsPerThread)
-            }
+            1 -> Intent(this, CPUTestActivity::class.java)
             2 -> Intent(this, RAMTestActivity::class.java)
             3 -> Intent(this, ImageLoadingActivity::class.java)
             4 -> Intent(this, ApiTestActivity::class.java)
             5 -> Intent(this, LocationTestActivity::class.java)
             else -> return
         }
+        
+        // Pass configuration to the test activity
+        intent.putExtra("sample_count", selectedConfig.sampleCount)
+        intent.putExtra("output_file", csvPath)
+        intent.putExtra("session_id", sessionTimestamp)
+        
+        // Specific extras
+        if (index == 1) { // CPU Test
+            intent.putExtra("cpu_iterations", selectedConfig.cpuIterationsPerThread)
+        }
+
         intent.putExtra("auto_mode", true)
-        intent.putExtra("callback_activity", BenchmarkSuiteActivity::class.java.name)
         startActivityForResult(intent, TEST_ACTIVITY_REQUEST_CODE)
     }
 
     private fun onTestCompleted(result: TestResult) {
         try {
             val iterationEndTime = System.currentTimeMillis()
-            val intervalDuration = iterationEndTime - currentIterationStartTime
             val cumulativeTime = iterationEndTime - testSuiteStartTime
 
-            val entry = TestEntry(
-                iteration = currentIteration,
+            // Log completion
+            Log.i(BENCHMARK_TAG, "TEST_END:${result.testName} Duration:${result.executionTime}ms")
+
+            // Update UI with summary
+            val summaryEntry = TestEntry(
+                iteration = totalSamplesCollected, 
                 result = result,
                 intervalStartMs = currentIterationStartTime,
-                intervalDurationMs = intervalDuration,
+                intervalDurationMs = result.executionTime,
                 cumulativeTimeMs = cumulativeTime
             )
+            
+            uiDisplayBuffers[result.testName]?.add(summaryEntry)
 
-            // Write to buffered CSV
-            csvWriters[result.testName]?.write(
-                iteration = currentIteration,
-                executionTimeMs = result.executionTime,
-                details = result.details,
-                intervalStartMs = currentIterationStartTime,
-                intervalDurationMs = intervalDuration,
-                cumulativeTimeMs = cumulativeTime
-            )
-
-            // Update UI display buffer (ring buffer)
-            uiDisplayBuffers[result.testName]?.let { buffer ->
-                if (buffer.size >= UI_DISPLAY_BUFFER_SIZE) {
-                    buffer.removeFirst()
-                }
-                buffer.addLast(entry)
-            }
-
-            totalSamplesCollected++
-            currentIteration++
+            totalSamplesCollected += selectedConfig.sampleCount // Approximate
+            currentTestIndex++
             updateProgress()
             updateCsvDisplay()
-
-            // Log end marker
-            Log.i(BENCHMARK_TAG, "TEST_END:${result.testName}")
 
         } catch (e: Exception) {
             errorsEncountered++
             Log.e(TAG, "Error processing result: ${e.message}", e)
-            saveAllCheckpoints()
         }
 
         // Continue with next test
@@ -294,7 +256,6 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         isRunning = false
         startTestsButton.text = "Start Tests"
         startTestsButton.isEnabled = true
-        sampleConfigSpinner.isEnabled = true
 
         closeWriters()
         metricsCollector?.stop()
@@ -321,11 +282,8 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
         // Log markers
         Log.i(BENCHMARK_TAG, "TEST_START:$testName")
-        Log.i(BENCHMARK_TAG, "ITERATION:$currentIteration")
-
         currentTestInfo.text = "Running: $testName\n" +
-                "Iteration ${currentIteration + 1}/${selectedConfig.sampleCount}\n" +
-                "Total collected: $totalSamplesCollected"
+                "Target samples: ${selectedConfig.sampleCount}\n"
     }
 
     private fun updateProgress() {

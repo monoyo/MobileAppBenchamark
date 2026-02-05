@@ -3,23 +3,28 @@ package com.jossy.android.mobilebenchmarkappkotlin.activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import coil.load
+import androidx.lifecycle.lifecycleScope
+import coil.imageLoader
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.R
+import com.jossy.android.mobilebenchmarkappkotlin.io.BufferedCsvWriter
 import com.jossy.android.mobilebenchmarkappkotlin.model.TestResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class ImageLoadingActivity : AppCompatActivity() {
-    private lateinit var loadingStatus: TextView
-    private lateinit var recyclerView: RecyclerView
-    private var startTime: Long = 0
 
+    private lateinit var statusText: TextView
+    private var sampleCount: Int = 10000
+    private var outputFile: String? = null
+    private var csvWriter: BufferedCsvWriter? = null
+    
     companion object {
         private val IMAGE_URLS = listOf(
             "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
@@ -31,71 +36,88 @@ class ImageLoadingActivity : AppCompatActivity() {
             "https://fastly.picsum.photos/id/163/300/200.jpg?hmac=fHGMH6DT42ra3SOzs6JtojmYZ7jECNcq5xn1Ap9OPNA",
             "https://fastly.picsum.photos/id/54/300/200.jpg?hmac=7Cm5bybfBDMHwUF7AvEbAKWA7l5WnE9MZvcZhPpULTc",
             "https://fastly.picsum.photos/id/992/300/200.jpg?hmac=w137wSlXMe7QugWkdz2qvxFlif1dwEWqNnv4qFIyWps",
-            "https://fastly.picsum.photos/id/764/300/200.jpg?hmac=1sBuxBDUdVzEEnIKB5S4cXJ_sQ5Tp3ZSnjrHOWF_E20",
+            "https://fastly.picsum.photos/id/764/300/200.jpg?hmac=1sBuxBDUdVzEEnIKB5S4cXJ_sQ5Tp3ZSnjrHOWF_E20"
         )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("ImageLoadingActivity", "onCreate called")
         setContentView(R.layout.activity_image_loading)
+        
+        statusText = findViewById(R.id.loadingStatus)
 
-        loadingStatus = findViewById(R.id.loadingStatus)
-        recyclerView = findViewById(R.id.imageRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = ImageAdapter()
-        recyclerView.adapter = adapter
-        Log.d("ImageLoadingActivity", "RecyclerView initialized")
-        loadingStatus.text = "Loading images..."
-        startTime = System.currentTimeMillis()
+
+        sampleCount = intent.getIntExtra("sample_count", 10000)
+        outputFile = intent.getStringExtra("output_file")
+        
+        initializeWriter()
+        startTestLoop()
     }
 
-    private inner class ImageAdapter : RecyclerView.Adapter<ImageViewHolder>() {
-        private var processedImages = 0
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
-            val imageView = layoutInflater.inflate(R.layout.item_image, parent, false) as ImageView
-            return ImageViewHolder(imageView)
+    private fun initializeWriter() {
+        outputFile?.let { path ->
+            csvWriter = BufferedCsvWriter(File(path), 1000, 64 * 1024)
+            csvWriter?.initialize()
         }
+    }
 
-        override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-            val url = IMAGE_URLS[position]
-            holder.imageView.load(url) {
-                listener(
-                    onSuccess = { _: ImageRequest, _ ->
-                        processedImages++
-                        Log.d("ImageLoadingActivity", "Image loaded: $processedImages/${IMAGE_URLS.size}")
-                        checkIfDone()
-                        if (processedImages < IMAGE_URLS.size) {
-                            recyclerView.smoothScrollToPosition(processedImages)
-                        }
-                    },
-                    onError = { _: ImageRequest, _ ->
-                        processedImages++
-                        Log.w("ImageLoadingActivity", "Image failed: $url ($processedImages/${IMAGE_URLS.size})")
-                        checkIfDone()
-                        recyclerView.smoothScrollToPosition(maxOf(0, processedImages - 1))
-                    }
+    private fun startTestLoop() {
+        lifecycleScope.launch(Dispatchers.IO) { // Network on IO
+            val startTime = System.currentTimeMillis()
+            var totalDuration = 0L
+            val imageLoader = imageLoader
+
+            for (i in 0 until sampleCount) {
+                val url = IMAGE_URLS[i % IMAGE_URLS.size]
+                val loopStart = System.currentTimeMillis()
+
+                val request = ImageRequest.Builder(this@ImageLoadingActivity)
+                    .data(url)
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .diskCachePolicy(CachePolicy.DISABLED)
+                    .build()
+
+                try {
+                    val result = imageLoader.execute(request)
+                    // Wait for result
+                } catch (e: Exception) {
+                    Log.e("ImageTest", "Failed $i", e)
+                }
+                
+                val loopEnd = System.currentTimeMillis()
+                val duration = loopEnd - loopStart
+                totalDuration += duration
+
+                csvWriter?.write(
+                    iteration = i,
+                    executionTimeMs = duration,
+                    details = "url=$url",
+                    intervalStartMs = loopStart,
+                    intervalDurationMs = duration,
+                    cumulativeTimeMs = loopEnd - startTime
                 )
+                
+                if(i % 50 == 0) {
+                     withContext(Dispatchers.Main) {
+                         // Update UI
+                     }
+                }
             }
-        }
 
-        private fun checkIfDone() {
-            if (processedImages == IMAGE_URLS.size) {
-                val totalTime = System.currentTimeMillis() - startTime
-                Log.d("ImageLoadingActivity", "All images processed, finishing")
-                val result = TestResult("Image Loading Test", totalTime, "Image Loading Test Completed", true)
+            csvWriter?.close()
+
+            withContext(Dispatchers.Main) {
+                val result = TestResult(
+                    "Image Loading Test",
+                    System.currentTimeMillis() - startTime,
+                    "Completed $sampleCount loads",
+                    true
+                )
                 val intent = Intent()
                 intent.putExtra(BenchmarkApplication.RESULT, result)
                 setResult(RESULT_OK, intent)
                 finish()
             }
         }
-
-        override fun getItemCount(): Int = IMAGE_URLS.size
-    }
-
-    private class ImageViewHolder(itemView: ImageView) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView
     }
 }
