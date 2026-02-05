@@ -21,6 +21,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
@@ -42,7 +43,6 @@ public class LocationTestActivity extends AppCompatActivity {
     private ProgressBar progressBar;
 
     private int sampleCount = 0;
-    private final int TARGET_SAMPLES = 10000;
     private long intervalMs = 1000L;
     private String csvPath;
     
@@ -95,7 +95,7 @@ public class LocationTestActivity extends AppCompatActivity {
         intervalMs = getIntent().getIntExtra("interval", 1000);
         csvPath = getIntent().getStringExtra("csv_path");
         if (progressBar != null) {
-            progressBar.setMax(TARGET_SAMPLES);
+            progressBar.setMax(Config.samplesAmount);
         }
     }
 
@@ -129,7 +129,7 @@ public class LocationTestActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void startBenchmark() {
-        Log.i(TAG, "Starting Benchmark: " + TARGET_SAMPLES + " samples @ " + intervalMs + "ms");
+        Log.i(TAG, "Starting Benchmark: " + Config.samplesAmount + " samples @ " + intervalMs + "ms");
         
         LocationRequest locationRequest = new LocationRequest.Builder(1000)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
@@ -152,11 +152,11 @@ public class LocationTestActivity extends AppCompatActivity {
 
             sampleCount++;
             
-            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= TARGET_SAMPLES) {
+            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= Config.samplesAmount) {
                 updateUI();
             }
 
-            if (sampleCount >= TARGET_SAMPLES) {
+            if (sampleCount >= Config.samplesAmount) {
                 finishBenchmark();
             }
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class LocationTestActivity extends AppCompatActivity {
     private void updateUI() {
         runOnUiThread(() -> {
             if (statusText != null) {
-                statusText.setText(String.format(Locale.US, "Progress: %d / %d", sampleCount, TARGET_SAMPLES));
+                statusText.setText(String.format(Locale.US, "Progress: %d / %d", sampleCount, Config.samplesAmount));
             }
             if (progressBar != null) {
                 progressBar.setProgress(sampleCount);

@@ -21,6 +21,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
@@ -31,7 +32,6 @@ import java.util.List;
 
 public class ImageLoadingActivity extends AppCompatActivity {
     private static final String TAG = "ImageLoadingActivity";
-    private static final int CONSTANT_SAMPLES = 10000;
 
     private TextView loadingStatus;
 
@@ -69,12 +69,12 @@ public class ImageLoadingActivity extends AppCompatActivity {
         loadingStatus.setText(R.string.initializing_image_batch);
 
         progressLiveData.observe(this, currentIteration ->
-                loadingStatus.setText(getString(R.string.image_test_progress, currentIteration, CONSTANT_SAMPLES)));
+                loadingStatus.setText(getString(R.string.image_test_progress, currentIteration, Config.samplesAmount)));
     }
 
     private void parseIntentData() {
         csvPath = getIntent().getStringExtra("csv_path");
-        Log.i(TAG, "Starting Image Batch: " + CONSTANT_SAMPLES);
+        Log.i(TAG, "Starting Image Batch: " + Config.samplesAmount);
     }
 
     private void startBatchTest() {
@@ -99,7 +99,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
     }
 
     private void loadNextImage() {
-        if (loadedImagesCount >= CONSTANT_SAMPLES) {
+        if (loadedImagesCount >= Config.samplesAmount) {
             finishBatch();
             return;
         }

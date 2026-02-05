@@ -19,7 +19,7 @@ import androidx.core.content.ContextCompat;
 
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
-import com.jossy.android.mobilebenchmarkappjava.config.SampleConfiguration;
+import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 
 import java.io.File;
@@ -41,7 +41,7 @@ import java.util.Locale;
 public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private static final String TAG = "BenchmarkSuiteActivity";
-    private static final String BENCHMARK_TAG = "BENCHMARK"; // Tag dla synchronizacji z Pythonem
+    private static final String BENCHMARK_TAG = "BENCHMARK";
     private static final int PERMISSION_REQUEST_CODE = 123;
     private static final int ALL_TESTS = 6;
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
@@ -52,9 +52,6 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     private ProgressBar testProgress;
     private Button startTestsButton;
     private Button exportResultsButton;
-
-    // Configuration - Fixed to LARGE (10,000 samples)
-    private SampleConfiguration selectedConfig = SampleConfiguration.LARGE;
 
     // Test State
     private int currentIteration = 0;
@@ -160,7 +157,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     private void updateProgressMax() {
-        testProgress.setMax(selectedConfig.sampleCount * ALL_TESTS);
+        testProgress.setMax(Config.samplesAmount  * ALL_TESTS);
     }
 
     private void startTestSuite() {
@@ -190,8 +187,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         startTestsButton.setEnabled(false);
         updateProgressMax();
 
-        Log.i(TAG, "Starting test suite: " + selectedConfig.displayName +
-                " (" + selectedConfig.sampleCount + " samples per test)");
+        Log.i(TAG, "Starting test suite");
 
         runNextTest();
     }
@@ -277,7 +273,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
                 break;
             default:
                 intent = new Intent(this, LocationTestActivity.class);
-                intent.putExtra("interval", selectedConfig.samplingIntervalMs);
+                intent.putExtra("interval", Config.samplesAmount);
                 break;
         }
 
@@ -304,7 +300,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         Log.i(TAG, "Test " + result.getTestName() + " completed in " + duration + "ms");
 
         if (result.isSuccess()) {
-            totalSamplesCollected += selectedConfig.sampleCount;
+            totalSamplesCollected += Config.samplesAmount;
         }
 
         // Advance to next test
@@ -343,7 +339,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private void updateProgress() {
         // Simplified progress: just showing which test we are on
-        int progress = (currentTestIndex + 1) * selectedConfig.sampleCount;
+        int progress = (currentTestIndex + 1) * Config.samplesAmount;
         testProgress.setProgress(progress);
     }
 

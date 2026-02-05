@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.Post;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
@@ -25,7 +26,6 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class ApiTestActivity extends AppCompatActivity {
     private TextView statusTextView;
     private int requestCount = 0;
-    private final int TARGET_SAMPLES = 10000;
     private long suiteStartTime;
     private String csvPath;
     private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
@@ -39,7 +39,7 @@ public class ApiTestActivity extends AppCompatActivity {
         statusTextView = findViewById(R.id.apiStatus);
         csvPath = getIntent().getStringExtra("csv_path");
 
-        Log.i("ApiTestActivity", "Starting API Batch: " + TARGET_SAMPLES);
+        Log.i("ApiTestActivity", "Starting API Batch: " + Config.samplesAmount);
         statusTextView.setText("Initializing API Batch...");
 
         setupRetrofit();
@@ -80,7 +80,7 @@ public class ApiTestActivity extends AppCompatActivity {
     }
 
     private void makeApiRequest() {
-        if (requestCount >= TARGET_SAMPLES) {
+        if (requestCount >= Config.samplesAmount) {
             finishBatch();
             return;
         }
@@ -119,7 +119,7 @@ public class ApiTestActivity extends AppCompatActivity {
 
         requestCount++;
 
-        runOnUiThread(() -> statusTextView.setText("API Test: " + requestCount + " / " + TARGET_SAMPLES));
+        runOnUiThread(() -> statusTextView.setText("API Test: " + requestCount + " / " + Config.samplesAmount));
 
         // Recursive call
         makeApiRequest();

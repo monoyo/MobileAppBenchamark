@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.RAMTest;
+import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
@@ -20,7 +21,6 @@ import java.io.IOException;
 import java.util.concurrent.Executors;
 
 public class RAMTestActivity extends AppCompatActivity {
-    private static final int TARGET_SAMPLES = 10000;
 
     private static final String TAG = "RAMTestActivity";
     private TextView statusText;
@@ -34,7 +34,7 @@ public class RAMTestActivity extends AppCompatActivity {
         statusText = findViewById(R.id.cpuStatus);
 
         progressLiveData.observe(this, currentIteration ->
-                statusText.setText(getString(R.string.ram_test_progress, currentIteration, TARGET_SAMPLES)));
+                statusText.setText(getString(R.string.ram_test_progress, currentIteration, Config.samplesAmount)));
 
         Log.d(TAG, "Starting RAM test activity");
         startRAMTest();
@@ -44,7 +44,7 @@ public class RAMTestActivity extends AppCompatActivity {
         String csvPath = getIntent().getStringExtra("csv_path");
         int runsPerSample = calculateRunsPerSample();
 
-        Log.i(TAG, "Starting RAM Batch: samples=" + TARGET_SAMPLES + ", runs/sample=" + runsPerSample);
+        Log.i(TAG, "Starting RAM Batch: samples=" + Config.samplesAmount + ", runs/sample=" + runsPerSample);
         statusText.setText(R.string.initializing_ram_batch);
 
         Executors.newSingleThreadExecutor().execute(() ->
@@ -74,7 +74,7 @@ public class RAMTestActivity extends AppCompatActivity {
     }
 
     private void runBenchmarkLoop(BufferedCsvWriter writer, int runsPerSample, long suiteStart) {
-for (int i = 0; i < TARGET_SAMPLES; i++) {
+for (int i = 0; i < Config.samplesAmount; i++) {
             long start = System.currentTimeMillis();
             RAMTest.runBenchmark(runsPerSample);
             long duration = System.currentTimeMillis() - start;
@@ -93,7 +93,7 @@ for (int i = 0; i < TARGET_SAMPLES; i++) {
 
         runOnUiThread(() -> {
             TestResult result = new TestResult(
-                    "RAM Test", totalTime, "Batch completed: " + TARGET_SAMPLES + " samples", true);
+                    "RAM Test", totalTime, "Batch completed: " + Config.samplesAmount + " samples", true);
             returnResult(result);
         });
     }

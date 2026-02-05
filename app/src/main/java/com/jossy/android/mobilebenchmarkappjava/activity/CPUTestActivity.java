@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.CPUTest;
 import com.jossy.android.mobilebenchmarkappjava.R;
+import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.CpuResult;
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
@@ -23,7 +24,6 @@ import java.util.concurrent.Executors;
 public class CPUTestActivity extends AppCompatActivity {
 
     private static final String TAG = "CPUTestActivity";
-    private static final int CONSTANT_SAMPLES = 10000;
 
     private TextView statusText;
     private final MutableLiveData<Integer> progressLiveData = new MutableLiveData<>();
@@ -36,17 +36,16 @@ public class CPUTestActivity extends AppCompatActivity {
 
         statusText = findViewById(R.id.cpuStatus);
 
-        // Obserwowanie zmian w LiveData i aktualizacja UI
-        progressLiveData.observe(this, currentIteration -> statusText.setText("CPU Test: " + currentIteration + " / " + CONSTANT_SAMPLES));
+        progressLiveData.observe(this, currentIteration -> statusText.setText("CPU Test: " + currentIteration + " / " + Config.samplesAmount));
 
-        Log.d(TAG, "Starting CPU test activity with " + CONSTANT_SAMPLES + " samples");
+        Log.d(TAG, "Starting CPU test activity with " + Config.samplesAmount + " samples");
         startCPUTest();
     }
 
     private void startCPUTest() {
         String csvPath = getIntent().getStringExtra("csv_path");
 
-        Log.i(TAG, "Starting CPU Batch Test: samples=" + CONSTANT_SAMPLES);
+        Log.i(TAG, "Starting CPU Batch Test: samples=" + Config.samplesAmount);
 
         Executors.newSingleThreadExecutor().execute(() ->
                 runBenchmarkTask(csvPath)
@@ -66,7 +65,7 @@ public class CPUTestActivity extends AppCompatActivity {
     private void performBatchTest(String csvPath, long suiteStart) throws Exception {
         try (BufferedCsvWriter writer = new BufferedCsvWriter(new File(csvPath), 1000, 64 * 1024)) {
             writer.initialize();
-            for (int i = 0; i < CPUTestActivity.CONSTANT_SAMPLES; i++) {
+            for (int i = 0; i < Config.samplesAmount; i++) {
                 runSingleIteration(i, suiteStart, writer);
             }
             writer.flush();
@@ -75,7 +74,7 @@ public class CPUTestActivity extends AppCompatActivity {
 
     private void runSingleIteration(int index, long suiteStart, BufferedCsvWriter writer) {
         long start = System.currentTimeMillis();
-        CpuResult r = CPUTest.runBenchmarkIterations(1000000L, null);
+        CpuResult r = CPUTest.runBenchmarkIterations(Config.samplesAmount, null);
         long duration = System.currentTimeMillis() - start;
 
         TestResult tr = new TestResult("CPU Test", duration, "threads=" + r.threads, true);
@@ -89,7 +88,7 @@ public class CPUTestActivity extends AppCompatActivity {
         Log.i(TAG, "CPU Batch completed in " + totalTime + "ms");
         runOnUiThread(() -> {
             TestResult result = new TestResult("CPU Test", totalTime,
-                    "Batch completed: " + CPUTestActivity.CONSTANT_SAMPLES + " samples", true);
+                    "Batch completed: " + Config.samplesAmount + " samples", true);
             returnResult(result);
         });
     }

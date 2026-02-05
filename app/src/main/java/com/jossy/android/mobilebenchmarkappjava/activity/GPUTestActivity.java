@@ -13,6 +13,7 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.view.StressTestView;
 
@@ -32,7 +33,6 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
     private static final String TAG = "StressTestActivity";
     private static final int INITIAL_OBJECT_COUNT = 250;
     private static final int OBJECT_INCREMENT_PER_SECOND = 250;
-    private static final int TARGET_SAMPLES = 10000;
     private static final float OBJECT_SIZE = 50f;
 
     private StressTestView stressTestView;
@@ -168,7 +168,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
 
         frameCount++;
 
-        if (frameCount >= TARGET_SAMPLES) {
+        if (frameCount >= Config.samplesAmount) {
             finishTest(true);
         } else {
             Choreographer.getInstance().postFrameCallback(this);
@@ -198,7 +198,7 @@ public class GPUTestActivity extends AppCompatActivity implements Choreographer.
     private void updateUI(double fps, long elapsedMs) {
         stressTestView.setObjects(objects, colors);
         infoText.setText(String.format(Locale.US, "Samples: %d / %d\nObjects: %d\nFPS: %.1f",
-                frameCount, TARGET_SAMPLES, currentObjectCount, fps));
+                frameCount, Config.samplesAmount, currentObjectCount, fps));
     }
 
     private void updatePositions() {
