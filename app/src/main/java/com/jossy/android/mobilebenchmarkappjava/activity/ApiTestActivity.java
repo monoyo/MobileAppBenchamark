@@ -1,16 +1,12 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
-import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
+import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.consts.Config;
 import com.jossy.android.mobilebenchmarkappjava.data.Post;
-import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.service.ApiService;
 
@@ -23,32 +19,27 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-public class ApiTestActivity extends AppCompatActivity {
-    private TextView statusTextView;
-    private int requestCount = 0;
-    private long suiteStartTime;
-    private String csvPath;
-    private com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter csvWriter;
+public class ApiTestActivity extends BaseTestActivity {
+    private static final String TAG = "ApiTestActivity";
 
     private ApiService apiService;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void initializeActivity() {
         setContentView(R.layout.activity_api_test);
-        statusTextView = findViewById(R.id.apiStatus);
-        csvPath = getIntent().getStringExtra("csv_path");
-
-        Log.i("ApiTestActivity", "Starting API Batch: " + Config.samplesAmount);
-        statusTextView.setText("Initializing API Batch...");
-
+        statusText = findViewById(R.id.apiStatus);
         setupRetrofit();
+    }
+
+    @Override
+    protected void executeBenchmark() throws Exception {
+        initializeCsvWriter();
         startBatchTest();
     }
 
     private void setupRetrofit() {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE); // Disable logging logic for speed in batch
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
@@ -64,82 +55,80 @@ public class ApiTestActivity extends AppCompatActivity {
     }
 
     private void startBatchTest() {
-        suiteStartTime = System.currentTimeMillis();
-
-        try {
-            csvWriter = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(
-                    new java.io.File(csvPath != null ? csvPath : getFilesDir() + "/temp_api.csv"), 1000, 64 * 1024);
-            csvWriter.initialize();
-        } catch (Exception e) {
-            Log.e("ApiTestActivity", "Writer init failed", e);
-            finish();
-            return;
-        }
-
+        currentSampleIndex = 0;
         makeApiRequest();
     }
 
     private void makeApiRequest() {
-        if (requestCount >= Config.samplesAmount) {
+        if (currentSampleIndex >= Config.samplesAmount) {
             finishBatch();
             return;
         }
 
         long start = System.currentTimeMillis();
-        // Trigger generic GET request
-        apiService.getPosts().enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
-                boolean success = response.isSuccessful() && response.body() != null;
-                recordResult(start, success, success ? "Success" : "Error: " + response.code());
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
-                recordResult(start, false, "Failure: " + t.getMessage());
-            }
-        });
+        apiService.getPosts().enqueue(new ApiCallback(start, currentSampleIndex));
+        currentSampleIndex++;
     }
 
-    private void recordResult(long startTime, boolean success, String details) {
-        long duration = System.currentTimeMillis() - startTime;
+    private class ApiCallback implements Callback<List<Post>> {
+        private final long startTime;
+        private final int iteration;
 
-        try {
-            com.jossy.android.mobilebenchmarkappjava.data.TestResult tr = new com.jossy.android.mobilebenchmarkappjava.data.TestResult(
-                    "API Test", duration, details, success);
-            com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry = new com.jossy.android.mobilebenchmarkappjava.data.TestEntry(
-                    requestCount, tr, startTime, duration, System.currentTimeMillis() - suiteStartTime);
-
-            if (csvWriter != null)
-                csvWriter.write(entry);
-
-        } catch (Exception e) {
-            Log.e("ApiTestActivity", "Log failed", e);
+        ApiCallback(long startTime, int iteration) {
+            this.startTime = startTime;
+            this.iteration = iteration;
         }
 
-        requestCount++;
+        @Override
+        public void onResponse(@NonNull Call<List<Post>> call, @NonNull Response<List<Post>> response) {
+            boolean success = response.isSuccessful() && response.body() != null;
+            recordResult(success, success ? "Success" : "Error: " + response.code());
+        }
 
-        runOnUiThread(() -> statusTextView.setText("API Test: " + requestCount + " / " + Config.samplesAmount));
+        @Override
+        public void onFailure(@NonNull Call<List<Post>> call, @NonNull Throwable t) {
+            recordResult(false, "Failure: " + t.getMessage());
+        }
 
-        // Recursive call
-        makeApiRequest();
+        private void recordResult(boolean success, String details) {
+            long duration = System.currentTimeMillis() - startTime;
+
+            try {
+                TestResult result = new TestResult("API Test", duration, details, success);
+                logTestResult(iteration, result);
+                updateProgress(iteration + 1);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to record result: " + e.getMessage(), e);
+            }
+
+            makeApiRequest();
+        }
     }
 
     private void finishBatch() {
+        closeCsvWriter();
         long totalTime = System.currentTimeMillis() - suiteStartTime;
-        try {
-            if (csvWriter != null) {
-                csvWriter.flush();
-                csvWriter.close();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        TestResult result = new TestResult(
+            "API Test",
+            totalTime,
+            "Batch completed: " + currentSampleIndex,
+            true
+        );
+        runOnUiThread(() -> {
+            Intent intent = new Intent();
+            intent.putExtra(com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication.RESULT, result);
+            setResult(RESULT_OK, intent);
+            finish();
+        });
+    }
 
-        TestResult result = new TestResult("API Test", totalTime, "Batch completed: " + requestCount, true);
-        Intent intent = new Intent();
-        intent.putExtra(BenchmarkApplication.RESULT, result);
-        setResult(RESULT_OK, intent);
-        finish();
+    @Override
+    protected String getProgressDisplayText(int currentIteration) {
+        return "API Test: " + currentIteration + " / " + Config.samplesAmount;
+    }
+
+    @Override
+    protected String getTestName() {
+        return "API Test";
     }
 }

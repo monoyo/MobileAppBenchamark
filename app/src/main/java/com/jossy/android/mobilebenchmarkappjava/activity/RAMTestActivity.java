@@ -1,117 +1,61 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.MutableLiveData;
-
-import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication;
 import com.jossy.android.mobilebenchmarkappjava.R;
 import com.jossy.android.mobilebenchmarkappjava.RAMTest;
 import com.jossy.android.mobilebenchmarkappjava.consts.Config;
-import com.jossy.android.mobilebenchmarkappjava.data.TestEntry;
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
-import com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.Executors;
-
-public class RAMTestActivity extends AppCompatActivity {
+public class RAMTestActivity extends BaseTestActivity {
 
     private static final String TAG = "RAMTestActivity";
-    private TextView statusText;
-    private final MutableLiveData<Integer> progressLiveData = new MutableLiveData<>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void initializeActivity() {
         setContentView(R.layout.activity_ram_test);
-
         statusText = findViewById(R.id.cpuStatus);
-
-        progressLiveData.observe(this, currentIteration ->
-                statusText.setText(getString(R.string.ram_test_progress, currentIteration, Config.samplesAmount)));
-
-        Log.d(TAG, "Starting RAM test activity");
-        startRAMTest();
     }
 
-    private void startRAMTest() {
-        String csvPath = getIntent().getStringExtra("csv_path");
+    @Override
+    protected void executeBenchmark() throws Exception {
+        initializeCsvWriter();
         int runsPerSample = calculateRunsPerSample();
-
+        
         Log.i(TAG, "Starting RAM Batch: samples=" + Config.samplesAmount + ", runs/sample=" + runsPerSample);
-        statusText.setText(R.string.initializing_ram_batch);
-
-        Executors.newSingleThreadExecutor().execute(() ->
-                performBenchmarkTask(csvPath, runsPerSample)
-        );
+        
+        for (int i = 0; i < Config.samplesAmount; i++) {
+            executeSingleIteration(i, runsPerSample);
+        }
+        csvWriter.flush();
     }
 
     private int calculateRunsPerSample() {
         return 50;
     }
 
-    private void performBenchmarkTask(String csvPath, int runsPerSample) {
-        long suiteStart = System.currentTimeMillis();
-        File logFile = new File(csvPath != null ? csvPath : getFilesDir() + "/temp_ram.csv");
+    private void executeSingleIteration(int index, int runsPerSample) {
+        long start = System.currentTimeMillis();
+        RAMTest.runBenchmark(runsPerSample);
+        long duration = System.currentTimeMillis() - start;
 
-        try (BufferedCsvWriter writer = new BufferedCsvWriter(logFile, 1000, 64 * 1024)) {
-            writer.initialize();
-
-            runBenchmarkLoop(writer, runsPerSample, suiteStart);
-
-            writer.flush();
-            handleBenchmarkSuccess(suiteStart);
-
-        } catch (IOException e) {
-            handleBenchmarkError(e);
-        }
+        TestResult result = new TestResult(
+            "RAM Test",
+            duration,
+            "RAM benchmark",
+            true
+        );
+        logTestResult(index, result);
+        updateProgress(index + 1);
     }
 
-    private void runBenchmarkLoop(BufferedCsvWriter writer, int runsPerSample, long suiteStart) {
-for (int i = 0; i < Config.samplesAmount; i++) {
-            long start = System.currentTimeMillis();
-            RAMTest.runBenchmark(runsPerSample);
-            long duration = System.currentTimeMillis() - start;
-
-            TestResult tr = new TestResult("RAM Test", duration, "RAM benchmark", true);
-            TestEntry entry = new TestEntry(i, tr, start, duration, System.currentTimeMillis() - suiteStart);
-            writer.write(entry);
-
-            progressLiveData.postValue(i + 1);
-        }
+    @Override
+    protected String getProgressDisplayText(int currentIteration) {
+        return getString(R.string.ram_test_progress, currentIteration, Config.samplesAmount);
     }
 
-    private void handleBenchmarkSuccess(long suiteStartTime) {
-        long totalTime = System.currentTimeMillis() - suiteStartTime;
-        Log.i(TAG, "RAM Batch completed in " + totalTime + "ms");
-
-        runOnUiThread(() -> {
-            TestResult result = new TestResult(
-                    "RAM Test", totalTime, "Batch completed: " + Config.samplesAmount + " samples", true);
-            returnResult(result);
-        });
-    }
-
-    private void handleBenchmarkError(Exception e) {
-        Log.e(TAG, "Batch RAM Test failed", e);
-        runOnUiThread(() -> {
-            statusText.setText(getString(R.string.error_message, e.getMessage()));
-            TestResult result = new TestResult(
-                    "RAM Test", 0, "Error: " + e.getMessage(), false);
-            returnResult(result);
-        });
-    }
-
-    private void returnResult(TestResult result) {
-        Intent intent = new Intent();
-        intent.putExtra(BenchmarkApplication.RESULT, result);
-        setResult(RESULT_OK, intent);
-        finish();
+    @Override
+    protected String getTestName() {
+        return "RAM Test";
     }
 }

@@ -17,121 +17,137 @@ import java.util.List;
  */
 public class CPUTest {
 
+    private static final int THREAD_PRIORITY = Thread.NORM_PRIORITY;
+
     /**
      * Uruchamia benchmark oparty na określonej liczbie iteracji (nowa metoda).
-     * 
-     * @param totalIterations Całkowita liczba iteracji do wykonania (rozdzielona
-     *                        między wątki)
-     * @param threadsOpt      Opcjonalna liczba wątków (null = auto-detect)
-     * @return Wynik z czasem wykonania, liczbą iteracji i checksum
      */
     public static CpuResult runBenchmarkIterations(long totalIterations, Integer threadsOpt) {
-        final int threads = (threadsOpt != null && threadsOpt > 0) ? threadsOpt
-                : Math.max(1, Runtime.getRuntime().availableProcessors());
-
+        final int threads = getThreadCount(threadsOpt);
         final long iterationsPerThread = totalIterations / threads;
         final long startTime = System.nanoTime();
 
         final long[] counters = new long[threads];
         final double[] sums = new double[threads];
-        List<Thread> ts = new ArrayList<>(threads);
+        List<Thread> threadList = createWorkerThreads(threads, iterationsPerThread, counters, sums, 
+            (threadIndex, iterations, countersArray, sumsArray) -> runIterationBased(threadIndex, iterations, countersArray, sumsArray));
 
-        for (int idx = 0; idx < threads; idx++) {
-            final int threadIndex = idx;
-            Thread t = new Thread(() -> {
-                long iter = 0L;
-                double acc = 0.0;
-                double x = (threadIndex + 1);
-
-                // Pętla iteracyjna zamiast czasowej
-                try {
-                    for (long i = 0; i < iterationsPerThread; i++) {
-                        x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
-                        acc += x;
-                        iter++;
-                    }
-                } catch (Exception e) {
-                    System.err.println("Thread " + threadIndex + " crashed: " + e);
-                }
-
-                counters[threadIndex] = iter;
-                sums[threadIndex] = acc;
-            }, "cpu-iter-" + idx);
-            t.setPriority(Thread.NORM_PRIORITY);
-            ts.add(t);
-            t.start();
-        }
-
-        for (Thread t : ts) {
-            try {
-                t.join();
-            } catch (InterruptedException ignored) {
-            }
-        }
+        startAndJoinThreads(threadList);
 
         long endTime = System.nanoTime();
         long durationMs = (endTime - startTime) / 1_000_000L;
-
-        long actualIterations = 0L;
-        double checksum = 0.0;
-        for (int i = 0; i < threads; i++) {
-            actualIterations += counters[i];
-            checksum += sums[i];
-        }
+        long actualIterations = sumCounters(counters);
+        double checksum = sumSums(sums);
 
         return new CpuResult(threads, durationMs, actualIterations, checksum);
     }
 
     /**
-     * Uruchamia benchmark oparty na czasie (oryginalna metoda - zachowana dla
-     * kompatybilności).
-     * 
-     * @param durationMs Czas trwania testu w milisekundach
-     * @param threadsOpt Opcjonalna liczba wątków (null = auto-detect)
-     * @return Wynik z czasem wykonania, liczbą iteracji i checksum
+     * Uruchamia benchmark oparty na czasie (oryginalna metoda).
      */
     public static CpuResult runBenchmarkParallel(long durationMs, Integer threadsOpt) {
-        final int threads = (threadsOpt != null && threadsOpt > 0) ? threadsOpt
-                : Math.max(1, Runtime.getRuntime().availableProcessors());
+        final int threads = getThreadCount(threadsOpt);
         final long deadline = System.nanoTime() + durationMs * 1_000_000L;
 
         final long[] counters = new long[threads];
         final double[] sums = new double[threads];
-        List<Thread> ts = new ArrayList<>(threads);
+        List<Thread> threadList = createWorkerThreads(threads, deadline, counters, sums,
+            (threadIndex, deadline1, countersArray, sumsArray) -> runTimeBased(threadIndex, deadline1, countersArray, sumsArray));
 
-        for (int idx = 0; idx < threads; idx++) {
+        startAndJoinThreads(threadList);
+
+        long totalIterations = sumCounters(counters);
+        double checksum = sumSums(sums);
+
+        return new CpuResult(threads, durationMs, totalIterations, checksum);
+    }
+
+    private static int getThreadCount(Integer threadsOpt) {
+        return (threadsOpt != null && threadsOpt > 0) ? threadsOpt
+                : Math.max(1, Runtime.getRuntime().availableProcessors());
+    }
+
+    private static List<Thread> createWorkerThreads(int threadCount, long parameter, 
+            long[] counters, double[] sums, ThreadWorker worker) {
+        List<Thread> threads = new ArrayList<>(threadCount);
+        
+        for (int idx = 0; idx < threadCount; idx++) {
             final int threadIndex = idx;
-            Thread t = new Thread(() -> {
-                long iter = 0L;
-                double acc = 0.0;
-                double x = (threadIndex + 1);
-                while (System.nanoTime() < deadline) {
-                    x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
-                    acc += x;
-                    iter++;
-                }
-                counters[threadIndex] = iter;
-                sums[threadIndex] = acc;
-            }, "cpu-burn-" + idx);
-            t.setPriority(Thread.NORM_PRIORITY);
-            ts.add(t);
+            Thread t = new Thread(() -> 
+                worker.execute(threadIndex, parameter, counters, sums),
+                "cpu-worker-" + idx);
+            t.setPriority(THREAD_PRIORITY);
+            threads.add(t);
+        }
+        
+        return threads;
+    }
+
+    private static void startAndJoinThreads(List<Thread> threads) {
+        for (Thread t : threads) {
             t.start();
         }
-
-        for (Thread t : ts) {
+        
+        for (Thread t : threads) {
             try {
                 t.join();
             } catch (InterruptedException ignored) {
             }
         }
+    }
 
-        long totalIterations = 0L;
-        double checksum = 0.0;
-        for (int i = 0; i < threads; i++) {
-            totalIterations += counters[i];
-            checksum += sums[i];
+    private static long sumCounters(long[] counters) {
+        long sum = 0L;
+        for (long counter : counters) {
+            sum += counter;
+        }
+        return sum;
+    }
+
+    private static double sumSums(double[] sums) {
+        double sum = 0.0;
+        for (double s : sums) {
+            sum += s;
+        }
+        return sum;
+    }
+
+    private static void runIterationBased(int threadIndex, long iterations, long[] counters, double[] sums) {
+        long iter = 0L;
+        double acc = 0.0;
+        double x = (threadIndex + 1);
+
+        try {
+            for (long i = 0; i < iterations; i++) {
+                x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
+                acc += x;
+                iter++;
+            }
+        } catch (Exception e) {
+            System.err.println("Thread " + threadIndex + " crashed: " + e);
         }
 
-        return new CpuResult(threads, durationMs, totalIterations, checksum);
+        counters[threadIndex] = iter;
+        sums[threadIndex] = acc;
+    }
+
+    private static void runTimeBased(int threadIndex, long deadline, long[] counters, double[] sums) {
+        long iter = 0L;
+        double acc = 0.0;
+        double x = (threadIndex + 1);
+        
+        while (System.nanoTime() < deadline) {
+            x = Math.sin(x) * Math.cos(x) + Math.sqrt(x * x + 1.234567);
+            acc += x;
+            iter++;
+        }
+        
+        counters[threadIndex] = iter;
+        sums[threadIndex] = acc;
+    }
+
+    @FunctionalInterface
+    private interface ThreadWorker {
+        void execute(int threadIndex, long parameter, long[] counters, double[] sums);
     }
 }
