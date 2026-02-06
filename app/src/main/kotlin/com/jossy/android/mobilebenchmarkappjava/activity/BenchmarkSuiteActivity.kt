@@ -3,6 +3,7 @@ package com.jossy.android.mobilebenchmarkappjava.activity
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -10,6 +11,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -17,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication
-import com.jossy.android.mobilebenchmarkappjava.R
 import com.jossy.android.mobilebenchmarkappjava.consts.Config
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult
 import java.io.File
@@ -68,8 +69,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_benchmark_suite)
-
+        initializeActivity()
         initViews()
         setupButtons()
 
@@ -126,12 +126,70 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         Log.i(TAG, "Session restored: ${outputDir?.absolutePath}")
     }
 
+    private fun initializeActivity() {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            setPadding(32, 32, 32, 32)
+            setBackgroundColor(Color.WHITE)
+        }
+        
+        currentTestInfo = TextView(this).apply {
+            text = "Ready to start tests"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        layout.addView(currentTestInfo)
+        
+        testResults = TextView(this).apply {
+            text = "Test Results:"
+            textSize = 14f
+            setTextColor(Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        layout.addView(testResults)
+        
+        testProgress = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        layout.addView(testProgress)
+        
+        startTestsButton = Button(this).apply {
+            text = "Start Tests"
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        layout.addView(startTestsButton)
+        
+        exportResultsButton = Button(this).apply {
+            text = "Export Results"
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        layout.addView(exportResultsButton)
+        
+        setContentView(layout)
+    }
+
     private fun initViews() {
-        currentTestInfo = findViewById(R.id.currentTestInfo)
-        testResults = findViewById(R.id.testResults)
-        testProgress = findViewById(R.id.testProgress)
-        startTestsButton = findViewById(R.id.startTestsButton)
-        exportResultsButton = findViewById(R.id.exportResultsButton)
+        // Views are already initialized in initializeActivity()
     }
 
     private fun setupButtons() {
@@ -257,7 +315,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         val duration = System.currentTimeMillis() - currentIterationStartTime
         Log.i(TAG, "Test ${result.testName} completed in ${duration}ms")
 
-        if (result.isSuccess) {
+        if (result.success) {
             totalSamplesCollected += Config.samplesAmount
         }
 

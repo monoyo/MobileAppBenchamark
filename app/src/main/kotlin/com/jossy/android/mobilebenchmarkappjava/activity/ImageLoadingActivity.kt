@@ -1,11 +1,13 @@
 package com.jossy.android.mobilebenchmarkappjava.activity
 
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +19,6 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication
-import com.jossy.android.mobilebenchmarkappjava.R
 import com.jossy.android.mobilebenchmarkappjava.consts.Config
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult
@@ -51,19 +52,36 @@ class ImageLoadingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_image_loading)
-
         initUI()
         parseIntentData()
         startBatchTest()
     }
 
     private fun initUI() {
-        loadingStatus = findViewById(R.id.loadingStatus)
-        loadingStatus.setText(R.string.initializing_image_batch)
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            setPadding(32, 32, 32, 32)
+            setBackgroundColor(Color.WHITE)
+        }
+        
+        loadingStatus = TextView(this).apply {
+            text = "Initializing Image Batch..."
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        layout.addView(loadingStatus)
+        setContentView(layout)
 
         progressLiveData.observe(this) { currentIteration ->
-            loadingStatus.text = getString(R.string.image_test_progress, currentIteration, Config.samplesAmount)
+            loadingStatus.text = "Image Loading Progress: $currentIteration / ${Config.samplesAmount}"
         }
     }
 

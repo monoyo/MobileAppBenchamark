@@ -2,11 +2,13 @@ package com.jossy.android.mobilebenchmarkappjava.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +19,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication
-import com.jossy.android.mobilebenchmarkappjava.R
 import com.jossy.android.mobilebenchmarkappjava.consts.Config
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult
@@ -70,8 +71,6 @@ class LocationTestActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_location_test)
-
         initViews()
         parseIntent()
         initCsv()
@@ -80,9 +79,47 @@ class LocationTestActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        statusText = findViewById(R.id.locationStatus)
-        metricsText = findViewById(R.id.metricsText)
-        progressBar = findViewById(R.id.testProgress)
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            setPadding(32, 32, 32, 32)
+            setBackgroundColor(Color.WHITE)
+        }
+        
+        statusText = TextView(this).apply {
+            text = "Location Test: Starting..."
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        layout.addView(statusText)
+        
+        metricsText = TextView(this).apply {
+            text = "System metrics disabled"
+            textSize = 14f
+            setTextColor(Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        layout.addView(metricsText)
+        
+        progressBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = 16 }
+        }
+        layout.addView(progressBar)
+        
+        setContentView(layout)
     }
 
     private fun parseIntent() {

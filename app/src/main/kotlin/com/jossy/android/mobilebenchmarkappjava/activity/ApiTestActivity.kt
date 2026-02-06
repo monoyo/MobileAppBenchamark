@@ -2,8 +2,10 @@ package com.jossy.android.mobilebenchmarkappjava.activity
 
 import android.content.Intent
 import android.util.Log
+import android.widget.TextView
+import android.widget.LinearLayout
+import android.graphics.Color
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication
-import com.jossy.android.mobilebenchmarkappjava.R
 import com.jossy.android.mobilebenchmarkappjava.consts.Config
 import com.jossy.android.mobilebenchmarkappjava.data.Post
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult
@@ -25,8 +27,26 @@ class ApiTestActivity : BaseTestActivity() {
     private lateinit var apiService: ApiService
 
     override fun initializeActivity() {
-        setContentView(R.layout.activity_api_test)
-        statusText = findViewById(R.id.apiStatus)
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            setPadding(32, 32, 32, 32)
+            setBackgroundColor(Color.WHITE)
+        }
+        statusText = TextView(this).apply {
+            text = "API Test: Starting..."
+            textSize = 18f
+            setTextColor(Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        layout.addView(statusText)
+        setContentView(layout)
         setupRetrofit()
     }
 

@@ -1,7 +1,9 @@
 package com.jossy.android.mobilebenchmarkappjava.activity
 
 import android.util.Log
-import com.jossy.android.mobilebenchmarkappjava.R
+import android.widget.TextView
+import android.widget.LinearLayout
+import android.graphics.Color
 import com.jossy.android.mobilebenchmarkappjava.RAMTest
 import com.jossy.android.mobilebenchmarkappjava.consts.Config
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult
@@ -13,8 +15,26 @@ class RAMTestActivity : BaseTestActivity() {
     }
 
     override fun initializeActivity() {
-        setContentView(R.layout.activity_ram_test)
-        statusText = findViewById(R.id.cpuStatus)
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            setPadding(32, 32, 32, 32)
+            setBackgroundColor(Color.WHITE)
+        }
+        statusText = TextView(this).apply {
+            text = "RAM Test: Starting..."
+            textSize = 18f
+            setTextColor(Color.BLACK)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        layout.addView(statusText)
+        setContentView(layout)
     }
 
     override fun executeBenchmark() {
@@ -47,7 +67,7 @@ class RAMTestActivity : BaseTestActivity() {
     }
 
     override fun getProgressDisplayText(currentIteration: Int): String =
-        getString(R.string.ram_test_progress, currentIteration, Config.samplesAmount)
+        "RAM Test: $currentIteration / ${Config.samplesAmount}"
 
     override fun getTestName(): String = "RAM Test"
 }

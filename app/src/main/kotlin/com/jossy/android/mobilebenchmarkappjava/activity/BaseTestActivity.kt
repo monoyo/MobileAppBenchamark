@@ -1,13 +1,14 @@
 package com.jossy.android.mobilebenchmarkappjava.activity
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.MutableLiveData
 import com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication
-import com.jossy.android.mobilebenchmarkappjava.R
 import com.jossy.android.mobilebenchmarkappjava.consts.Config
 import com.jossy.android.mobilebenchmarkappjava.data.TestEntry
 import com.jossy.android.mobilebenchmarkappjava.data.TestResult
