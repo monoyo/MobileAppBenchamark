@@ -21,8 +21,8 @@ class BenchmarkSuitePage extends StatefulWidget {
 }
 
 class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
-  // Use config for iterations
-  SampleConfig _selectedConfig = SampleConfig.small;
+  // Hardcoded config per user request
+  final SampleConfig _selectedConfig = SampleConfig.medium;
   
   late final int _allTests;
   int _currentIteration = 0;
@@ -290,19 +290,10 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
             ),
             const SizedBox(height: 16),
             
-            // Config Selector
-            if (!_running) 
-              Center(
-                child: DropdownButton<SampleConfig>(
-                  value: _selectedConfig,
-                  items: SampleConfig.values.map((c) {
-                    return DropdownMenuItem(value: c, child: Text(c.displayName));
-                  }).toList(),
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedConfig = val);
-                  },
-                ),
-              ),
+// Config Selector removed per user request
+            // We use fixed SampleConfig.medium
+            if (!_running)
+              const SizedBox(height: 16),
 
             const SizedBox(height: 16),
             LinearProgressIndicator(value: _running ? _progress : 0.0),
