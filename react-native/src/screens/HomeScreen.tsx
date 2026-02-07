@@ -1,11 +1,9 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Button, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { writeCsvFiles } from '../lib/export';
 import type { TestResult } from '../lib/testTypes';
 
-// Konfiguracja testów (tylko te ekrany które mamy realnie zaimplementowane)
-// Nazwy odpowiadają Flutter benchmark_suite.dart
 const TEST_SEQUENCE = [
   { name: 'UI Test', route: 'UI' },
   { name: 'CPU Test', route: 'CPU' },
@@ -15,23 +13,18 @@ const TEST_SEQUENCE = [
   { name: 'Location Test', route: 'Location' },
 ];
 
-const ITERATIONS_PER_TEST = 2; // analogicznie do Fluttera
+const ITERATIONS_PER_TEST = 2;
 
-// Dane pojedynczego wpisu (opakowanie TestResult + numer iteracji)
 interface Entry { iteration: number; result: TestResult; }
 
 type Props = NativeStackScreenProps<any, 'Home'>;
 
 export default function HomeScreen({ navigation, route }: Props) {
-  // launchTimeMs przekazany z App.tsx
-  const launchTimeMs: number | undefined = route?.params?.launchTimeMs;
-
   const [running, setRunning] = useState(false);
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [currentIteration, setCurrentIteration] = useState(0);
-  const [info, setInfo] = useState(
-    launchTimeMs != null ? `App launched in: ${launchTimeMs}ms. Ready to start tests.` : 'Ready to start tests.'
-  );
+  const [statusInfo, setStatusInfo] = useState('Benchmark Suite');
+
   const [resultsByTest, setResultsByTest] = useState<Record<string, Entry[]>>({});
   const [averagesBlock, setAveragesBlock] = useState<string | null>(null);
   const runIdRef = useRef<string>(`${Date.now()}`);
@@ -46,11 +39,9 @@ export default function HomeScreen({ navigation, route }: Props) {
     setCurrentIteration(0);
     setResultsByTest({});
     setAveragesBlock(null);
+    setStatusInfo('Benchmark Suite');
     runIdRef.current = `${Date.now()}`;
-    setInfo(
-      launchTimeMs != null ? `App launched in: ${launchTimeMs}ms. Ready to start tests.` : 'Ready to start tests.'
-    );
-  }, [launchTimeMs]);
+  }, []);
 
   const computeAverages = useCallback((data: Record<string, Entry[]>) => {
     const lines: string[] = ['# Averages (ms)'];
@@ -74,30 +65,26 @@ export default function HomeScreen({ navigation, route }: Props) {
     [currentIteration],
   );
 
-  // Uruchom kolejny test / iterację
   const runNext = useCallback(() => {
-    // Czy skończyliśmy wszystkie testy?
     if (currentTestIndex >= TEST_SEQUENCE.length) {
       setRunning(false);
-      setInfo('All tests completed!');
       setAveragesBlock(prev => prev ?? computeAverages(resultsByTest));
+      setStatusInfo('All tests completed!');
       return;
     }
-    // Czy zakończyliśmy iteracje dla bieżącego testu?
     if (currentIteration >= ITERATIONS_PER_TEST) {
       setCurrentTestIndex(i => i + 1);
       setCurrentIteration(0);
-      return; // kolejny useEffect odpali runNext ponownie
+      return;
     }
 
     const test = TEST_SEQUENCE[currentTestIndex];
-    setInfo(`Running: ${test.name} (Iteration ${currentIteration + 1}/${ITERATIONS_PER_TEST})`);
+    setStatusInfo(`Running: ${test.name} (Iter ${currentIteration + 1}/${ITERATIONS_PER_TEST})`);
 
-    // Nawigacja do ekranu testowego z callbackiem
     navigation.navigate(test.route as any, {
       onResult: (r: Omit<TestResult, 'iteration'> & { testName?: string }) => {
         const result: TestResult = {
-          iteration: currentIteration + 1, // zachowane dla spójności typu
+          iteration: currentIteration + 1,
           executionTimeMs: r.executionTimeMs,
           details: r.details,
           success: r.success,
@@ -108,10 +95,8 @@ export default function HomeScreen({ navigation, route }: Props) {
     });
   }, [currentTestIndex, currentIteration, navigation, onSingleTestFinished, resultsByTest, computeAverages]);
 
-  // Efekt który odpala test po zmianie indeksu lub iteracji (gdy wciąż running)
   useEffect(() => {
     if (!running) return;
-    // Małe opóźnienie aby UI zrenderował się przed startem ciężkiego testu
     const t = setTimeout(runNext, 120);
     return () => clearTimeout(t);
   }, [running, currentTestIndex, currentIteration, runNext]);
@@ -140,12 +125,14 @@ export default function HomeScreen({ navigation, route }: Props) {
     const blocks: string[] = [];
     Object.entries(resultsByTest).forEach(([testName, entries]) => {
       const sorted = [...entries].sort((a, b) => a.iteration - b.iteration);
+      // Show last 10
+      const display = sorted.length > 10 ? sorted.slice(sorted.length - 10) : sorted;
+
       blocks.push(`# ${testName}`);
-      blocks.push('iteration,executionTimeMs,details,success');
-      sorted.forEach(e => {
-        // escape details for csv view only (prostota)
+      blocks.push('iteration,executionTimeMs,details');
+      display.forEach(e => {
         const det = e.result.details.replace(/\n/g, ' ');
-        blocks.push(`${e.iteration},${e.result.executionTimeMs},${det},${e.result.success}`);
+        blocks.push(`${e.iteration},${e.result.executionTimeMs},${det}`);
       });
       blocks.push('');
     });
@@ -155,29 +142,123 @@ export default function HomeScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.info} selectable>{info}</Text>
+      {/* Header */}
+      <Text style={styles.headerText}>
+        {statusInfo}
+      </Text>
+
+      {/* Progress Bar */}
       <View style={styles.progressBarWrapper}>
-        <View style={[styles.progressFill, { flex: progress }]} />
-        <View style={{ flex: 1 - progress }} />
+        <View style={[styles.progressFill, { flex: running ? progress : 0 }]} />
+        <View style={{ flex: 1 - (running ? progress : 0) }} />
       </View>
-      <ScrollView style={styles.resultsScroll} contentContainerStyle={{ paddingBottom: 32 }}>
-        <Text style={styles.resultsText} selectable>{renderResults()}</Text>
-      </ScrollView>
+
+      {/* Results Area */}
+      <View style={styles.resultsContainer}>
+        <ScrollView style={styles.resultsScroll} contentContainerStyle={{ padding: 8 }}>
+          <Text style={styles.resultsText} selectable>{renderResults()}</Text>
+        </ScrollView>
+      </View>
+
+      {/* Buttons (Bottom) */}
       <View style={styles.buttonsRow}>
-        <Button title={running ? 'Running…' : 'Start Tests'} disabled={running} onPress={startSuite} color="#443FD8" />
-        <View style={{ width: 12 }} />
-        <Button title="Export Results" disabled={!Object.keys(resultsByTest).length} onPress={exportResults} />
+        <TouchableOpacity
+          style={[styles.primaryButton, running && styles.buttonDisabled]}
+          onPress={startSuite}
+          disabled={running}
+        >
+          <Text style={styles.primaryButtonText}>{running ? 'Running...' : 'Start Tests'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.outlinedButton}
+          onPress={exportResults}
+          disabled={running}
+        >
+          <Text style={styles.outlinedButtonText}>Export Results</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 32, paddingVertical: 52 },
-  info: { textAlign: 'center', fontSize: 18, fontWeight: '700', marginBottom: 16 },
-  progressBarWrapper: { height: 4, backgroundColor: '#eee', borderRadius: 2, flexDirection: 'row', overflow: 'hidden', marginBottom: 16 },
-  progressFill: { backgroundColor: '#3b82f6' },
-  resultsScroll: { flex: 1 },
-  resultsText: { fontSize: 14, fontFamily: 'Courier' },
-  buttonsRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 12 },
+  container: {
+    flex: 1,
+    paddingHorizontal: 32,
+    paddingVertical: 52,
+    backgroundColor: '#ffffff'
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: '700', // Bold
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  progressBarWrapper: {
+    height: 4,
+    backgroundColor: '#EEEEEE',
+    borderRadius: 2,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  progressFill: {
+    backgroundColor: '#443FD8',
+  },
+  resultsContainer: {
+    flex: 1, // Fill available space
+    backgroundColor: '#FAFAFA',
+    marginBottom: 16,
+    // Add border to match Flutter logic? Or just background.
+    // Flutter one had border. Let's add simple border if needed, 
+    // but Java XML just has ScrollView with bg #FAFAFA.
+  },
+  resultsScroll: {
+    flex: 1,
+  },
+  resultsText: {
+    fontSize: 14,
+    fontFamily: 'monospace',
+    color: '#000000',
+  },
+  buttonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  primaryButton: {
+    backgroundColor: '#443FD8',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginRight: 8, // 8dp margin end
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+    fontSize: 14,
+  },
+  buttonDisabled: {
+    backgroundColor: '#A0A0A0',
+  },
+  outlinedButton: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 16,
+    paddingVertical: 10, // Adjust for border width
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#443FD8',
+    marginLeft: 8, // 8dp margin start
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  outlinedButtonText: {
+    color: '#443FD8',
+    fontWeight: '500',
+    fontSize: 14,
+  },
 });
