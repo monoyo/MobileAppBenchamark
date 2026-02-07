@@ -1,0 +1,62 @@
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+*.iml
+
+# node.js
+#
+node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
+yarn.lock
+
+# BUCK
+buck-out/
+\.buckd/
+*.keystore
+
+# Fastlane
+#
+*/fastlane/report.xml
+*/fastlane/Preview.html
+*/fastlane/screenshots
+
+# Bundle artifact
+*.jsbundle
+
+# Expo
+.expo/
+.expo-shared/
+expo-env.d.ts
+web-build/
+
+##### Cross-Framework Ignores (to prevent pollution when switching branches)
+
+# Java / Kotlin / Android (native app)
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+.kotlin/
+app/src/main/java/
+app/src/main/kotlin/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+pubspec.lock
+/ios/Pods/
+/ios/Flutter/
+/ios/.symlinks/
+/macos/Flutter/
+/linux/flutter/
+/windows/flutter/
+lib/
