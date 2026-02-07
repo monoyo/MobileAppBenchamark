@@ -54,7 +54,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   void initState() {
     super.initState();
     _allTests = _testNames.length;
-    _currentInfo = 'App launched in: ${widget.appLaunchMs}ms.\nReady to start tests';
+    _currentInfo = 'Benchmark Suite';
   }
 
   Future<void> _initializeSession() async {
@@ -91,6 +91,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       _currentTestIndex = 0;
       _progress = 0.0;
       _averagesBlock = null;
+      _currentInfo = 'Running Tests...';
     });
     
     _suiteStartTime = DateTime.now().millisecondsSinceEpoch;
@@ -275,37 +276,56 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     final csvText = _buildCsvDisplayState();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 32.0,
           vertical: 52.0,
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Header
             Text(
-              _currentInfo.isNotEmpty ? _currentInfo : 'Ready',
+              _currentInfo.isNotEmpty ? _currentInfo : 'Benchmark Suite',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 18, 
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             const SizedBox(height: 16),
             
-// Config Selector removed per user request
-            // We use fixed SampleConfig.medium
-            if (!_running)
-              const SizedBox(height: 16),
-
+            // Progress Bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: _running ? _progress : 0.0,
+                minHeight: 4,
+                backgroundColor: const Color(0xFFEEEEEE),
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF443FD8)),
+              ),
+            ),
             const SizedBox(height: 16),
-            LinearProgressIndicator(value: _running ? _progress : 0.0),
-            const SizedBox(height: 16),
 
+            // Results Area
             Expanded(
               child: Container(
-                decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFAFAFA),
+                ),
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: SelectableText(csvText, style: const TextStyle(fontSize: 12, fontFamily: 'monospace')),
+                    child: Text(
+                      csvText, 
+                      style: const TextStyle(
+                        fontSize: 14, 
+                        fontFamily: 'monospace',
+                        color: Colors.black,
+                      )
+                    ),
                   ),
                 ),
               ),
@@ -313,6 +333,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
 
             const SizedBox(height: 16),
 
+            // Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -320,14 +341,36 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
                   onPressed: _running ? null : _startSuite,
                   child: Text(_running ? 'Running...' : 'Start Tests'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    backgroundColor: const Color.fromARGB(255, 68, 63, 216),
+                    backgroundColor: const Color(0xFF443FD8),
                     foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    elevation: 2,
                   )
                 ),
-                // Export button is now redundant as we save automatically, 
-                // but we can keep it to show path or re-open folder (if feasible).
-                // Let's just show path in snackbar upon completion.
+                const SizedBox(width: 16),
+                OutlinedButton(
+                  onPressed: () { 
+                     // Export is strict, but functionality is auto-save.
+                     // We show this mainly for visual parity.
+                     if (_sessionDir != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                           SnackBar(content: Text('Saved: ${_sessionDir!.path}'))
+                        );
+                     }
+                  },
+                  child: const Text('Export Results'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF443FD8),
+                    side: const BorderSide(color: Color(0xFF443FD8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  )
+                ),
               ],
             ),
           ],
@@ -375,4 +418,3 @@ extension on _BenchmarkSuitePageState {
     return _buildCsvDisplayFrom(_perTestResults, _averagesBlock);
   }
 }
-
