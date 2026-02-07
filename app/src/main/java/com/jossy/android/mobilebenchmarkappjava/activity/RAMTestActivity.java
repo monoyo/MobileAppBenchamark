@@ -14,16 +14,16 @@ public class RAMTestActivity extends BaseTestActivity {
     @Override
     protected void initializeActivity() {
         setContentView(R.layout.activity_ram_test);
-        statusText = findViewById(R.id.cpuStatus);
+        statusText = findViewById(R.id.ramStatus);
     }
 
     @Override
     protected void executeBenchmark() throws Exception {
         initializeCsvWriter();
         int runsPerSample = calculateRunsPerSample();
-        
+
         Log.i(TAG, "Starting RAM Batch: samples=" + Config.samplesAmount + ", runs/sample=" + runsPerSample);
-        
+
         for (int i = 0; i < Config.samplesAmount; i++) {
             executeSingleIteration(i, runsPerSample);
         }
@@ -40,11 +40,10 @@ public class RAMTestActivity extends BaseTestActivity {
         long duration = System.currentTimeMillis() - start;
 
         TestResult result = new TestResult(
-            "RAM Test",
-            duration,
-            "RAM benchmark",
-            true
-        );
+                "RAM Test",
+                duration,
+                "RAM benchmark",
+                true);
         logTestResult(index, result);
         updateProgress(index + 1);
     }
