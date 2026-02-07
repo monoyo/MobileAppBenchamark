@@ -1,6 +1,6 @@
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Button, ScrollView, StyleSheet, Text, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { writeCsvFiles } from '../lib/export';
 import type { TestResult } from '../lib/testTypes';
 
@@ -164,11 +164,9 @@ export default function HomeScreen({ navigation, route }: Props) {
         <Text style={styles.resultsText} selectable>{renderResults()}</Text>
       </ScrollView>
       <View style={styles.buttonsRow}>
-        <Button title={running ? 'Running…' : 'Start Tests'} disabled={running} onPress={startSuite} />
+        <Button title={running ? 'Running…' : 'Start Tests'} disabled={running} onPress={startSuite} color="#443FD8" />
         <View style={{ width: 12 }} />
         <Button title="Export Results" disabled={!Object.keys(resultsByTest).length} onPress={exportResults} />
-        <View style={{ width: 12 }} />
-        <Button title="Reset" disabled={running} onPress={reset} />
       </View>
     </View>
   );
