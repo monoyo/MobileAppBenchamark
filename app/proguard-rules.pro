@@ -20,9 +20,19 @@
 # Coil
 -keep class coil.** { *; }
 
-# AndroidX Lifecycle (for LiveData/ViewModel if used)
+# AndroidX Lifecycle
 -keep class androidx.lifecycle.** { *; }
 
-# Keep model classes used in benchmarks to prevent stripping
--keep class com.jossy.android.mobilebenchmarkappkotlin.model.** { *; }
--keep class com.jossy.android.mobilebenchmarkappjava.data.** { *; }
+# Keep all benchmark classes to prevent stripping and ensure performance consistency
+-keep class com.jossy.android.mobilebenchmarkappjava.** { *; }
+-keep class com.jossy.android.mobilebenchmarkappkotlin.** { *; }
+
+# Gson requirements
+-keepattributes Signature, EnclosingMethod, InnerClasses
+-keep class com.google.gson.** { *; }
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+-dontwarn com.google.gson.internal.bind.util.ISO8601Utils
+
+# Keep model classes used for JSON serialization
+-keepclassmembers class com.jossy.android.mobilebenchmarkappjava.data.** { <fields>; }
