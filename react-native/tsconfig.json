@@ -5,7 +5,7 @@
     "jsx": "react",
     "strict": true,
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,

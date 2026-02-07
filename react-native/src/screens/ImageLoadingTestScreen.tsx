@@ -1,7 +1,6 @@
 import { Image as ExpoImage } from 'expo-image';
 import React, { useEffect, useRef, useState } from 'react';
 import { FlatList, Text, View } from 'react-native';
-import type { TestResult } from '../lib/testTypes';
 
 const URLS = [
   'https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4',
@@ -21,7 +20,7 @@ const STALL_MS = 10_000;   // brak progresu
 const MAX_RETRIES = 2;
 
 export default function ImageLoadingTestScreen({ navigation, route }: any) {
-  const onResult = route?.params?.onResult as (r: Omit<TestResult, 'iteration'>) | undefined;
+  const onResult = route?.params?.onResult as ((r: { executionTimeMs: number; details: string; success: boolean }) => void) | undefined;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loaded, setLoaded] = useState(0);
   const [failed, setFailed] = useState(0);
@@ -130,7 +129,7 @@ export default function ImageLoadingTestScreen({ navigation, route }: any) {
         ref={listRef}
         data={URLS}
         keyExtractor={(_, i) => String(i)}
-        extraData={currentIndex + loaded + failed + done}
+        extraData={currentIndex + loaded + failed + (done ? 1 : 0)}
         getItemLayout={(_, index) => ({ length: 220, offset: 220 * index, index })}
         renderItem={renderItem}
       />

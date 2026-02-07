@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
-import type { TestResult } from '../lib/testTypes';
 
 // Adaptacja do wersji Flutter cpu_test.dart (bez wielowątkowości JS - threads=1)
 // Wykonujemy mieszankę operacji FP (sin/cos/sqrt) aż do deadlinu (3000ms)
@@ -12,7 +11,7 @@ const CHUNK_ITERATIONS = 50_000; // kompromis: duży chunk ale nadal yielduje
 export default function CPUTestScreen({ navigation, route }: any) {
   useEffect(() => {
     let cancelled = false;
-    const onResult = route?.params?.onResult as (r: Omit<TestResult, 'iteration'>) | undefined;
+    const onResult = route?.params?.onResult as ((r: { executionTimeMs: number; details: string; success: boolean }) => void) | undefined;
 
     const run = () => {
       const deadline = Date.now() + DURATION_MS;

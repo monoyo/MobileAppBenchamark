@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { View, Dimensions, PixelRatio, StyleSheet } from 'react-native';
-import type { TestResult } from '../lib/testTypes';
-import { Animated } from 'react-native';react-native≥[;'p-]']
-;
+import { Animated, Dimensions, PixelRatio, StyleSheet, View } from 'react-native';
+
 const TEST_DURATION_MS = 5000;
 
 export default function UITestScreen({ navigation, route }: any) {
-  const onResult = route?.params?.onResult as (r: Omit<TestResult, 'iteration'>) | undefined;
+  const onResult = route?.params?.onResult as ((r: { executionTimeMs: number; details: string; success: boolean }) => void) | undefined;
   const startRef = useRef<number>(Date.now());
 
   const { width, height } = Dimensions.get('window');
@@ -20,7 +18,7 @@ export default function UITestScreen({ navigation, route }: any) {
       const startY = Math.random() * Math.max(1, height - size);
       const dx = (Math.random() * 400 - 200) / ratio;
       const dy = (Math.random() * 400 - 200) / ratio;
-      const color = `rgb(${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)},${Math.floor(Math.random()*256)})`;
+      const color = `rgb(${Math.floor(Math.random() * 256)},${Math.floor(Math.random() * 256)},${Math.floor(Math.random() * 256)})`;
       list.push({ key: i, startX, startY, dx, dy, color, animX: new Animated.Value(0), animY: new Animated.Value(0) });
     }
     return list;
