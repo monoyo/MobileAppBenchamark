@@ -69,7 +69,7 @@ class RAMTest {
         if (filtered.isNotEmpty) {
           final randomUser = filtered[random.nextInt(filtered.length)];
           // Ensure random user is accessed to prevent optimization
-          _ = randomUser.name;
+          randomUser.name.length; // Side-effect free access
         }
 
         // 5. Aggregate name frequencies (similar to Java stream collection pattern)

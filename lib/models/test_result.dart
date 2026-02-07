@@ -7,13 +7,13 @@ class TestResult {
   final bool success;
   final DateTime timestamp;
 
-  const TestResult(
+  TestResult(
     this.testName,
     this.executionTimeMs,
     this.details,
     this.success, {
     DateTime? timestamp,
-  }) : timestamp = timestamp ?? const DateTime.fromMicrosecondsSinceEpoch(0, isUtc: true);
+  }) : timestamp = timestamp ?? DateTime.now();
 
   /// Creates a TestResult from JSON data.
   factory TestResult.fromJson(Map<String, dynamic> json) {
