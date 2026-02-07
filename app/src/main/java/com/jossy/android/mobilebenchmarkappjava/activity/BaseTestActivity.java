@@ -54,7 +54,7 @@ public abstract class BaseTestActivity extends AppCompatActivity {
     /**
      * Subclasses implement this to perform the actual benchmark.
      */
-    protected abstract void executeBenchmark();
+    protected abstract void executeBenchmark() throws Exception;
 
     /**
      * Called when benchmark results need to be formatted for display.
