@@ -9,6 +9,7 @@ kotlin = "2.0.21"
 coreKtx = "1.16.0"
 kotlinxserializationjson = "1.6.0"
 playlocation = "21.0.1"
+playServicesLocation = "21.0.1"
 kotlixcoroutine = "1.7.3"
 coroutineplayservices = "1.7.3"
 kotlinxserialization = "1.9.0"
@@ -21,6 +22,13 @@ gson = "2.10.1"
 okhttp = "4.11.0"
 
 [libraries]
+# Aliases for Java build.gradle
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+
+# Original definitions
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
