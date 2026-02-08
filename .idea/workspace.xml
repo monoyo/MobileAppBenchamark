@@ -51,10 +51,11 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Implement automated benchmark analysis and cross-platform statistical reporting.&#10;&#10;This commit introduces a unified reporting system across Kotlin, Java, Flutter, and React Native platforms to generate aggregated performance metrics and visualizations.&#10;&#10;The following changes were made:&#10;&#10;- Added `analyze_benchmarks.py` script to process CSV data, generate statistical comparisons, and produce PDF charts and Markdown reports.&#10;- Added `StatisticsUtils` and `SummaryWriter` utilities to all four platforms to compute metrics (mean, median, std dev, and percentiles P25-P99) during test execution.&#10;- Updated `BufferedCsvWriter` in all platforms to include `platform` and `test_name` columns in the raw output for better data traceability.&#10;- Modified benchmark suite controllers in each framework to trigger summary generation automatically upon test completion.&#10;- Standardized CSV headers and formats across all implementations to ensure compatibility with the new analysis tooling.">
+    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Refactor UI performance tests to match the Java/Kotlin GPUTestActivity implementation&#10;&#10;This commit synchronizes the UI test logic across Flutter and React Native platforms to match the native Android implementation's physics-based animation algorithm.&#10;&#10;The following changes were made:&#10;- Replaced simple looping animations with a physics-based movement system featuring wall-bouncing logic.&#10;- Implemented a dynamic object count system that starts at 250 objects and increments by 250 every second.&#10;- Standardized object size to 50px and maximum velocity to ±10 px/frame.&#10;- Switched Flutter implementation to use `CustomPaint` and a single `Ticker` for improved performance rendering many objects.&#10;- Switched React Native implementation to use `requestAnimationFrame` and `View` transforms instead of the `Animated` library.&#10;- Added an on-screen overlay to display real-time metrics including frame samples, object count, and FPS.&#10;- Standardized test completion to trigger based on reaching a target sample count from `SampleConfiguration`.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/ui_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/ui_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/ui-test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/ui-test.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/android/app/debug.keystore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/java/gradle.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,27 +130,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;Android App.Unnamed.executor&quot;: &quot;Run&quot;,
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;android.gradle.sync.needed&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master-consolidated&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/PC/Dokumenty/MobileAppBenchamark&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.android.studio.ml.bot.mainConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "Android App.Unnamed.executor": "Run",
+    "Android App.app.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "android.gradle.sync.needed": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "master-consolidated",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "E:/PC/Dokumenty/MobileAppBenchamark/java/android",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "ml.llm.LLMConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\PC\Dokumenty\MobileAppBenchamark\java\android" />
+    </key>
     <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
       <recent name="com.jossy.android.mobilebenchmarkappkotlin.source" />
       <recent name="com.jossy.android.mobilebenchmarkappkotlin.test" />
@@ -229,6 +245,14 @@
       </method>
     </configuration>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.30387.90" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="" />
@@ -236,6 +260,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1768743805505</updated>
+      <workItem from="1770553950760" duration="291000" />
+      <workItem from="1770554260771" duration="3330000" />
     </task>
     <task id="LOCAL-00001" summary="Fix the code complexity">
       <option name="closed" value="true" />
@@ -565,8 +591,27 @@
       <option name="project" value="LOCAL" />
       <updated>1770512316924</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="Refactor UI performance tests to match the Java/Kotlin GPUTestActivity implementation&#10;&#10;This commit synchronizes the UI test logic across Flutter and React Native platforms to match the native Android implementation's physics-based animation algorithm.&#10;&#10;The following changes were made:&#10;- Replaced simple looping animations with a physics-based movement system featuring wall-bouncing logic.&#10;- Implemented a dynamic object count system that starts at 250 objects and increments by 250 every second.&#10;- Standardized object size to 50px and maximum velocity to ±10 px/frame.&#10;- Switched Flutter implementation to use `CustomPaint` and a single `Ticker` for improved performance rendering many objects.&#10;- Switched React Native implementation to use `requestAnimationFrame` and `View` transforms instead of the `Animated` library.&#10;- Added an on-screen overlay to display real-time metrics including frame samples, object count, and FPS.&#10;- Standardized test completion to trigger based on reaching a target sample count from `SampleConfiguration`.">
+      <option name="closed" value="true" />
+      <created>1770513385536</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1770513385536</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Refactor UI performance tests to match the Java/Kotlin GPUTestActivity implementation&#10;&#10;This commit synchronizes the UI test logic across Flutter and React Native platforms to match the native Android implementation's physics-based animation algorithm.&#10;&#10;The following changes were made:&#10;- Replaced simple looping animations with a physics-based movement system featuring wall-bouncing logic.&#10;- Implemented a dynamic object count system that starts at 250 objects and increments by 250 every second.&#10;- Standardized object size to 50px and maximum velocity to ±10 px/frame.&#10;- Switched Flutter implementation to use `CustomPaint` and a single `Ticker` for improved performance rendering many objects.&#10;- Switched React Native implementation to use `requestAnimationFrame` and `View` transforms instead of the `Animated` library.&#10;- Added an on-screen overlay to display real-time metrics including frame samples, object count, and FPS.&#10;- Standardized test completion to trigger based on reaching a target sample count from `SampleConfiguration`.">
+      <option name="closed" value="true" />
+      <created>1770514836395</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1770514836395</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="RECENT_FILTERS">
@@ -597,7 +642,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="refactor RAMTestActivity to improve code structure and use constant sample count&#10;&#10;This commit refactors the `RAMTestActivity` to improve maintainability and readability by modularizing the benchmark logic. It also hardcodes a target sample count, removing the dependency on intent extras for iteration count in several activities.&#10;&#10;The following changes were made:&#10;&#10;- Extracted benchmark execution into smaller, private helper methods (`performBenchmarkTask`, `runBenchmarkLoop`, `updateUIProgress`).&#10;- Hardcoded `TARGET_SAMPLES` to 10,000 in `RAMTestActivity`.&#10;- Removed `iterations` extra from intents passed to `RAMTestActivity`, `ImageLoadingActivity`, `ApiTestActivity`, and `LocationTestActivity` in `BenchmarkSuiteActivity`.&#10;- Cleaned up imports and used short class names for `TestResult`, `TestEntry`, and `BufferedCsvWriter`.&#10;- Added a `TAG` constant and improved logging consistency.&#10;- Introduced `calculateRunsPerSample` to handle adaptive load logic." />
     <MESSAGE value="refactor RAM test to use LiveData for UI progress updates&#10;&#10;This commit replaces the manual `runOnUiThread` progress updates in `RAMTestActivity` with `MutableLiveData` to handle UI state more efficiently and consistently.&#10;&#10;The following changes were made:&#10;- Added `progressLiveData` to `RAMTestActivity`.&#10;- Added an observer in `onCreate` to update `statusText` when progress changes.&#10;- Refactored `runBenchmark` to post progress updates to `progressLiveData`.&#10;- Removed the manual `updateUIProgress` method." />
     <MESSAGE value="refactor RAMTestActivity to use string resources and simplify method signatures&#10;&#10;This commit refactors `RAMTestActivity` to use Android string resources for UI messages and streamlines the benchmark logic.&#10;&#10;The following changes were made:&#10;- Added `ram_test_progress`, `initializing_ram_batch`, and `error_message` to `strings.xml`.&#10;- Updated `RAMTestActivity` to use `getString()` for status updates instead of hardcoded strings.&#10;- Simplified `calculateRunsPerSample` to return a constant value and removed the `targetSamples` parameter from several internal methods, opting to use the `TARGET_SAMPLES` constant directly.&#10;- Refined error handling in `performBenchmarkTask` to catch specific `IOException`.&#10;- Removed redundant comments." />
     <MESSAGE value="refactor ImageLoadingActivity to use constant sample size and improve code structure&#10;&#10;This commit refactors `ImageLoadingActivity` to use a fixed sample size of 10,000 instead of an intent-provided value and reorganizes the logic into smaller, more maintainable methods.&#10;&#10;The following changes were made:&#10;- Introduced `CONSTANT_SAMPLES` set to 10,000 for image loading tests.&#10;- Extracted UI initialization and intent parsing into `initUI` and `parseIntentData`.&#10;- Refactored image loading logic into dedicated methods: `performImageLoad`, `createRequestListener`, and `handleLoadResult`.&#10;- Improved resource management by centralizing CSV writer initialization and closure logic.&#10;- Simplified imports and utilized `TAG` for consistent logging.&#10;- Enhanced code readability by breaking down the monolithic `recordResult` and `finishBatch` methods into smaller functional units." />
@@ -622,7 +666,12 @@
     <MESSAGE value="Refactor benchmark configuration to use fixed sample settings&#10;&#10;This change replaces the dynamic sample configuration options with a fixed set of requirements (10,000 samples).&#10;&#10;The following changes were made:&#10;- Removed the `SampleConfig` enum and multiple configuration tiers (Small to Extreme) in both Flutter and React implementations.&#10;- Standardized `sampleCount` to 10,000, `bufferSize` to 1,000, and `cpuIterations` to 2,000,000 across the benchmark suite.&#10;- Updated `benchmark_suite.dart` to reference static `SampleConfig` values instead of an instance-based selection.&#10;- Refactored `SampleConfiguration.ts` to export a single `CONFIG` object while maintaining a legacy compatibility function." />
     <MESSAGE value="Update benchmark suite metrics and UI test object counts&#10;&#10;This commit updates the benchmark data collection logic and standardizes initial object counts across Flutter and React implementations.&#10;&#10;The following changes were made:&#10;- Added `cumulativeTimeMs` tracking to the benchmark suite to measure total elapsed time.&#10;- Updated `BufferedCsvWriter` to include `cumulativeTimeMs` in CSV output while removing the `fps` field.&#10;- Adjusted the default `rectangleCount` (Flutter) and `SQUARE_COUNT` (React) to 250 to match the Java implementation's initial object count.&#10;- Updated project workspace metadata and task history in `.idea/workspace.xml`." />
     <MESSAGE value="Implement automated benchmark analysis and cross-platform statistical reporting.&#10;&#10;This commit introduces a unified reporting system across Kotlin, Java, Flutter, and React Native platforms to generate aggregated performance metrics and visualizations.&#10;&#10;The following changes were made:&#10;&#10;- Added `analyze_benchmarks.py` script to process CSV data, generate statistical comparisons, and produce PDF charts and Markdown reports.&#10;- Added `StatisticsUtils` and `SummaryWriter` utilities to all four platforms to compute metrics (mean, median, std dev, and percentiles P25-P99) during test execution.&#10;- Updated `BufferedCsvWriter` in all platforms to include `platform` and `test_name` columns in the raw output for better data traceability.&#10;- Modified benchmark suite controllers in each framework to trigger summary generation automatically upon test completion.&#10;- Standardized CSV headers and formats across all implementations to ensure compatibility with the new analysis tooling." />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement automated benchmark analysis and cross-platform statistical reporting.&#10;&#10;This commit introduces a unified reporting system across Kotlin, Java, Flutter, and React Native platforms to generate aggregated performance metrics and visualizations.&#10;&#10;The following changes were made:&#10;&#10;- Added `analyze_benchmarks.py` script to process CSV data, generate statistical comparisons, and produce PDF charts and Markdown reports.&#10;- Added `StatisticsUtils` and `SummaryWriter` utilities to all four platforms to compute metrics (mean, median, std dev, and percentiles P25-P99) during test execution.&#10;- Updated `BufferedCsvWriter` in all platforms to include `platform` and `test_name` columns in the raw output for better data traceability.&#10;- Modified benchmark suite controllers in each framework to trigger summary generation automatically upon test completion.&#10;- Standardized CSV headers and formats across all implementations to ensure compatibility with the new analysis tooling." />
+    <MESSAGE value="Refactor UI performance tests to match the Java/Kotlin GPUTestActivity implementation&#10;&#10;This commit synchronizes the UI test logic across Flutter and React Native platforms to match the native Android implementation's physics-based animation algorithm.&#10;&#10;The following changes were made:&#10;- Replaced simple looping animations with a physics-based movement system featuring wall-bouncing logic.&#10;- Implemented a dynamic object count system that starts at 250 objects and increments by 250 every second.&#10;- Standardized object size to 50px and maximum velocity to ±10 px/frame.&#10;- Switched Flutter implementation to use `CustomPaint` and a single `Ticker` for improved performance rendering many objects.&#10;- Switched React Native implementation to use `requestAnimationFrame` and `View` transforms instead of the `Animated` library.&#10;- Added an on-screen overlay to display real-time metrics including frame samples, object count, and FPS.&#10;- Standardized test completion to trigger based on reaching a target sample count from `SampleConfiguration`." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor UI performance tests to match the Java/Kotlin GPUTestActivity implementation&#10;&#10;This commit synchronizes the UI test logic across Flutter and React Native platforms to match the native Android implementation's physics-based animation algorithm.&#10;&#10;The following changes were made:&#10;- Replaced simple looping animations with a physics-based movement system featuring wall-bouncing logic.&#10;- Implemented a dynamic object count system that starts at 250 objects and increments by 250 every second.&#10;- Standardized object size to 50px and maximum velocity to ±10 px/frame.&#10;- Switched Flutter implementation to use `CustomPaint` and a single `Ticker` for improved performance rendering many objects.&#10;- Switched React Native implementation to use `requestAnimationFrame` and `View` transforms instead of the `Animated` library.&#10;- Added an on-screen overlay to display real-time metrics including frame samples, object count, and FPS.&#10;- Standardized test completion to trigger based on reaching a target sample count from `SampleConfiguration`." />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
