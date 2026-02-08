@@ -21,8 +21,7 @@ class BenchmarkSuitePage extends StatefulWidget {
 }
 
 class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
-  // Hardcoded config per user request
-  final SampleConfig _selectedConfig = SampleConfig.medium;
+  // Fixed 10000 samples as per requirement
   
   late final int _allTests;
   int _currentIteration = 0;
@@ -74,7 +73,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       _writers.clear();
       for (final name in _testNames) {
         final safeName = name.toLowerCase().replaceAll(' ', '_');
-        final writer = BufferedCsvWriter('${dir.path}/$safeName.csv', bufferSize: _selectedConfig.bufferSize);
+        final writer = BufferedCsvWriter('${dir.path}/$safeName.csv', bufferSize: SampleConfig.bufferSize);
         await writer.initialize();
         _writers[name] = writer;
       }
@@ -130,10 +129,10 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       return;
     }
 
-    if (_currentIteration < _selectedConfig.sampleCount) {
+    if (_currentIteration < SampleConfig.sampleCount) {
       final name = _testNames[_currentTestIndex];
       setState(() {
-        _currentInfo = 'Running: $name (Iteration ${_currentIteration + 1}/${_selectedConfig.sampleCount})';
+        _currentInfo = 'Running: $name (Iteration ${_currentIteration + 1}/${SampleConfig.sampleCount})';
       });
 
       // Start FPS counter
@@ -152,7 +151,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
           break;
         case 1:
           res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => CPUTestPage(iterations: _selectedConfig.cpuIterations)),
+            MaterialPageRoute(builder: (_) => CPUTestPage(iterations: SampleConfig.cpuIterations)),
           );
           break;
         case 2:
@@ -218,8 +217,8 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
 
       setState(() {
         _currentIteration++;
-        _progress = ((_currentTestIndex * _selectedConfig.sampleCount) + _currentIteration) /
-            (_selectedConfig.sampleCount * _allTests);
+        _progress = ((_currentTestIndex * SampleConfig.sampleCount) + _currentIteration) /
+            (SampleConfig.sampleCount * _allTests);
       });
 
       // Tiny delay to allow UI to breathe
