@@ -118,7 +118,7 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
     _frameCount++;
 
     // Check completion based on sample count
-    if (_frameCount >= SampleConfiguration.samplesAmount) {
+    if (_frameCount >= SampleConfig.sampleCount) {
       _completeTest();
     } else {
       setState(() {}); // Trigger repaint
@@ -191,7 +191,7 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
               padding: const EdgeInsets.all(8),
               color: Colors.white.withOpacity(0.8),
               child: Text(
-                'Samples: $_frameCount / ${SampleConfiguration.samplesAmount}\n'
+                'Samples: $_frameCount / ${SampleConfig.sampleCount}\n'
                 'Objects: $_currentObjectCount\n'
                 'FPS: ${_currentFps.toStringAsFixed(1)}',
                 style: const TextStyle(fontSize: 14, color: Colors.black),
