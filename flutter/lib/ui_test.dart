@@ -2,229 +2,226 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'models/test_result.dart';
+import 'config/sample_configuration.dart';
 
 /// UI performance test page rendering animated rectangles.
 /// Tests frame rendering performance and animation smoothness.
-/// Similar to Java UITest with animated elements and frame tracking.
+/// Matches Java/Kotlin GPUTestActivity algorithm.
 class UITestPage extends StatefulWidget {
-  final Duration testDuration;
-  final int rectangleCount;
-  
-  const UITestPage({
-    super.key,
-    this.testDuration = const Duration(seconds: 2),
-    this.rectangleCount = 250, // Match Java INITIAL_OBJECT_COUNT
-  });
+  const UITestPage({super.key});
 
   @override
   State<UITestPage> createState() => _UITestPageState();
 }
 
-class _UITestPageState extends State<UITestPage> with TickerProviderStateMixin {
+class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateMixin {
+  // Match Java/Kotlin constants
+  static const int _initialObjectCount = 250;
+  static const int _objectIncrementPerSecond = 250;
+  static const double _objectSize = 50.0;
+  static const double _maxVelocity = 10.0; // ±10 px/frame like Java
+
   late final int _startTime;
-  late final List<AnimationController> _controllers;
-  late final FrameCounter _frameCounter;
+  late Ticker _ticker;
+  
   int _frameCount = 0;
+  int _currentObjectCount = 0;
+  double _currentFps = 0.0;
+  int _lastFpsUpdateMs = 0;
+  int _framesSinceFpsUpdate = 0;
+  
+  // Object data (like Java arrays)
+  final List<Rect> _objects = [];
+  final List<Color> _colors = [];
+  final List<double> _velocitiesX = [];
+  final List<double> _velocitiesY = [];
+  final Random _random = Random();
+  
+  Size _screenSize = Size.zero;
+  bool _disposed = false;
 
   @override
   void initState() {
     super.initState();
     _startTime = DateTime.now().millisecondsSinceEpoch;
-    _frameCounter = FrameCounter();
-    _frameCounter.start();
+    _lastFpsUpdateMs = _startTime;
+    
+    _ticker = createTicker(_onFrame);
+    
+    // Defer start until we have screen size
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_disposed) {
+        _screenSize = MediaQuery.of(context).size;
+        _initObjects(_initialObjectCount);
+        _ticker.start();
+      }
+    });
+  }
 
-    // Create animation controllers for each rectangle
-    _controllers = List.generate(
-      widget.rectangleCount,
-      (index) => AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: 800 + (index % 200)),
-      )..repeat(),
-    );
+  void _initObjects(int count) {
+    _objects.clear();
+    _colors.clear();
+    _velocitiesX.clear();
+    _velocitiesY.clear();
+    _currentObjectCount = 0;
+    _addObjects(count);
+  }
 
-    // Schedule test completion
-    Future.delayed(widget.testDuration, _completeTest);
+  void _addObjects(int count) {
+    if (count <= 0) return;
+    
+    final maxW = _screenSize.width > 0 ? _screenSize.width : 1000.0;
+    final maxH = _screenSize.height > 0 ? _screenSize.height : 2000.0;
+
+    for (int i = 0; i < count; i++) {
+      final x = _random.nextDouble() * (maxW - _objectSize);
+      final y = _random.nextDouble() * (maxH - _objectSize);
+
+      _objects.add(Rect.fromLTWH(x, y, _objectSize, _objectSize));
+      
+      // Deterministic color based on hue
+      final hue = ((_currentObjectCount + i) % 12) * 30.0;
+      _colors.add(HSVColor.fromAHSV(1.0, hue, 0.8, 0.9).toColor());
+      
+      // Random velocity: (random - 0.5) * 20 = range [-10, 10]
+      _velocitiesX.add((_random.nextDouble() - 0.5) * _maxVelocity * 2);
+      _velocitiesY.add((_random.nextDouble() - 0.5) * _maxVelocity * 2);
+    }
+    _currentObjectCount += count;
+  }
+
+  void _onFrame(Duration elapsed) {
+    if (_disposed || !mounted) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final elapsedMs = now - _startTime;
+    
+    // Update FPS every 500ms
+    _framesSinceFpsUpdate++;
+    if (now - _lastFpsUpdateMs >= 500) {
+      final elapsedSeconds = (now - _lastFpsUpdateMs) / 1000.0;
+      _currentFps = _framesSinceFpsUpdate / elapsedSeconds;
+      _framesSinceFpsUpdate = 0;
+      _lastFpsUpdateMs = now;
+    }
+
+    // Manage object count (add 250 per second like Java)
+    final secondsElapsed = elapsedMs ~/ 1000;
+    final desiredObjects = _initialObjectCount + (secondsElapsed * _objectIncrementPerSecond);
+    if (desiredObjects > _currentObjectCount) {
+      _addObjects(desiredObjects - _currentObjectCount);
+    }
+
+    // Update positions with physics
+    _updatePositions();
+
+    _frameCount++;
+
+    // Check completion based on sample count
+    if (_frameCount >= SampleConfiguration.samplesAmount) {
+      _completeTest();
+    } else {
+      setState(() {}); // Trigger repaint
+    }
+  }
+
+  void _updatePositions() {
+    if (_screenSize.width == 0) return;
+
+    for (int i = 0; i < _objects.length; i++) {
+      var rect = _objects[i];
+      var vx = _velocitiesX[i];
+      var vy = _velocitiesY[i];
+
+      // Move
+      rect = rect.translate(vx, vy);
+
+      // Bounce off walls (like Java handleBoundsCollision)
+      if (rect.left < 0 || rect.right > _screenSize.width) {
+        vx = -vx;
+        _velocitiesX[i] = vx;
+        rect = rect.translate(-vx * 2, 0);
+      }
+      if (rect.top < 0 || rect.bottom > _screenSize.height) {
+        vy = -vy;
+        _velocitiesY[i] = vy;
+        rect = rect.translate(0, -vy * 2);
+      }
+
+      _objects[i] = rect;
+    }
   }
 
   void _completeTest() {
-    _frameCounter.stop();
-    
+    _ticker.stop();
+    _disposed = true;
+
     if (!mounted) return;
 
     final elapsedMs = DateTime.now().millisecondsSinceEpoch - _startTime;
-    final fps = _frameCounter.averageFps;
-    final frameText = 'Rendered ${widget.rectangleCount} animating rectangles, '
-        'FPS: ${fps.toStringAsFixed(2)}, Frames: ${_frameCounter.totalFrames}';
-    
-    final result = TestResult('UI Test', elapsedMs, frameText, true);
+    final details = 'Max Objects: $_currentObjectCount, Samples: $_frameCount, FPS: ${_currentFps.toStringAsFixed(1)}';
+
+    final result = TestResult('UI Test', elapsedMs, details, true);
     Navigator.pop(context, result);
   }
 
   @override
   void dispose() {
-    for (final controller in _controllers) {
-      controller.dispose();
-    }
-    _frameCounter.stop();
+    _disposed = true;
+    _ticker.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
-        children: List.generate(
-          widget.rectangleCount,
-          (index) => _AnimatedRectangle(
-            controller: _controllers[index],
-            index: index,
-            screenSize: MediaQuery.of(context).size,
+        children: [
+          // Render all squares using CustomPaint for performance
+          CustomPaint(
+            size: _screenSize,
+            painter: _SquaresPainter(_objects, _colors),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Single animated rectangle widget.
-class _AnimatedRectangle extends StatefulWidget {
-  final AnimationController controller;
-  final int index;
-  final Size screenSize;
-
-  const _AnimatedRectangle({
-    required this.controller,
-    required this.index,
-    required this.screenSize,
-  });
-
-  @override
-  State<_AnimatedRectangle> createState() => _AnimatedRectangleState();
-}
-
-class _AnimatedRectangleState extends State<_AnimatedRectangle>
-    with SingleTickerProviderStateMixin {
-  late final Animation<double> _positionX;
-  late final Animation<double> _positionY;
-  late final Color _color;
-
-  @override
-  void initState() {
-    super.initState();
-    
-    final random = Random(widget.index);
-    final startX = random.nextDouble() * (widget.screenSize.width - 20);
-    final startY = random.nextDouble() * (widget.screenSize.height - 20);
-    final endX = random.nextDouble() * (widget.screenSize.width - 20);
-    final endY = random.nextDouble() * (widget.screenSize.height - 20);
-
-    // Create position animations with tween sequences
-    _positionX = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: startX, end: endX),
-        weight: 50,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: endX, end: startX),
-        weight: 50,
-      ),
-    ]).animate(widget.controller);
-
-    _positionY = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: startY, end: endY),
-        weight: 50,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: endY, end: startY),
-        weight: 50,
-      ),
-    ]).animate(widget.controller);
-
-    // Deterministic color based on index
-    _color = _generateColor(widget.index);
-  }
-
-  /// Generates deterministic color for rectangle.
-  Color _generateColor(int index) {
-    final hue = (index % 12) * 30.0;
-    return HSVColor.fromAHSV(1.0, hue, 0.8, 0.9).toColor();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: widget.controller,
-      builder: (context, child) {
-        return Positioned(
-          left: _positionX.value,
-          top: _positionY.value,
-          child: Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              color: _color,
-              borderRadius: BorderRadius.circular(2),
+          // Info overlay
+          Positioned(
+            left: 20,
+            top: 40,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              color: Colors.white.withOpacity(0.8),
+              child: Text(
+                'Samples: $_frameCount / ${SampleConfiguration.samplesAmount}\n'
+                'Objects: $_currentObjectCount\n'
+                'FPS: ${_currentFps.toStringAsFixed(1)}',
+                style: const TextStyle(fontSize: 14, color: Colors.black),
+              ),
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
 
-/// Tracks frame rendering performance.
-class FrameCounter {
-  int _totalFrames = 0;
-  int _framesSinceLastCheck = 0;
-  int _lastCheckTime = 0;
-  double _currentFps = 0.0;
-  bool _isRunning = false;
-  final List<double> _fpsHistory = [];
+/// Custom painter for efficient rendering of many rectangles.
+class _SquaresPainter extends CustomPainter {
+  final List<Rect> objects;
+  final List<Color> colors;
 
-  void start() {
-    if (_isRunning) return;
-    _isRunning = true;
-    _totalFrames = 0;
-    _framesSinceLastCheck = 0;
-    _lastCheckTime = DateTime.now().millisecondsSinceEpoch;
-    _fpsHistory.clear();
+  _SquaresPainter(this.objects, this.colors);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
     
-    SchedulerBinding.instance.addPersistentFrameCallback(_onFrame);
-  }
-
-  void stop() {
-    _isRunning = false;
-  }
-
-  void _onFrame(Duration timestamp) {
-    if (!_isRunning) return;
-
-    _totalFrames++;
-    _framesSinceLastCheck++;
-
-    final now = DateTime.now().millisecondsSinceEpoch;
-    const checkIntervalMs = 500; // Update FPS every 500ms
-
-    if (now - _lastCheckTime >= checkIntervalMs) {
-      final elapsedSeconds = (now - _lastCheckTime) / 1000.0;
-      _currentFps = _framesSinceLastCheck / elapsedSeconds;
-      _fpsHistory.add(_currentFps);
-      
-      _framesSinceLastCheck = 0;
-      _lastCheckTime = now;
+    for (int i = 0; i < objects.length; i++) {
+      paint.color = colors[i];
+      canvas.drawRect(objects[i], paint);
     }
   }
 
-  /// Returns current frames per second.
-  double get currentFps => _currentFps;
-
-  /// Returns average FPS across all measurements.
-  double get averageFps {
-    if (_fpsHistory.isEmpty) return 0.0;
-    return _fpsHistory.reduce((a, b) => a + b) / _fpsHistory.length;
-  }
-
-  /// Returns total frames rendered.
-  int get totalFrames => _totalFrames;
+  @override
+  bool shouldRepaint(covariant _SquaresPainter oldDelegate) => true;
 }
+

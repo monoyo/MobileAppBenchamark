@@ -1,157 +1,209 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Animated, Dimensions, View } from 'react-native';
+import { Dimensions, Text, View } from 'react-native';
 import type { TestResult } from './types';
 import { resolveResult } from './utils/navResult';
+import { getSampleConfig } from './constants/SampleConfiguration';
 
-const ANIM_DURATION_MS = 1_000; // 1s per cycle
-const TOTAL_DURATION_MS = 2_000; // 2s total test time
-const SQUARE_SIZE = 20; // Block size in dp
-const SQUARE_COUNT = 250; // Match Java INITIAL_OBJECT_COUNT
+// Match Java/Kotlin constants
+const INITIAL_OBJECT_COUNT = 250;
+const OBJECT_INCREMENT_PER_SECOND = 250;
+const OBJECT_SIZE = 50; // 50px like Java
+const MAX_VELOCITY = 10; // ±10 px/frame like Java
 
-/**
- * Generate random integer in range [0, max)
- */
-function randomInt(max: number): number {
-  return Math.floor(Math.random() * max);
-}
-
-interface AnimatedSquare {
+interface Square {
   id: number;
-  baseX: number;
-  baseY: number;
-  deltaX: number; // Target X offset from baseX
-  deltaY: number; // Target Y offset from baseY
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
   color: string;
-  animX: Animated.Value; // Animated X position
-  animY: Animated.Value; // Animated Y position
 }
 
 /**
  * UI rendering performance benchmark.
- * Measures frame rate and animation smoothness with many animated elements.
- * Creates squares with looping animations and measures total duration.
+ * Matches Java/Kotlin GPUTestActivity algorithm:
+ * - 50px squares
+ * - Physics-based movement with wall bouncing
+ * - +250 objects per second
+ * - Frame-count based completion
  */
 export default function UITest(): React.ReactElement {
   const { width, height } = Dimensions.get('window');
   const router = useRouter();
   const params = useLocalSearchParams<{ key: string }>();
+  const config = getSampleConfig(0);
 
-  const [squares, setSquares] = React.useState<AnimatedSquare[]>([]);
-  const startedRef = React.useRef<boolean>(false);
+  const [squares, setSquares] = React.useState<Square[]>([]);
+  const [frameCount, setFrameCount] = React.useState<number>(0);
+  const [currentFps, setCurrentFps] = React.useState<number>(0);
+  const [currentObjectCount, setCurrentObjectCount] = React.useState<number>(0);
 
-  // Initialize all squares at once (burst creation like Java)
-  React.useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
-    const arr: AnimatedSquare[] = [];
-    for (let i = 0; i < SQUARE_COUNT; i++) {
-      const baseX = randomInt(Math.max(1, width - SQUARE_SIZE));
-      const baseY = randomInt(Math.max(1, height - SQUARE_SIZE));
-      const deltaX = randomInt(401) - 200; // Range: -200..200
-      const deltaY = randomInt(401) - 200;
-      const color = `rgb(${randomInt(256)},${randomInt(256)},${randomInt(256)})`;
-      const animX = new Animated.Value(baseX);
-      const animY = new Animated.Value(baseY);
-      arr.push({
-        id: i,
-        baseX,
-        baseY,
-        deltaX,
-        deltaY,
-        color,
-        animX,
-        animY,
+  const startTimeRef = React.useRef<number>(Date.now());
+  const lastFpsUpdateRef = React.useRef<number>(Date.now());
+  const framesSinceFpsUpdateRef = React.useRef<number>(0);
+  const animFrameRef = React.useRef<number | null>(null);
+  const squaresRef = React.useRef<Square[]>([]);
+
+  // Generate deterministic color
+  const generateColor = React.useCallback((index: number): string => {
+    const hue = (index % 12) * 30;
+    // Convert HSV to RGB (simplified for bright colors)
+    const h = hue / 60;
+    const x = 1 - Math.abs((h % 2) - 1);
+    let r = 0, g = 0, b = 0;
+    if (h < 1) { r = 1; g = x; }
+    else if (h < 2) { r = x; g = 1; }
+    else if (h < 3) { g = 1; b = x; }
+    else if (h < 4) { g = x; b = 1; }
+    else if (h < 5) { r = x; b = 1; }
+    else { r = 1; b = x; }
+    return `rgb(${Math.round(r * 230)},${Math.round(g * 230)},${Math.round(b * 230)})`;
+  }, []);
+
+  // Add objects to the scene
+  const addObjects = React.useCallback((count: number, startIndex: number): Square[] => {
+    const newSquares: Square[] = [];
+    const maxW = width > 0 ? width : 1000;
+    const maxH = height > 0 ? height : 2000;
+
+    for (let i = 0; i < count; i++) {
+      newSquares.push({
+        id: startIndex + i,
+        x: Math.random() * (maxW - OBJECT_SIZE),
+        y: Math.random() * (maxH - OBJECT_SIZE),
+        vx: (Math.random() - 0.5) * MAX_VELOCITY * 2,
+        vy: (Math.random() - 0.5) * MAX_VELOCITY * 2,
+        color: generateColor(startIndex + i),
       });
     }
-    setSquares(arr);
+    return newSquares;
+  }, [width, height, generateColor]);
+
+  // Update positions with bouncing physics
+  const updatePositions = React.useCallback((sqs: Square[]): Square[] => {
+    return sqs.map(sq => {
+      let { x, y, vx, vy } = sq;
+
+      // Move
+      x += vx;
+      y += vy;
+
+      // Bounce off walls
+      if (x < 0 || x + OBJECT_SIZE > width) {
+        vx = -vx;
+        x += vx * 2;
+      }
+      if (y < 0 || y + OBJECT_SIZE > height) {
+        vy = -vy;
+        y += vy * 2;
+      }
+
+      return { ...sq, x, y, vx, vy };
+    });
   }, [width, height]);
 
+  // Initialize and run animation loop
   React.useEffect(() => {
-    if (squares.length === 0) return;
-    const startTimeMs = Date.now();
-    const animationCount = squares.length;
+    const startTime = Date.now();
+    startTimeRef.current = startTime;
+    lastFpsUpdateRef.current = startTime;
 
-    /**
-     * Creates a looping back-and-forth animation for a value.
-     * Mimics Android ObjectAnimator behavior.
-     */
-    const createLoopingAnimation = (
-      animValue: Animated.Value,
-      baseValue: number,
-      deltaValue: number
-    ): Animated.CompositeAnimation => {
-      return Animated.loop(
-        Animated.sequence([
-          Animated.timing(animValue, {
-            toValue: baseValue + deltaValue,
-            duration: ANIM_DURATION_MS / 2,
-            useNativeDriver: true,
-          }),
-          Animated.timing(animValue, {
-            toValue: baseValue,
-            duration: ANIM_DURATION_MS / 2,
-            useNativeDriver: true,
-          }),
-        ])
-      );
+    // Initialize with initial objects
+    const initial = addObjects(INITIAL_OBJECT_COUNT, 0);
+    squaresRef.current = initial;
+    setSquares(initial);
+    setCurrentObjectCount(INITIAL_OBJECT_COUNT);
+
+    let frame = 0;
+    let objCount = INITIAL_OBJECT_COUNT;
+
+    const loop = () => {
+      const now = Date.now();
+      const elapsedMs = now - startTime;
+
+      // Update FPS every 500ms
+      framesSinceFpsUpdateRef.current++;
+      if (now - lastFpsUpdateRef.current >= 500) {
+        const elapsedSeconds = (now - lastFpsUpdateRef.current) / 1000;
+        setCurrentFps(framesSinceFpsUpdateRef.current / elapsedSeconds);
+        framesSinceFpsUpdateRef.current = 0;
+        lastFpsUpdateRef.current = now;
+      }
+
+      // Manage object count (+250 per second)
+      const secondsElapsed = Math.floor(elapsedMs / 1000);
+      const desiredObjects = INITIAL_OBJECT_COUNT + (secondsElapsed * OBJECT_INCREMENT_PER_SECOND);
+      if (desiredObjects > objCount) {
+        const toAdd = desiredObjects - objCount;
+        const newOnes = addObjects(toAdd, objCount);
+        squaresRef.current = [...squaresRef.current, ...newOnes];
+        objCount = desiredObjects;
+        setCurrentObjectCount(objCount);
+      }
+
+      // Update positions
+      squaresRef.current = updatePositions(squaresRef.current);
+      setSquares([...squaresRef.current]);
+
+      frame++;
+      setFrameCount(frame);
+
+      // Check completion
+      if (frame >= config.sampleCount) {
+        const duration = Date.now() - startTime;
+        const res: TestResult = {
+          testName: 'UI Test',
+          group: 'ui',
+          executionTimeMs: duration,
+          details: `Max Objects: ${objCount}, Samples: ${frame}`,
+          success: true,
+        };
+        resolveResult(params.key as string, res);
+        router.back();
+      } else {
+        animFrameRef.current = requestAnimationFrame(loop);
+      }
     };
 
-    // Start all animations (X and Y independently)
-    const animations: Animated.CompositeAnimation[] = [];
-    squares.forEach((sq) => {
-      animations.push(
-        createLoopingAnimation(sq.animX, sq.baseX, sq.deltaX)
-      );
-      animations.push(
-        createLoopingAnimation(sq.animY, sq.baseY, sq.deltaY)
-      );
-    });
-    animations.forEach((anim) => anim.start());
-
-    // Run test for fixed duration
-    const timer = setTimeout(() => {
-      const elapsedMs = Date.now() - startTimeMs;
-      const res: TestResult = {
-        testName: 'UI Test',
-        group: 'ui',
-        executionTimeMs: elapsedMs,
-        details: `squares=${animationCount} duration=${TOTAL_DURATION_MS}ms cycle=${ANIM_DURATION_MS}ms`,
-        success: true,
-      };
-      resolveResult(params.key as string, res);
-      router.back();
-    }, TOTAL_DURATION_MS);
+    animFrameRef.current = requestAnimationFrame(loop);
 
     return () => {
-      clearTimeout(timer);
-      // Clean up all animations
-      squares.forEach((sq) => {
-        sq.animX.stopAnimation();
-        sq.animY.stopAnimation();
-      });
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
     };
-  }, [squares, params.key, router]);
+  }, [addObjects, updatePositions, config.sampleCount, params.key, router]);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
-      {squares.map((sq) => (
-        <Animated.View
+      {squares.map(sq => (
+        <View
           key={sq.id}
           style={{
             position: 'absolute',
-            width: SQUARE_SIZE,
-            height: SQUARE_SIZE,
-            left: 0,
-            top: 0,
+            left: sq.x,
+            top: sq.y,
+            width: OBJECT_SIZE,
+            height: OBJECT_SIZE,
             backgroundColor: sq.color,
-            transform: [
-              { translateX: sq.animX },
-              { translateY: sq.animY },
-            ],
           }}
         />
       ))}
+      <View style={{
+        position: 'absolute',
+        left: 20,
+        top: 40,
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        padding: 8,
+      }}>
+        <Text style={{ fontSize: 14, color: '#000' }}>
+          Samples: {frameCount} / {config.sampleCount}{'\n'}
+          Objects: {currentObjectCount}{'\n'}
+          FPS: {currentFps.toFixed(1)}
+        </Text>
+      </View>
     </View>
   );
 }
+
