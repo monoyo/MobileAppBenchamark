@@ -302,6 +302,7 @@ export default function Suite(): React.ReactElement {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 32,
     paddingVertical: 52,
   },
@@ -309,11 +310,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     fontWeight: '700',
+    color: '#000000',
     marginBottom: 16,
   },
   progressBarWrap: {
     height: 4,
-    backgroundColor: '#eee',
+    backgroundColor: '#EEEEEE',
     borderRadius: 2,
     flexDirection: 'row',
     overflow: 'hidden',
@@ -368,6 +370,7 @@ const styles = StyleSheet.create({
   },
   mono: {
     fontSize: 14,
+    color: '#000000',
     fontFamily: Platform.select({
       ios: 'Menlo',
       android: 'monospace',
