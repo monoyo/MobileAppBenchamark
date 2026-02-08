@@ -2,7 +2,6 @@ import { Href, useRouter } from 'expo-router';
 import React from 'react';
 import {
   Alert,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -17,8 +16,8 @@ import {
   getSampleConfig,
 } from './constants/SampleConfiguration';
 import { useFpsCounter } from './hooks/useFpsCounter';
-import type { GroupAverage, TestResult } from './types';
-import { computeGroupAverages, formatResult } from './types';
+import type { TestResult } from './types';
+import { formatResult } from './types';
 import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
 import { getLaunchTime, markSuiteReady } from './utils/launchTime';
 import {
@@ -54,11 +53,8 @@ export default function Suite(): React.ReactElement {
   >(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Configuration
-  const [configId, setConfigId] = React.useState<number>(0);
-  const [showConfigModal, setShowConfigModal] = React.useState<boolean>(
-    false
-  );
+  // Configuration - hardcoded to medium (matching other variants)
+  const configId = 0;
   const config = getSampleConfig(configId);
 
   const launchTimeRef = React.useRef<number | null>(null);
@@ -236,59 +232,12 @@ export default function Suite(): React.ReactElement {
   const completed = iteration * TESTS.length + testIndex;
   const progress = total === 0 ? 0 : Math.max(0, Math.min(1, completed / total));
 
-  const groupAverages: GroupAverage[] =
-    computeGroupAverages(results);
-
   return (
     <View style={styles.root}>
-      <Text style={styles.header}>Run Config: {config.displayName}</Text>
-
-      <TouchableOpacity
-        onPress={() => setShowConfigModal(true)}
-        disabled={running}
-        style={styles.configBtn}
-      >
-        <Text style={styles.configBtnText}>Change Configuration</Text>
-      </TouchableOpacity>
-
-      {/* Configuration Modal */}
-      <Modal visible={showConfigModal} transparent animationType="slide">
-        <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Sample Size</Text>
-            {SampleConfiguration.map((c) => (
-              <TouchableOpacity
-                key={c.id}
-                style={styles.modalItem}
-                onPress={() => {
-                  setConfigId(c.id);
-                  setShowConfigModal(false);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.modalItemText,
-                    c.id === configId && styles.selectedItem,
-                  ]}
-                >
-                  {c.displayName}
-                </Text>
-              </TouchableOpacity>
-            ))}
-            <TouchableOpacity
-              style={styles.closeBtn}
-              onPress={() => setShowConfigModal(false)}
-            >
-              <Text style={styles.closeBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Text style={styles.subHeader}>
+      <Text style={styles.header}>
         {running
           ? `Running: ${TESTS[testIndex]?.name} (${iteration + 1}/${config.sampleCount})`
-          : 'Ready'}
+          : 'Benchmark Suite'}
       </Text>
 
       <View style={styles.progressBarWrap}>
@@ -300,31 +249,16 @@ export default function Suite(): React.ReactElement {
         <Text style={styles.errorText}>{error}</Text>
       )}
 
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingVertical: 8 }}
-      >
-        <Text style={styles.sectionTitle}>Recent Results</Text>
-        <Text style={styles.mono}>
-          {results
-            .slice(-10)
-            .map((r, i) =>
-              `[${results.length - 10 + i}] ${formatResult(r)}`
-            )
-            .join('\n')}
-        </Text>
-
-        {groupAverages.length > 0 && (
-          <View style={{ marginTop: 16 }}>
-            <Text style={styles.sectionTitle}>Averages</Text>
-            {groupAverages.map((g) => (
-              <Text key={g.group} style={styles.avgLine}>
-                {g.group}: {g.averageMs.toFixed(2)} ms
-              </Text>
-            ))}
-          </View>
-        )}
-      </ScrollView>
+      <View style={styles.resultsContainer}>
+        <ScrollView>
+          <Text style={styles.mono}>
+            {results
+              .slice(-50)
+              .map((r) => formatResult(r))
+              .join('\n')}
+          </Text>
+        </ScrollView>
+      </View>
 
       <View style={styles.row}>
         <Pressable
@@ -345,6 +279,21 @@ export default function Suite(): React.ReactElement {
             {running ? 'Running...' : 'Start Tests'}
           </Text>
         </Pressable>
+
+        <View style={{ width: 16 }} />
+
+        <Pressable
+          onPress={() => {
+            if (lastSavedPath) {
+              Alert.alert('Results Saved', `Path: ${lastSavedPath}`);
+            }
+          }}
+          style={[styles.btn, styles.btnOutlined]}
+        >
+          <Text style={[styles.btnText, styles.btnTextOutlined]}>
+            Export Results
+          </Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -360,22 +309,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: 4,
-  },
-  subHeader: {
-    textAlign: 'center',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-  configBtn: {
-    alignSelf: 'center',
-    padding: 8,
     marginBottom: 16,
-  },
-  configBtnText: {
-    color: '#3b82f6',
-    fontWeight: '600',
   },
   progressBarWrap: {
     height: 4,
@@ -386,7 +320,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   progressBarFill: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#443FD8',
   },
   errorText: {
     color: '#dc2626',
@@ -394,6 +328,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 8,
     fontWeight: '500',
+  },
+  resultsContainer: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+    padding: 8,
+    marginBottom: 16,
   },
   row: {
     flexDirection: 'row',
@@ -418,58 +358,20 @@ const styles = StyleSheet.create({
   btnTextDisabled: {
     color: '#ccc',
   },
-  sectionTitle: {
-    fontWeight: '700',
-    marginBottom: 4,
+  btnOutlined: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#443FD8',
   },
-  avgLine: {
-    fontSize: 13,
+  btnTextOutlined: {
+    color: '#443FD8',
   },
   mono: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: 'Menlo',
       android: 'monospace',
       default: 'monospace',
     }),
-  },
-
-  // Modal
-  modalBg: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 32,
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  modalItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalItemText: {
-    fontSize: 16,
-  },
-  selectedItem: {
-    color: '#3b82f6',
-    fontWeight: 'bold',
-  },
-  closeBtn: {
-    marginTop: 16,
-    alignSelf: 'center',
-  },
-  closeBtnText: {
-    color: 'red',
-    fontWeight: '600',
   },
 });
