@@ -4,6 +4,6 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocationPermission } from './hooks/useLocationPermission';
 
-// Index now delegates to Benchmark screen directly (avoid duplicate implementations)
-import Benchmark from './Benchmark';
-export default Benchmark;
+// Index now delegates to Suite screen (unified with Java/Kotlin/Flutter)
+import Suite from './suite';
+export default Suite;
