@@ -1,11 +1,17 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -34,6 +40,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
     private static final String TAG = "ImageLoadingActivity";
 
     private TextView loadingStatus;
+    private ImageView benchmarkImageView;
 
     private static final List<String> IMAGE_URLS = Arrays.asList(
             "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
@@ -57,19 +64,37 @@ public class ImageLoadingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_image_loading);
-
         initUI();
         parseIntentData();
-        startBatchTest();
+        mainHandler.post(this::startBatchTest);
     }
 
     private void initUI() {
-        loadingStatus = findViewById(R.id.loadingStatus);
+        LinearLayout rootLayout = new LinearLayout(this);
+        rootLayout.setOrientation(LinearLayout.VERTICAL);
+        rootLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT));
+        rootLayout.setBackgroundColor(Color.WHITE);
+        rootLayout.setGravity(Gravity.CENTER);
+
+        loadingStatus = new TextView(this);
+        loadingStatus.setTextSize(18f);
+        loadingStatus.setTextColor(Color.BLACK);
+        loadingStatus.setGravity(Gravity.CENTER);
+        loadingStatus.setPadding(0, 20, 0, 20);
         loadingStatus.setText(R.string.initializing_image_batch);
 
-        progressLiveData.observe(this, currentIteration ->
-                loadingStatus.setText(getString(R.string.image_test_progress, currentIteration, Config.samplesAmount)));
+        benchmarkImageView = new ImageView(this);
+        benchmarkImageView.setLayoutParams(new LinearLayout.LayoutParams(900, 600));
+        benchmarkImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        benchmarkImageView.setBackgroundColor(Color.LTGRAY);
+
+        rootLayout.addView(loadingStatus);
+        rootLayout.addView(benchmarkImageView);
+        setContentView(rootLayout);
+
+        progressLiveData.observe(this, currentIteration -> loadingStatus
+                .setText(getString(R.string.image_test_progress, currentIteration, Config.samplesAmount)));
     }
 
     private void parseIntentData() {
@@ -112,25 +137,29 @@ public class ImageLoadingActivity extends AppCompatActivity {
 
         Glide.with(this)
                 .load(url)
+                .placeholder(new ColorDrawable(Color.LTGRAY))
+                .error(new ColorDrawable(Color.RED))
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .listener(createRequestListener(startTime))
-                .preload();
+                .into(benchmarkImageView);
     }
 
     private RequestListener<Drawable> createRequestListener(long startTime) {
         return new RequestListener<>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model,
-                                        @NonNull Target<Drawable> target, boolean isFirstResource) {
+                    @NonNull Target<Drawable> target, boolean isFirstResource) {
+                Log.e(TAG,
+                        "Load Error at #" + loadedImagesCount + ": " + (e != null ? e.getMessage() : "Unknown error"));
                 handleLoadResult(startTime, false, "Failed");
                 return false;
             }
 
             @Override
             public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model,
-                                           @NonNull Target<Drawable> target, @NonNull DataSource dataSource,
-                                           boolean isFirstResource) {
+                    @NonNull Target<Drawable> target, @NonNull DataSource dataSource,
+                    boolean isFirstResource) {
                 handleLoadResult(startTime, true, "Success");
                 return false;
             }
@@ -161,7 +190,7 @@ public class ImageLoadingActivity extends AppCompatActivity {
     }
 
     private void scheduleNextLoad() {
-        mainHandler.post(this::loadNextImage);
+        mainHandler.postDelayed(this::loadNextImage, 16);
     }
 
     private void finishBatch() {
