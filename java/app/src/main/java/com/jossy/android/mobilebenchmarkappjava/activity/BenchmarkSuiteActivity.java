@@ -315,6 +315,15 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         startTestsButton.setText("Start Tests");
         startTestsButton.setEnabled(true);
 
+        // Generate summary.csv with aggregated statistics
+        if (outputDir != null) {
+            try {
+                com.jossy.android.mobilebenchmarkappjava.utils.SummaryWriter.writeSummary(outputDir);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to write summary", e);
+            }
+        }
+
         long totalTime = System.currentTimeMillis() - testSuiteStartTime;
         String summary = String.format(Locale.US,
                 "All tests completed!\n" +

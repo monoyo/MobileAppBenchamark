@@ -17,11 +17,13 @@ import java.util.concurrent.locks.ReentrantLock
 class BufferedCsvWriter(
     private val outputFile: File,
     private val bufferCapacity: Int,
-    private val writeBufferBytes: Int
+    private val writeBufferBytes: Int,
+    private val testName: String = "unknown"
 ) : AutoCloseable {
 
     companion object {
         private const val TAG = "BufferedCsvWriter"
+        private const val PLATFORM = "kotlin"
     }
 
     private val checkpointFile = File(outputFile.parentFile, outputFile.name.replace(".csv", "_checkpoint.csv"))
@@ -122,9 +124,11 @@ class BufferedCsvWriter(
 
     private fun writeEntries(entries: List<TestEntry>) {
         val writer = writer ?: throw Exception("Writer not initialized")
-        val sb = StringBuilder(entries.size * 100)
+        val sb = StringBuilder(entries.size * 120)
         entries.forEach { entry ->
-            sb.append(entry.iteration).append(',')
+            sb.append(PLATFORM).append(',')
+                .append(csvEscape(testName)).append(',')
+                .append(entry.iteration).append(',')
                 .append(entry.result.executionTime).append(',')
                 .append(csvEscape(entry.result.details)).append(',')
                 .append(entry.intervalStartMs).append(',')
@@ -135,7 +139,7 @@ class BufferedCsvWriter(
     }
 
     private fun writeHeader() {
-        writer?.write("iteration,executionTimeMs,details,intervalStartMs,intervalDurationMs,cumulativeTimeMs\n")
+        writer?.write("platform,test_name,iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms\n")
     }
 
     fun saveCheckpoint() {
@@ -150,7 +154,7 @@ class BufferedCsvWriter(
             BufferedWriter(FileWriter(checkpointFile, true)).use { cpWriter ->
                 entries.forEach { entry ->
                     cpWriter.write(
-                        "${entry.iteration},${entry.result.executionTime}," +
+                        "$PLATFORM,${csvEscape(testName)},${entry.iteration},${entry.result.executionTime}," +
                                 "${csvEscape(entry.result.details)},${entry.intervalStartMs}," +
                                 "${entry.intervalDurationMs},${entry.cumulativeTimeMs}\n"
                     )

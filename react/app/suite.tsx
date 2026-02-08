@@ -20,6 +20,7 @@ import type { TestResult } from './types';
 import { formatResult } from './types';
 import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
 import { getLaunchTime, markSuiteReady } from './utils/launchTime';
+import { exportSummary } from './utils/summaryExport';
 import {
   createResultKey,
   waitForResult,
@@ -110,6 +111,15 @@ export default function Suite(): React.ReactElement {
             await csvWriters.current[key].flush();
           } catch (flushErr) {
             console.warn(`Failed to flush ${key}:`, flushErr);
+          }
+        }
+
+        // Generate summary.csv with aggregated statistics
+        if (sessionDir.current) {
+          try {
+            await exportSummary(acc, sessionDir.current, 'react_native');
+          } catch (summaryErr) {
+            console.warn('Failed to export summary:', summaryErr);
           }
         }
 

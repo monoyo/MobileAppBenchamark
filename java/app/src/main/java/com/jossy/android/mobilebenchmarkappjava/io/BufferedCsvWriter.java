@@ -23,6 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BufferedCsvWriter implements AutoCloseable {
 
     private static final String TAG = "BufferedCsvWriter";
+    private static final String PLATFORM = "java";
 
     private final File outputFile;
     private final File checkpointFile;
@@ -39,12 +40,19 @@ public class BufferedCsvWriter implements AutoCloseable {
     private long lastFlushTimeMs = System.currentTimeMillis();
     private volatile Throwable lastError = null;
 
+    private final String testName;
+
     public BufferedCsvWriter(File outputFile, int bufferCapacity, int writeBufferBytes) {
+        this(outputFile, bufferCapacity, writeBufferBytes, "unknown");
+    }
+
+    public BufferedCsvWriter(File outputFile, int bufferCapacity, int writeBufferBytes, String testName) {
         this.outputFile = outputFile;
         this.checkpointFile = new File(outputFile.getParent(),
                 outputFile.getName().replace(".csv", "_checkpoint.csv"));
         this.bufferCapacity = bufferCapacity;
         this.writeBufferBytes = writeBufferBytes;
+        this.testName = testName;
         this.buffer = new ArrayList<>(bufferCapacity);
         this.writeExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "csv-writer-" + outputFile.getName());
@@ -140,9 +148,11 @@ public class BufferedCsvWriter implements AutoCloseable {
 
     private void writeEntries(List<TestEntry> entries) throws IOException {
         if (writer == null) throw new IOException("Writer not initialized");
-        StringBuilder sb = new StringBuilder(entries.size() * 100);
+        StringBuilder sb = new StringBuilder(entries.size() * 120);
         for (TestEntry entry : entries) {
-            sb.append(entry.iteration).append(',')
+            sb.append(PLATFORM).append(',')
+                    .append(csvEscape(testName)).append(',')
+                    .append(entry.iteration).append(',')
                     .append(entry.result.getExecutionTime()).append(',')
                     .append(csvEscape(entry.result.getDetails())).append(',')
                     .append(entry.intervalStartMs).append(',')
@@ -154,7 +164,7 @@ public class BufferedCsvWriter implements AutoCloseable {
 
     private void writeHeader() throws IOException {
         if (writer != null) {
-            writer.write("iteration,executionTimeMs,details,intervalStartMs,intervalDurationMs,cumulativeTimeMs\n");
+            writer.write("platform,test_name,iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms\n");
         }
     }
 
@@ -171,7 +181,7 @@ public class BufferedCsvWriter implements AutoCloseable {
         if (entries == null || entries.isEmpty()) return;
         try (BufferedWriter cpWriter = new BufferedWriter(new FileWriter(checkpointFile, true))) {
             for (TestEntry entry : entries) {
-                cpWriter.write(entry.iteration + "," + entry.result.getExecutionTime() + "," +
+                cpWriter.write(PLATFORM + "," + csvEscape(testName) + "," + entry.iteration + "," + entry.result.getExecutionTime() + "," +
                         csvEscape(entry.result.getDetails()) + "," + entry.intervalStartMs + "," +
                         entry.intervalDurationMs + "," + entry.cumulativeTimeMs + "\n");
             }

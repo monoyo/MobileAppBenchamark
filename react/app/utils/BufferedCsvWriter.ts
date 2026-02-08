@@ -1,17 +1,22 @@
 import RNFS from 'react-native-fs';
 
+const DEFAULT_HEADER = 'platform,test_name,iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms';
+const PLATFORM = 'react_native';
+
 export class BufferedCsvWriter {
     private buffer: string[] = [];
     private filePath: string;
     private bufferSize: number;
+    private testName: string;
     private initialized = false;
 
-    constructor(filePath: string, bufferSize: number = 1000) {
+    constructor(filePath: string, bufferSize: number = 1000, testName: string = 'unknown') {
         this.filePath = filePath;
         this.bufferSize = bufferSize;
+        this.testName = testName;
     }
 
-    async initialize(header: string = 'iteration,executionTimeMs,details,intervalStartMs,intervalDurationMs,cumulativeTimeMs') {
+    async initialize(header: string = DEFAULT_HEADER) {
         if (this.initialized) return;
         try {
             // Verify path is writable. usually RNFS.DocumentDirectoryPath is used.
@@ -24,19 +29,23 @@ export class BufferedCsvWriter {
         }
     }
 
+    private csvSafe(value: string): string {
+        const escaped = value.replace(/"/g, '""');
+        const needsQuote = escaped.includes(',') || escaped.includes('\n') || escaped.includes('"');
+        return needsQuote ? `"${escaped}"` : escaped;
+    }
+
     async write(
         iteration: number,
         executionTimeMs: number,
         details: string,
-        intervalStartMs: number,
-        intervalDurationMs: number,
-        cumulativeTimeMs: number
+        intervalStartMs: number = 0,
+        intervalDurationMs: number = 0,
+        cumulativeTimeMs: number = 0
     ) {
-        const escapedDetails = details.replace(/"/g, '""');
-        const needsQuote = escapedDetails.includes(',') || escapedDetails.includes('\n');
-        const finalDetails = needsQuote ? `"${escapedDetails}"` : escapedDetails;
-
-        const line = `${iteration},${executionTimeMs},${finalDetails},${intervalStartMs},${intervalDurationMs},${cumulativeTimeMs}`;
+        const safeDetails = this.csvSafe(details);
+        const safeTestName = this.csvSafe(this.testName);
+        const line = `${PLATFORM},${safeTestName},${iteration},${executionTimeMs},${safeDetails},${intervalStartMs},${intervalDurationMs},${cumulativeTimeMs}`;
         this.buffer.push(line);
 
         if (this.buffer.length >= this.bufferSize) {
@@ -62,3 +71,4 @@ export class BufferedCsvWriter {
         await this.flush();
     }
 }
+

@@ -11,6 +11,7 @@ import 'location_test.dart';
 import 'config/sample_configuration.dart';
 import 'utils/buffered_csv_writer.dart';
 import 'utils/fps_counter.dart';
+import 'utils/summary_writer.dart';
 
 class BenchmarkSuitePage extends StatefulWidget {
   final int appLaunchMs;
@@ -119,6 +120,12 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     if (_currentTestIndex >= _allTests) {
       // Finished all tests
       await _closeWriters();
+      
+      // Generate summary.csv with aggregated statistics
+      if (_sessionDir != null) {
+        await SummaryWriter.writeSummary(_sessionDir!);
+      }
+      
       _appendAverages();
       setState(() => _running = false);
       if (_sessionDir != null) {

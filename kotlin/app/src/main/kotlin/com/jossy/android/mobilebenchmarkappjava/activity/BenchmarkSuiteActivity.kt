@@ -330,6 +330,15 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             isEnabled = true
         }
 
+        // Generate summary.csv with aggregated statistics
+        outputDir?.let { dir ->
+            try {
+                com.jossy.android.mobilebenchmarkappjava.utils.SummaryWriter.writeSummary(dir)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to write summary", e)
+            }
+        }
+
         val totalTime = System.currentTimeMillis() - testSuiteStartTime
         val summary = String.format(
             Locale.US,

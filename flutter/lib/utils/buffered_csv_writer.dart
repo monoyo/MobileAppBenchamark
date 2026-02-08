@@ -3,13 +3,15 @@ import 'dart:io';
 class BufferedCsvWriter {
   final String filePath;
   final int bufferSize;
+  final String testName;
+  final String platform;
   final List<String> _buffer = [];
   bool _initialized = false;
   IOSink? _sink;
 
-  BufferedCsvWriter(this.filePath, {this.bufferSize = 1000});
+  BufferedCsvWriter(this.filePath, {this.bufferSize = 1000, this.testName = 'unknown', this.platform = 'flutter'});
 
-  Future<void> initialize({String header = 'iteration,executionTimeMs,details,intervalStartMs,intervalDurationMs,cumulativeTimeMs'}) async {
+  Future<void> initialize({String header = 'platform,test_name,iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms'}) async {
     if (_initialized) return;
     try {
       final file = File(filePath);
@@ -40,7 +42,7 @@ class BufferedCsvWriter {
     if (!_initialized) return;
 
     final safeDetails = _csvSafe(details);
-    final line = '$iteration,$executionTimeMs,$safeDetails,$intervalStartMs,$intervalDurationMs,$cumulativeTimeMs';
+    final line = '$platform,${_csvSafe(testName)},$iteration,$executionTimeMs,$safeDetails,$intervalStartMs,$intervalDurationMs,$cumulativeTimeMs';
     _buffer.add(line);
 
     if (_buffer.length >= bufferSize) {
@@ -73,3 +75,4 @@ class BufferedCsvWriter {
     return v;
   }
 }
+
