@@ -15,11 +15,11 @@ class UITestPage extends StatefulWidget {
 }
 
 class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateMixin {
-  // Match Java/Kotlin constants
+  // Match Java/Kotlin constants (Physical Pixels)
   static const int _initialObjectCount = 250;
   static const int _objectIncrementPerSecond = 250;
-  static const double _objectSize = 50.0;
-  static const double _maxVelocity = 10.0; // ±10 px/frame like Java
+  static const double _nativeObjectSizePx = 50.0; // 50 physical pixels
+  static const double _nativeMaxVelocityPx = 10.0; // 10 physical pixels
 
   late final int _startTime;
   late Ticker _ticker;
@@ -30,15 +30,17 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
   int _lastFpsUpdateMs = 0;
   int _framesSinceFpsUpdate = 0;
   
-  // Object data (like Java arrays)
+  // Object data
   final List<Rect> _objects = [];
   final List<Color> _colors = [];
   final List<double> _velocitiesX = [];
   final List<double> _velocitiesY = [];
   final Random _random = Random();
   
-  Size _screenSize = Size.zero;
+  Size _viewSize = Size.zero; // Size of the rendering area in logical pixels
+  double _devicePixelRatio = 1.0;
   bool _disposed = false;
+  bool _initialized = false;
 
   @override
   void initState() {
@@ -47,15 +49,7 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
     _lastFpsUpdateMs = _startTime;
     
     _ticker = createTicker(_onFrame);
-    
-    // Defer start until we have screen size
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !_disposed) {
-        _screenSize = MediaQuery.of(context).size;
-        _initObjects(_initialObjectCount);
-        _ticker.start();
-      }
-    });
+    // Ticker will be started when we have valid size from LayoutBuilder
   }
 
   void _initObjects(int count) {
@@ -68,30 +62,36 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
   }
 
   void _addObjects(int count) {
-    if (count <= 0) return;
+    if (count <= 0 || _viewSize.isEmpty) return;
     
-    final maxW = _screenSize.width > 0 ? _screenSize.width : 1000.0;
-    final maxH = _screenSize.height > 0 ? _screenSize.height : 2000.0;
+    // Logic uses logical pixels, so we convert physical constants to logical
+    final objectSizeLogical = _nativeObjectSizePx / _devicePixelRatio;
+    final maxVelocityLogical = _nativeMaxVelocityPx / _devicePixelRatio;
+
+    final maxW = _viewSize.width;
+    final maxH = _viewSize.height;
 
     for (int i = 0; i < count; i++) {
-      final x = _random.nextDouble() * (maxW - _objectSize);
-      final y = _random.nextDouble() * (maxH - _objectSize);
+        // Random position within bounds
+        // Ensure we don't spawn outside if size is small, though maxW should be >> objectSize
+        final x = _random.nextDouble() * (maxW - objectSizeLogical);
+        final y = _random.nextDouble() * (maxH - objectSizeLogical);
 
-      _objects.add(Rect.fromLTWH(x, y, _objectSize, _objectSize));
-      
-      // Deterministic color based on hue
-      final hue = ((_currentObjectCount + i) % 12) * 30.0;
-      _colors.add(HSVColor.fromAHSV(1.0, hue, 0.8, 0.9).toColor());
-      
-      // Random velocity: (random - 0.5) * 20 = range [-10, 10]
-      _velocitiesX.add((_random.nextDouble() - 0.5) * _maxVelocity * 2);
-      _velocitiesY.add((_random.nextDouble() - 0.5) * _maxVelocity * 2);
+        _objects.add(Rect.fromLTWH(x, y, objectSizeLogical, objectSizeLogical));
+        
+        // Deterministic color
+        final hue = ((_currentObjectCount + i) % 12) * 30.0;
+        _colors.add(HSVColor.fromAHSV(1.0, hue, 0.8, 0.9).toColor());
+        
+        // Random velocity: (random - 0.5) * 2 * maxVelocity
+        _velocitiesX.add((_random.nextDouble() - 0.5) * 2 * maxVelocityLogical);
+        _velocitiesY.add((_random.nextDouble() - 0.5) * 2 * maxVelocityLogical);
     }
     _currentObjectCount += count;
   }
 
   void _onFrame(Duration elapsed) {
-    if (_disposed || !mounted) return;
+    if (_disposed || !mounted || !_initialized) return;
 
     final now = DateTime.now().millisecondsSinceEpoch;
     final elapsedMs = now - _startTime;
@@ -105,28 +105,31 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
       _lastFpsUpdateMs = now;
     }
 
-    // Manage object count (add 250 per second like Java)
+    // Manage object count
     final secondsElapsed = elapsedMs ~/ 1000;
     final desiredObjects = _initialObjectCount + (secondsElapsed * _objectIncrementPerSecond);
     if (desiredObjects > _currentObjectCount) {
       _addObjects(desiredObjects - _currentObjectCount);
     }
 
-    // Update positions with physics
+    // Update positions
     _updatePositions();
 
     _frameCount++;
 
-    // Check completion based on sample count
     if (_frameCount >= SampleConfig.sampleCount) {
       _completeTest();
     } else {
-      setState(() {}); // Trigger repaint
+      setState(() {});
     }
   }
 
   void _updatePositions() {
-    if (_screenSize.width == 0) return;
+    if (_viewSize.isEmpty) return;
+    
+    // Bounds in logical pixels
+    final width = _viewSize.width;
+    final height = _viewSize.height;
 
     for (int i = 0; i < _objects.length; i++) {
       var rect = _objects[i];
@@ -136,16 +139,26 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
       // Move
       rect = rect.translate(vx, vy);
 
-      // Bounce off walls (like Java handleBoundsCollision)
-      if (rect.left < 0 || rect.right > _screenSize.width) {
+      // Bounce off walls
+      // Note: rect.left/right/top/bottom are in logical pixels
+      if (rect.left < 0 || rect.right > width) {
         vx = -vx;
         _velocitiesX[i] = vx;
-        rect = rect.translate(-vx * 2, 0);
+        // Correct position to stay in bounds
+        if (rect.left < 0) {
+            rect = rect.shift(Offset(-rect.left * 2, 0)); // reflect
+        } else {
+             rect = rect.shift(Offset(-(rect.right - width) * 2, 0));
+        }
       }
-      if (rect.top < 0 || rect.bottom > _screenSize.height) {
+      if (rect.top < 0 || rect.bottom > height) {
         vy = -vy;
         _velocitiesY[i] = vy;
-        rect = rect.translate(0, -vy * 2);
+        if (rect.top < 0) {
+            rect = rect.shift(Offset(0, -rect.top * 2));
+        } else {
+            rect = rect.shift(Offset(0, -(rect.bottom - height) * 2));
+        }
       }
 
       _objects[i] = rect;
@@ -174,31 +187,51 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    // Get device pixel ratio for physical <-> logical conversion
+    _devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Render all squares using CustomPaint for performance
-          CustomPaint(
-            size: _screenSize,
-            painter: _SquaresPainter(_objects, _colors),
-          ),
-          // Info overlay
-          Positioned(
-            left: 20,
-            top: 40,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              color: Colors.white.withOpacity(0.8),
-              child: Text(
-                'Samples: $_frameCount / ${SampleConfig.sampleCount}\n'
-                'Objects: $_currentObjectCount\n'
-                'FPS: ${_currentFps.toStringAsFixed(1)}',
-                style: const TextStyle(fontSize: 14, color: Colors.black),
-              ),
-            ),
-          ),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+            // Update view size based on actual layout constraints
+            final newSize = Size(constraints.maxWidth, constraints.maxHeight);
+            
+            if (newSize != _viewSize) {
+                _viewSize = newSize;
+                
+                // If this is the first time we have a valid size, start the test
+                if (!_initialized && !_viewSize.isEmpty) {
+                    _initialized = true;
+                    // Initialize objects now that we know the size and pixel ratio
+                    _initObjects(_initialObjectCount);
+                    _ticker.start();
+                }
+            }
+
+            return Stack(
+                children: [
+                CustomPaint(
+                    size: _viewSize,
+                    painter: _SquaresPainter(_objects, _colors),
+                ),
+                Positioned(
+                    left: 20,
+                    top: 40,
+                    child: Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.white.withOpacity(0.8),
+                    child: Text(
+                        'Samples: $_frameCount / ${SampleConfig.sampleCount}\n'
+                        'Objects: $_currentObjectCount\n'
+                        'FPS: ${_currentFps.toStringAsFixed(1)}',
+                        style: const TextStyle(fontSize: 14, color: Colors.black),
+                    ),
+                    ),
+                ),
+                ],
+            );
+        },
       ),
     );
   }
