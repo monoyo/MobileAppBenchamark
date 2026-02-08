@@ -269,10 +269,6 @@ class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Image Loading Test'),
-        elevation: 0,
-      ),
       body: ListView.builder(
         controller: _scrollController,
         itemExtent: _scrollItemHeight.toDouble(),

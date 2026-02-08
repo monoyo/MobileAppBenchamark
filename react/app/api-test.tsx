@@ -59,7 +59,7 @@ export default function ApiTest(): React.ReactElement {
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Running API test...</Text>
+      <Text style={{ fontSize: 18 }}>Running API test...</Text>
     </View>
   );
 }

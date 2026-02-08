@@ -64,13 +64,10 @@ class _ApiTestPageState extends State<ApiTestPage> {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Fetching API data...'),
-          ],
+        child: Text(
+          'Fetching API data...',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 16),
         ),
       ),
     );

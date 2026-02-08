@@ -103,7 +103,7 @@ export default function LocationTest(): React.ReactElement {
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Getting location...</Text>
+      <Text style={{ fontSize: 18 }}>Waiting for location...</Text>
     </View>
   );
 }

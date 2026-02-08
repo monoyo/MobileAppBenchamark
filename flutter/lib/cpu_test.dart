@@ -61,7 +61,7 @@ class _CPUTestPageState extends State<CPUTestPage> {
     return const Scaffold(
       body: Center(
         child: Text(
-          'Running CPU Test...',
+          'CPU processing ...',
           style: TextStyle(fontSize: 18),
         ),
       ),

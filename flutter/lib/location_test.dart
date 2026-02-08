@@ -19,7 +19,7 @@ class LocationTestPage extends StatefulWidget {
 
 class _LocationTestPageState extends State<LocationTestPage> {
   late final int _startTime;
-  String _statusMessage = 'Initializing...';
+  String _statusMessage = 'Waiting for location...';
 
   @override
   void initState() {
@@ -136,17 +136,13 @@ class _LocationTestPageState extends State<LocationTestPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 24),
-            Text(
-              _statusMessage,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
+        child: Text(
+          _statusMessage,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

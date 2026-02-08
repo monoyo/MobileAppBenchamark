@@ -95,7 +95,7 @@ export default function CPUTest(): React.ReactElement {
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ fontSize: 18 }}>Running CPU Test...</Text>
+      <Text style={{ fontSize: 18 }}>CPU processing ...</Text>
     </View>
   );
 }

@@ -15,7 +15,10 @@ class RAMTestPage extends StatelessWidget {
 
     return const Scaffold(
       body: Center(
-        child: Text('Running RAM test...'),
+        child: Text(
+          'RAM processing ...',
+          style: TextStyle(fontSize: 18),
+        ),
       ),
     );
   }

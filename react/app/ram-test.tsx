@@ -218,11 +218,7 @@ export default function RAMTest(): React.ReactElement {
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>
-        {status === 'running'
-          ? `RAM test: ${progress}%`
-          : 'Complete'}
-      </Text>
+      <Text style={{ fontSize: 18 }}>RAM processing ...</Text>
     </View>
   );
 }
