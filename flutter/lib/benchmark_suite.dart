@@ -204,13 +204,14 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         // Write to CSV immediately
         final writer = _writers[res.testName];
         if (writer != null) {
+            final cumulativeMs = DateTime.now().millisecondsSinceEpoch - _suiteStartTime;
             writer.write(
                 iterNum, 
                 res.executionTimeMs, 
                 res.details, 
-                fps: currentFps,
                 intervalStartMs: intervalStart, 
-                intervalDurationMs: intervalDuration
+                intervalDurationMs: intervalDuration,
+                cumulativeTimeMs: cumulativeMs,
             );
         }
       }

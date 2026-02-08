@@ -7,7 +7,7 @@ import { resolveResult } from './utils/navResult';
 const ANIM_DURATION_MS = 1_000; // 1s per cycle
 const TOTAL_DURATION_MS = 2_000; // 2s total test time
 const SQUARE_SIZE = 20; // Block size in dp
-const SQUARE_COUNT = 50; // Number of animated squares
+const SQUARE_COUNT = 250; // Match Java INITIAL_OBJECT_COUNT
 
 /**
  * Generate random integer in range [0, max)

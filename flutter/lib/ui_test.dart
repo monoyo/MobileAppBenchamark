@@ -13,7 +13,7 @@ class UITestPage extends StatefulWidget {
   const UITestPage({
     super.key,
     this.testDuration = const Duration(seconds: 2),
-    this.rectangleCount = 1500,
+    this.rectangleCount = 250, // Match Java INITIAL_OBJECT_COUNT
   });
 
   @override

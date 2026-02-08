@@ -51,8 +51,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Refactor benchmark suite UI and update project configuration&#10;&#10;This commit refactors the React Native benchmark suite to simplify configuration and improves the UI. It also adds IDE project files for several Android library modules and updates the workspace configuration.&#10;&#10;The following changes were made:&#10;&#10;- Hardcoded the benchmark configuration to &quot;medium&quot; (configId 0) and removed the sample size selection modal from `suite.tsx`.&#10;- Updated the `BenchmarkSuite` UI to display a fixed &quot;Benchmark Suite&quot; header instead of dynamic status strings when ready.&#10;- Increased the results scrollback buffer from 10 to 50 items and simplified the results list display.&#10;- Added an &quot;Export Results&quot; button to the suite UI to allow users to view the saved CSV path.&#10;- Updated the progress bar color to `#443FD8` and standardized button styles.&#10;- Generated and added Eclipse `.project` files for multiple `node_modules` Android sub-projects (including Expo and React Native libraries) to support better IDE integration.&#10;- Updated `.idea/workspace.xml` with recent task history, project state, and layout configurations.">
-      <change beforePath="$PROJECT_DIR$/react/app/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/index.tsx" afterDir="false" />
+    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Refactor benchmark configuration to use fixed sample settings&#10;&#10;This change replaces the dynamic sample configuration options with a fixed set of requirements (10,000 samples).&#10;&#10;The following changes were made:&#10;- Removed the `SampleConfig` enum and multiple configuration tiers (Small to Extreme) in both Flutter and React implementations.&#10;- Standardized `sampleCount` to 10,000, `bufferSize` to 1,000, and `cpuIterations` to 2,000,000 across the benchmark suite.&#10;- Updated `benchmark_suite.dart` to reference static `SampleConfig` values instead of an instance-based selection.&#10;- Refactored `SampleConfiguration.ts` to export a single `CONFIG` object while maintaining a legacy compatibility function.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,26 +127,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "Android App.Unnamed.executor": "Run",
-    "Android App.app.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "android.gradle.sync.needed": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "master-consolidated",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "E:/PC/Dokumenty/MobileAppBenchamark",
-    "settings.editor.selected.configurable": "com.android.studio.ml.bot.mainConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;Android App.Unnamed.executor&quot;: &quot;Run&quot;,
+    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;android.gradle.sync.needed&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master-consolidated&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/PC/Dokumenty/MobileAppBenchamark&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.android.studio.ml.bot.mainConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
       <recent name="com.jossy.android.mobilebenchmarkappkotlin.source" />
@@ -515,7 +515,39 @@
       <option name="project" value="LOCAL" />
       <updated>1770509306219</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Update entry point to delegate to Suite screen&#10;&#10;The `index.tsx` entry point now redirects to the `Suite` component instead of `Benchmark` to unify the implementation with other platforms.">
+      <option name="closed" value="true" />
+      <created>1770509691629</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1770509691629</updated>
+    </task>
+    <task id="LOCAL-00037" summary="Update test screen UI across React and Flutter apps&#10;&#10;This commit standardizes the loading and processing screens for various benchmarks in both the React Native and Flutter implementations.&#10;&#10;Key changes include:&#10;- Simplified the UI for RAM, CPU, and API tests by removing progress indicators and complex layouts in favor of centered text.&#10;- Standardized text labels to &quot;CPU processing ...&quot;, &quot;RAM processing ...&quot;, and &quot;Waiting for location...&quot;.&#10;- Applied consistent font sizes (18px) and styles across test screens.&#10;- Removed the AppBar from the Flutter `image_loading_test.dart` for a cleaner full-screen appearance.&#10;- Updated project metadata in `.idea/workspace.xml`.">
+      <option name="closed" value="true" />
+      <created>1770509936867</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1770509936867</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Update styles in suite.tsx&#10;&#10;This commit updates the styling for the `suite.tsx` component to ensure consistent background and text colors.&#10;&#10;The following changes were made:&#10;- Added a white background color to the root container.&#10;- Explicitly set the text color to black for the title and monospace text elements.&#10;- Updated the progress bar background color to use a consistent hex code.">
+      <option name="closed" value="true" />
+      <created>1770510076618</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1770510076618</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Refactor benchmark configuration to use fixed sample settings&#10;&#10;This change replaces the dynamic sample configuration options with a fixed set of requirements (10,000 samples).&#10;&#10;The following changes were made:&#10;- Removed the `SampleConfig` enum and multiple configuration tiers (Small to Extreme) in both Flutter and React implementations.&#10;- Standardized `sampleCount` to 10,000, `bufferSize` to 1,000, and `cpuIterations` to 2,000,000 across the benchmark suite.&#10;- Updated `benchmark_suite.dart` to reference static `SampleConfig` values instead of an instance-based selection.&#10;- Refactored `SampleConfiguration.ts` to export a single `CONFIG` object while maintaining a legacy compatibility function.">
+      <option name="closed" value="true" />
+      <created>1770510702590</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1770510702590</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -547,10 +579,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="update GPUTestActivity to increase initial object count and refactor rendering logic&#10;&#10;This commit modifies the GPU stress test to increase the starting load and cleans up the test execution logic.&#10;&#10;The following changes were made:&#10;- Increased `INITIAL_OBJECT_COUNT` from 100 to 1000.&#10;- Extracted object size into a class-level constant `SIZE`.&#10;- Removed `targetFrames` and `END_OBJECTS` variables as they were unused or superseded by time-based logic.&#10;- Removed the retrieval of &quot;iterations&quot; from the intent.&#10;- Simplified `addObjects` to use the new `SIZE` constant.&#10;- Cleaned up comments and redundant spacing throughout `GPUTestActivity.java`." />
-    <MESSAGE value="refactor GPUTestActivity to improve code structure and maintainability&#10;&#10;This commit refactors the `GPUTestActivity` class by extracting logic into helper methods and introducing constants for better readability.&#10;&#10;Key changes:&#10;- Introduced constants for `START_OBJECTS`, `TEST_DURATION_MS`, and `OBJECT_SIZE`.&#10;- Refactored `onCreate` to use helper methods `initUI`, `initObjects`, and `setupCsv`.&#10;- Extracted directory resolution logic into `getBenchmarkDirectory`.&#10;- Simplified `doFrame` by delegating tasks to specific methods: `logFrameData`, `manageObjectCount`, `updateUI`, and `updatePositions`.&#10;- Improved bounds collision handling by extracting it into `handleBoundsCollision`.&#10;- Cleaned up CSV writer management with a dedicated `closeCsvWriter` method.&#10;- Improved code formatting and consistency across the file." />
-    <MESSAGE value="refactor GPU test to use fixed sample count instead of time duration&#10;&#10;This commit changes the GPU stress test logic to terminate after a target number of samples rather than a fixed time duration.&#10;&#10;- Removed &quot;iterations&quot; extra from `BenchmarkSuiteActivity` when launching `GPUTestActivity`.&#10;- Replaced `TEST_DURATION_MS` with `TARGET_SAMPLES` (set to 10,000) in `GPUTestActivity`.&#10;- Updated the test loop to use `frameCount` against `TARGET_SAMPLES` as the termination condition.&#10;- Updated the UI and test results to display sample progress instead of elapsed time." />
-    <MESSAGE value="clean up CPUTestActivity by removing unused constants and comments&#10;&#10;This commit simplifies `CPUTestActivity.java` by removing unused private constants and redundant comments within the CPU benchmark execution block.&#10;&#10;The following changes were made:&#10;- Removed unused `DEFAULT_CPU_ITERATIONS`, `DEFAULT_DURATION_MS`, and `lastUiUpdate` variables.&#10;- Removed outdated comments regarding CSV writer initialization and `TestEntry` logic." />
     <MESSAGE value="Refactor `CPUTestActivity` to improve code structure and readability&#10;&#10;This commit refactors the `CPUTestActivity` by extracting the benchmark execution logic into smaller, modular methods. These changes improve maintainability and separate concerns within the activity.&#10;&#10;The following changes were made:&#10;&#10;- Extracted the main benchmark logic into `runBenchmarkTask`, `performBatchTest`, and `runSingleIteration` methods.&#10;- Isolated UI updates and error handling into dedicated helper methods (`updateProgressUI`, `handleSuccess`, and `handleError`).&#10;- Improved code readability by cleaning up imports and removing redundant comments.&#10;- Streamlined the background execution flow using a more structured method-based approach." />
     <MESSAGE value="refactor CPU test to use constant sample size and LiveData for UI updates&#10;&#10;This commit simplifies the CPU benchmark by replacing dynamic configuration with a constant sample size and leveraging LiveData for more efficient UI progress updates.&#10;&#10;The following changes were made:&#10;- Removed `getOptimalWriteBufferBytes` and `getCpuIterationsPerThread` from `SampleConfiguration`.&#10;- Refactored `CPUTestActivity` to use a fixed `CONSTANT_SAMPLES` value (10,000) instead of intent extras.&#10;- Introduced `MutableLiveData` in `CPUTestActivity` to track and observe test progress.&#10;- Hardcoded CPU benchmark iterations to 1,000,000 per sample.&#10;- Cleaned up unused parameters and methods related to dynamic configuration in `BenchmarkSuiteActivity` and `CPUTestActivity`." />
     <MESSAGE value="refactor RAMTestActivity to improve code structure and use constant sample count&#10;&#10;This commit refactors the `RAMTestActivity` to improve maintainability and readability by modularizing the benchmark logic. It also hardcodes a target sample count, removing the dependency on intent extras for iteration count in several activities.&#10;&#10;The following changes were made:&#10;&#10;- Extracted benchmark execution into smaller, private helper methods (`performBenchmarkTask`, `runBenchmarkLoop`, `updateUIProgress`).&#10;- Hardcoded `TARGET_SAMPLES` to 10,000 in `RAMTestActivity`.&#10;- Removed `iterations` extra from intents passed to `RAMTestActivity`, `ImageLoadingActivity`, `ApiTestActivity`, and `LocationTestActivity` in `BenchmarkSuiteActivity`.&#10;- Cleaned up imports and used short class names for `TestResult`, `TestEntry`, and `BufferedCsvWriter`.&#10;- Added a `TAG` constant and improved logging consistency.&#10;- Introduced `calculateRunsPerSample` to handle adaptive load logic." />
@@ -572,7 +600,11 @@
     <MESSAGE value="Add Android debug keystore&#10;&#10;This commit adds the `debug.keystore` file to the `android/app` directory, which is required for signing the Android application during the debug build process." />
     <MESSAGE value="Delete activity_main.xml" />
     <MESSAGE value="Refactor benchmark suite UI and update project configuration&#10;&#10;This commit refactors the React Native benchmark suite to simplify configuration and improves the UI. It also adds IDE project files for several Android library modules and updates the workspace configuration.&#10;&#10;The following changes were made:&#10;&#10;- Hardcoded the benchmark configuration to &quot;medium&quot; (configId 0) and removed the sample size selection modal from `suite.tsx`.&#10;- Updated the `BenchmarkSuite` UI to display a fixed &quot;Benchmark Suite&quot; header instead of dynamic status strings when ready.&#10;- Increased the results scrollback buffer from 10 to 50 items and simplified the results list display.&#10;- Added an &quot;Export Results&quot; button to the suite UI to allow users to view the saved CSV path.&#10;- Updated the progress bar color to `#443FD8` and standardized button styles.&#10;- Generated and added Eclipse `.project` files for multiple `node_modules` Android sub-projects (including Expo and React Native libraries) to support better IDE integration.&#10;- Updated `.idea/workspace.xml` with recent task history, project state, and layout configurations." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor benchmark suite UI and update project configuration&#10;&#10;This commit refactors the React Native benchmark suite to simplify configuration and improves the UI. It also adds IDE project files for several Android library modules and updates the workspace configuration.&#10;&#10;The following changes were made:&#10;&#10;- Hardcoded the benchmark configuration to &quot;medium&quot; (configId 0) and removed the sample size selection modal from `suite.tsx`.&#10;- Updated the `BenchmarkSuite` UI to display a fixed &quot;Benchmark Suite&quot; header instead of dynamic status strings when ready.&#10;- Increased the results scrollback buffer from 10 to 50 items and simplified the results list display.&#10;- Added an &quot;Export Results&quot; button to the suite UI to allow users to view the saved CSV path.&#10;- Updated the progress bar color to `#443FD8` and standardized button styles.&#10;- Generated and added Eclipse `.project` files for multiple `node_modules` Android sub-projects (including Expo and React Native libraries) to support better IDE integration.&#10;- Updated `.idea/workspace.xml` with recent task history, project state, and layout configurations." />
+    <MESSAGE value="Update entry point to delegate to Suite screen&#10;&#10;The `index.tsx` entry point now redirects to the `Suite` component instead of `Benchmark` to unify the implementation with other platforms." />
+    <MESSAGE value="Update test screen UI across React and Flutter apps&#10;&#10;This commit standardizes the loading and processing screens for various benchmarks in both the React Native and Flutter implementations.&#10;&#10;Key changes include:&#10;- Simplified the UI for RAM, CPU, and API tests by removing progress indicators and complex layouts in favor of centered text.&#10;- Standardized text labels to &quot;CPU processing ...&quot;, &quot;RAM processing ...&quot;, and &quot;Waiting for location...&quot;.&#10;- Applied consistent font sizes (18px) and styles across test screens.&#10;- Removed the AppBar from the Flutter `image_loading_test.dart` for a cleaner full-screen appearance.&#10;- Updated project metadata in `.idea/workspace.xml`." />
+    <MESSAGE value="Update styles in suite.tsx&#10;&#10;This commit updates the styling for the `suite.tsx` component to ensure consistent background and text colors.&#10;&#10;The following changes were made:&#10;- Added a white background color to the root container.&#10;- Explicitly set the text color to black for the title and monospace text elements.&#10;- Updated the progress bar background color to use a consistent hex code." />
+    <MESSAGE value="Refactor benchmark configuration to use fixed sample settings&#10;&#10;This change replaces the dynamic sample configuration options with a fixed set of requirements (10,000 samples).&#10;&#10;The following changes were made:&#10;- Removed the `SampleConfig` enum and multiple configuration tiers (Small to Extreme) in both Flutter and React implementations.&#10;- Standardized `sampleCount` to 10,000, `bufferSize` to 1,000, and `cpuIterations` to 2,000,000 across the benchmark suite.&#10;- Updated `benchmark_suite.dart` to reference static `SampleConfig` values instead of an instance-based selection.&#10;- Refactored `SampleConfiguration.ts` to export a single `CONFIG` object while maintaining a legacy compatibility function." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor benchmark configuration to use fixed sample settings&#10;&#10;This change replaces the dynamic sample configuration options with a fixed set of requirements (10,000 samples).&#10;&#10;The following changes were made:&#10;- Removed the `SampleConfig` enum and multiple configuration tiers (Small to Extreme) in both Flutter and React implementations.&#10;- Standardized `sampleCount` to 10,000, `bufferSize` to 1,000, and `cpuIterations` to 2,000,000 across the benchmark suite.&#10;- Updated `benchmark_suite.dart` to reference static `SampleConfig` values instead of an instance-based selection.&#10;- Refactored `SampleConfiguration.ts` to export a single `CONFIG` object while maintaining a legacy compatibility function." />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">
