@@ -52,8 +52,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Add release-key.jks">
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/res/layout/activity_benchmark_suite.xml" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/res/layout/activity_benchmark_suite.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/res/layout/activity_location_test.xml" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/res/layout/activity_location_test.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/java/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/java/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +159,7 @@
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "E:/PC/Dokumenty/MobileAppBenchamark/java/android",
+    "last_opened_file_path": "E:/PC/Dokumenty/MobileAppBenchamark/kotlin/app/src/main/res/values",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -170,6 +172,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\PC\Dokumenty\MobileAppBenchamark\kotlin\app\src\main\res\values" />
       <recent name="E:\PC\Dokumenty\MobileAppBenchamark\java\android" />
     </key>
     <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
@@ -267,7 +270,7 @@
       <option name="presentableId" value="Default" />
       <updated>1768743805505</updated>
       <workItem from="1770553950760" duration="291000" />
-      <workItem from="1770554260771" duration="4631000" />
+      <workItem from="1770554260771" duration="7110000" />
     </task>
     <task id="LOCAL-00001" summary="Fix the code complexity">
       <option name="closed" value="true" />
