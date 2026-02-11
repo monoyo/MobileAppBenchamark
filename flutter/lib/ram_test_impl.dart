@@ -3,12 +3,13 @@ import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
 import 'models/test_result.dart';
 import 'models/user.dart';
+import '../config/sample_configuration.dart';
 
 /// RAM benchmark suite testing memory allocation, manipulation, and management.
 /// Implements patterns from Java RAMTest: sorting, filtering, serialization, and aggregation.
 class RAMTest {
   /// Number of iterations for each test variant.
-  static const int runs = 1800;
+  static const int runs = SampleConfig.sampleCount;
   
   /// Counters for name frequency analysis.
   static final Map<String, int> nameFrequency = {};
@@ -65,11 +66,16 @@ class RAMTest {
             .map((user) => user.copyWith(name: user.name.toUpperCase()))
             .toList();
 
+        // 3b. Serialization Cycle (Missing heavy load)
+        // Matches RAMTest.java: processSerializationCycle
+        final String jsonString = jsonEncode(filtered);
+        final List<dynamic> decodedList = jsonDecode(jsonString);
+        final List<User> deserialized = decodedList.map((e) => User.fromJson(e)).toList();
+
         // 4. Access and use filtered data
-        if (filtered.isNotEmpty) {
-          final randomUser = filtered[random.nextInt(filtered.length)];
-          // Ensure random user is accessed to prevent optimization
-          randomUser.name.length; // Side-effect free access
+        if (deserialized.isNotEmpty) {
+           final randomUser = deserialized[random.nextInt(deserialized.length)];
+           randomUser.name.length; 
         }
 
         // 5. Aggregate name frequencies (similar to Java stream collection pattern)

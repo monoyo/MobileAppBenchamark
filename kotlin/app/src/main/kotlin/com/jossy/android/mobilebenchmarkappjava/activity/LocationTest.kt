@@ -123,7 +123,13 @@ class LocationTest : AppCompatActivity() {
     }
 
     private fun parseIntent() {
-        intervalMs = intent.getIntExtra("interval", 1000).toLong()
+        // Use 1ms interval for high-speed sampling in "Stream+Poll" mode
+        intervalMs = intent.getIntExtra("interval", 1).toLong()
+        if (intervalMs > 100) {
+            // If legacy interval was passed, override it to 1ms for standardization
+            intervalMs = 1L
+        }
+        
         csvPath = intent.getStringExtra("csv_path")
         progressBar.max = Config.samplesAmount
     }

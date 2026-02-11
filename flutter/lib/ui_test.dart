@@ -30,6 +30,7 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   double _currentFps = 0.0;
   int _lastFpsUpdateMs = 0;
   int _framesSinceFpsUpdate = 0;
+  int _lastFrameTime = 0;
   
   // Object data
   final List<Rect> _objects = [];
@@ -97,14 +98,20 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
     final now = DateTime.now().millisecondsSinceEpoch;
     final elapsedMs = now - _startTime;
     
-    // Update FPS every 500ms
-    _framesSinceFpsUpdate++;
-    if (now - _lastFpsUpdateMs >= 500) {
-      final elapsedSeconds = (now - _lastFpsUpdateMs) / 1000.0;
-      _currentFps = _framesSinceFpsUpdate / elapsedSeconds;
-      _framesSinceFpsUpdate = 0;
-      _lastFpsUpdateMs = now;
+    // Calculate instantaneous FPS
+    if (_lastFrameTime != 0) {
+      final delta = now - _lastFrameTime;
+      if (delta > 0) {
+        _currentFps = 1000.0 / delta;
+      }
     }
+    _lastFrameTime = now;
+
+    // Update FPS every 500ms for overlay (optional, but requested 16ms sampling)
+    // User requested "sampling" to be 16ms.
+    // If we just update _currentFps every frame, the print log will use it.
+    
+    /* Removed 500ms averaging block */
 
     // Manage object count
     final secondsElapsed = elapsedMs ~/ 1000;

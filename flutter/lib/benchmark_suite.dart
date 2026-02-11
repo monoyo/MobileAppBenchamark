@@ -33,6 +33,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   double _progress = 0.0; // 0.0 to 1.0
   String? _averagesBlock;
 
+  final Map<String, bool> _selectedTests = {};
   final Map<String, List<_TestEntry>> _perTestResults = {};
   
   // Resources
@@ -55,6 +56,11 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     super.initState();
     _allTests = _testNames.length;
     _currentInfo = 'Benchmark Suite';
+    
+    // Initialize all tests as selected by default
+    for (final name in _testNames) {
+      _selectedTests[name] = true;
+    }
   }
 
   Future<void> _initializeSession() async {
@@ -73,6 +79,8 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       // Init writers
       _writers.clear();
       for (final name in _testNames) {
+        if (_selectedTests[name] != true) continue;
+        
         final safeName = name.toLowerCase().replaceAll(' ', '_');
         final writer = BufferedCsvWriter('${dir.path}/$safeName.csv', bufferSize: SampleConfig.bufferSize);
         await writer.initialize();
@@ -84,6 +92,14 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   }
 
   void _startSuite() async {
+    // Check if any test is selected
+    if (!_testNames.any((name) => _selectedTests[name] == true)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+           const SnackBar(content: Text('Please select at least one test')),
+        );
+        return;
+    }
+
     setState(() {
       _running = true;
       _perTestResults.clear();
@@ -116,6 +132,11 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
 
   Future<void> _runNext() async {
     if (!mounted || _disposed) return;
+
+    // Skip unselected tests
+    while (_currentTestIndex < _allTests && _selectedTests[_testNames[_currentTestIndex]] != true) {
+        _currentTestIndex++;
+    }
 
     if (_currentTestIndex >= _allTests) {
       // Finished all tests
@@ -183,7 +204,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         break;
       case 5:
         res = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const LocationTest()),
+          MaterialPageRoute(builder: (_) => LocationTest(writer: writer)),
         );
         break;
     }
@@ -210,7 +231,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       // For now, let's keep writing the summary row to maintain compat with simple tests.
       if (writer != null) {
           final cumulativeMs = DateTime.now().millisecondsSinceEpoch - _suiteStartTime;
-          writer.write(
+          await writer.write(
               1, 
               res.executionTimeMs, 
               res.details, 
@@ -304,26 +325,42 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
             ),
             const SizedBox(height: 16),
 
-            // Results Area
+            // Results Area & Selection
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Color(0xFFFAFAFA),
                 ),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      csvText, 
-                      style: const TextStyle(
-                        fontSize: 14, 
-                        fontFamily: 'monospace',
-                        color: Colors.black,
-                      )
+                child: _running 
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          csvText, 
+                          style: const TextStyle(
+                            fontSize: 14, 
+                            fontFamily: 'monospace',
+                            color: Colors.black,
+                          )
+                        ),
+                      ),
+                    )
+                  : ListView(
+                      padding: const EdgeInsets.all(8.0),
+                      children: _testNames.map((name) {
+                        return CheckboxListTile(
+                          title: Text(name),
+                          value: _selectedTests[name] == true,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _selectedTests[name] = value == true;
+                            });
+                          },
+                          activeColor: const Color(0xFF443FD8),
+                        );
+                      }).toList(),
                     ),
-                  ),
-                ),
               ),
             ),
 

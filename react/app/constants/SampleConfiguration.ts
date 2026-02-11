@@ -7,11 +7,14 @@ export interface SampleConfiguration {
     cpuIterations: number;
 }
 
-export const CONFIG: SampleConfiguration = {
-    sampleCount: 10_000,
-    bufferSize: 1_000,
-    cpuIterations: 2_000_000,
+export const SampleConfiguration = {
+    // Low end device
+    0: {
+        sampleCount: 10000,
+        cpuIterations: 1000,
+        bufferSize: 100,
+    },
 };
 
 // Legacy compatibility function
-export const getSampleConfig = (_id: number): SampleConfiguration => CONFIG;
+export const getSampleConfig = (_id: number): any => SampleConfiguration[0];

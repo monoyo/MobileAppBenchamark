@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
 import 'services/api_service.dart';
+import 'config/sample_configuration.dart';
 
 /// API benchmark page testing network request performance.
 /// Implements recursive API calling pattern similar to Java API test.
@@ -19,6 +20,7 @@ class ApiTest extends StatefulWidget {
 class _ApiTestState extends State<ApiTest> {
   final ApiService _apiService = ApiService();
   late final int _startTime;
+  int _currentIteration = 0;
 
   @override
   void initState() {
@@ -30,8 +32,24 @@ class _ApiTestState extends State<ApiTest> {
   /// Executes API benchmark with proper error handling and resource cleanup.
   Future<void> _executeApiTest() async {
     try {
-      // Fetch posts from remote API
-      final posts = await _apiService.fetchPosts(timeout: const Duration(seconds: 30));
+      int successCount = 0;
+      int errorCount = 0;
+      
+      for (int i = 0; i < SampleConfig.sampleCount; i++) {
+        try {
+           // Fetch posts from remote API
+           await _apiService.fetchPosts(timeout: const Duration(seconds: 30));
+           successCount++;
+        } catch (_) {
+           errorCount++;
+        }
+        
+        if (mounted) {
+          setState(() {
+            _currentIteration = i + 1;
+          });
+        }
+      }
       
       if (!mounted) return;
 
@@ -39,7 +57,7 @@ class _ApiTestState extends State<ApiTest> {
       final result = TestResult(
         'API Test',
         elapsedMs,
-        'Fetched ${posts.length} posts successfully',
+        'Executed ${SampleConfig.sampleCount} calls. Success: $successCount, Errors: $errorCount',
         true,
       );
 
@@ -62,12 +80,12 @@ class _ApiTestState extends State<ApiTest> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Text(
-          'Fetching API data...',
+          'API Test: $_currentIteration / ${SampleConfig.sampleCount}',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
         ),
       ),
     );

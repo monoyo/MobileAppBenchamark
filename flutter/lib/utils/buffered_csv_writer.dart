@@ -31,14 +31,14 @@ class BufferedCsvWriter {
     }
   }
 
-  void write(
+  Future<void> write(
     int iteration,
     int executionTimeMs,
     String details, {
     int intervalStartMs = 0,
     int intervalDurationMs = 0,
     int cumulativeTimeMs = 0,
-  }) {
+  }) async {
     if (!_initialized) return;
 
     final safeDetails = _csvSafe(details);
@@ -46,7 +46,7 @@ class BufferedCsvWriter {
     _buffer.add(line);
 
     if (_buffer.length >= bufferSize) {
-      flush();
+      await flush();
     }
   }
 

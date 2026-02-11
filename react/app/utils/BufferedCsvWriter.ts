@@ -16,6 +16,10 @@ export class BufferedCsvWriter {
         this.testName = testName;
     }
 
+    getPath(): string {
+        return this.filePath;
+    }
+
     async initialize(header: string = DEFAULT_HEADER) {
         if (this.initialized) return;
         try {

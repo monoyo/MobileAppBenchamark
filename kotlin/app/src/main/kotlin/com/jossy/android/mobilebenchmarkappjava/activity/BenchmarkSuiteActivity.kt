@@ -50,6 +50,15 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     private lateinit var testProgress: ProgressBar
     private lateinit var startTestsButton: Button
     private lateinit var exportResultsButton: Button
+    
+    // CheckBoxes
+    private lateinit var testSelectionContainer: android.view.View
+    private lateinit var checkUi: android.widget.CheckBox
+    private lateinit var checkCpu: android.widget.CheckBox
+    private lateinit var checkRam: android.widget.CheckBox
+    private lateinit var checkImage: android.widget.CheckBox
+    private lateinit var checkApi: android.widget.CheckBox
+    private lateinit var checkLocation: android.widget.CheckBox
 
     private var currentIteration = 0
     private var currentTestIndex = 0
@@ -113,6 +122,14 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
                 Toast.makeText(this, "Failed to restore session: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
+        
+        // Restore UI state
+        if (isRunning) {
+            testSelectionContainer.visibility = android.view.View.GONE
+            startTestsButton.isEnabled = false
+            startTestsButton.text = "Uruchamianie..."
+        }
+        
         updateProgressMax()
         updateProgress()
     }
@@ -131,6 +148,14 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         testProgress = findViewById(R.id.testProgress)
         startTestsButton = findViewById(R.id.startTestsButton)
         exportResultsButton = findViewById(R.id.exportResultsButton)
+        
+        testSelectionContainer = findViewById(R.id.testSelectionContainer)
+        checkUi = findViewById(R.id.checkUi)
+        checkCpu = findViewById(R.id.checkCpu)
+        checkRam = findViewById(R.id.checkRam)
+        checkImage = findViewById(R.id.checkImage)
+        checkApi = findViewById(R.id.checkApi)
+        checkLocation = findViewById(R.id.checkLocation)
     }
 
     private fun setupButtons() {
@@ -145,6 +170,12 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun startTestSuite() {
+        // Validation: Check if at least one test is selected
+        if (!isAnyTestSelected()) {
+            Toast.makeText(this, "Please select at least one test", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (!checkPermissions()) {
             requestPermissions()
             return
@@ -170,10 +201,31 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             text = "Uruchamianie..."
             isEnabled = false
         }
+        
+        // Hide selection, show running state
+        testSelectionContainer.visibility = android.view.View.GONE
+        
         updateProgressMax()
 
         Log.i(TAG, "Starting test suite")
         runNextTest()
+    }
+    
+    private fun isAnyTestSelected(): Boolean {
+        return checkUi.isChecked || checkCpu.isChecked || checkRam.isChecked || 
+               checkImage.isChecked || checkApi.isChecked || checkLocation.isChecked
+    }
+    
+    private fun isTestSelected(index: Int): Boolean {
+        return when (index) {
+            0 -> checkUi.isChecked
+            1 -> checkCpu.isChecked
+            2 -> checkRam.isChecked
+            3 -> checkImage.isChecked
+            4 -> checkApi.isChecked
+            5 -> checkLocation.isChecked
+            else -> false
+        }
     }
 
     private fun initializeSession() {
@@ -188,6 +240,11 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun runNextTest() {
+        // Skip unselected tests
+        while (currentTestIndex < ALL_TESTS && !isTestSelected(currentTestIndex)) {
+            currentTestIndex++
+        }
+        
         if (currentTestIndex < ALL_TESTS) {
             val testName = getTestName(currentTestIndex)
             onTestStarted(testName)
@@ -197,6 +254,15 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             onAllTestsCompleted()
         }
     }
+    
+    // ... getTestName and startSpecificTest remain same ...
+
+    // ... onTestCompleted ...
+
+    // Restore onAllTestsCompleted to show selection again
+
+    
+    // ... rest of the file ...
 
     private fun getTestName(index: Int) = when (index) {
         0 -> "UI Stress Test"

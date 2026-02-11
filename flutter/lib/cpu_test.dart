@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
+import 'config/sample_configuration.dart';
 
 /// CPU benchmark page that distributes computation across isolates.
 /// Uses time-based and iteration-based modes similar to Java CPUTest pattern.
@@ -12,7 +13,7 @@ class CpuTest extends StatefulWidget {
   
   const CpuTest({
     super.key,
-    this.iterations = 500000,
+    this.iterations = SampleConfig.sampleCount,
     this.timeLimitDuration,
   });
 
@@ -21,20 +22,70 @@ class CpuTest extends StatefulWidget {
 }
 
 class _CpuTestState extends State<CpuTest> {
+  int _currentIteration = 0;
+  String _statusMsg = 'Initializing...';
+  _CPUBenchmark? _benchmark;
+
   @override
   void initState() {
     super.initState();
-    _runBenchmark();
+    _startBenchmark();
   }
 
-  /// Executes CPU benchmark with thread distribution across available processors.
-  Future<void> _runBenchmark() async {
+  @override
+  void dispose() {
+    _benchmark?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _startBenchmark() async {
     final start = DateTime.now().millisecondsSinceEpoch;
+    int totalIterationsProcessed = 0;
+    double totalChecksum = 0.0;
+    int threadCount = 0;
+
     try {
-      final result = await _CPUBenchmark.runParallel(
-        targetIterations: widget.iterations,
-        timeLimit: widget.timeLimitDuration,
-      );
+      _benchmark = _CPUBenchmark();
+      await _benchmark!.initialize();
+      threadCount = _benchmark!.threadCount;
+
+      // Outer loop: 10,000 "Samples"
+      // We process 1 by 1 to strictly match Kotlin's UI behavior (test after test).
+      const int batchSize = 1;
+      
+      for (int i = 0; i < widget.iterations; i += batchSize) {
+          if (!mounted) return;
+
+          int remaining = widget.iterations - i;
+          int currentBatch = remaining > batchSize ? batchSize : remaining;
+          
+          // Distribute this batch of "Samples" across workers.
+          // Each sample involves [SampleConfig.cpuIterations] ops.
+          // So we ask workers to perform (currentBatch * cpuIterations) / threads ops?
+          // No, to strictly match Kotlin:
+          // Kotlin: 10,000 outer loops. Each loop calls runBenchmarkIterations(10,000).
+          // So Total Ops = 10,000 * 10,000.
+          // Our `_benchmark.runBatch` should distribute (currentBatch * widget.iterations) ops.
+          // Wait, widget.iterations IS SampleConfig.sampleCount (10,000).
+          // So we need to run (currentBatch * 10,000) ops distributed across threads.
+          
+          final result = await _benchmark!.runBatch(
+             samples: currentBatch, 
+             opsPerSample: widget.iterations // 10,000 ops per sample
+          );
+
+          totalIterationsProcessed += result.totalIterations;
+          totalChecksum += result.checksum;
+
+          setState(() {
+            _currentIteration = i + currentBatch;
+            _statusMsg = 'CPU Test: $_currentIteration / ${widget.iterations}';
+          });
+          
+          // Yield to allow UI update
+          await Future.delayed(Duration.zero);
+      }
+
       final elapsed = DateTime.now().millisecondsSinceEpoch - start;
       
       if (!mounted) return;
@@ -43,7 +94,7 @@ class _CpuTestState extends State<CpuTest> {
         TestResult(
           'CPU Test',
           elapsed,
-          'threads=${result.threadCount}, iterations=${result.totalIterations}, checksum=${result.checksum.toStringAsFixed(2)}',
+          'threads=$threadCount, total_ops=$totalIterationsProcessed, checksum=${totalChecksum.toStringAsFixed(2)}',
           true,
         ),
       );
@@ -58,158 +109,109 @@ class _CpuTestState extends State<CpuTest> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Text(
-          'CPU processing ...',
-          style: TextStyle(fontSize: 18),
+          _statusMsg,
+          style: const TextStyle(fontSize: 18),
         ),
       ),
     );
   }
 }
 
-/// Result container for CPU benchmark execution.
 class _CPUResult {
-  final int threadCount;
   final int totalIterations;
   final double checksum;
   
   const _CPUResult({
-    required this.threadCount,
     required this.totalIterations,
     required this.checksum,
   });
 }
 
-/// Message passed to isolate for CPU computation.
-class _CPUIsolateMessage {
-  final int seed;
-  final int iterations;
-  final int? timeoutMs;
+class _WorkerMessage {
+  final int ops;
   final SendPort replyTo;
   
-  const _CPUIsolateMessage({
-    required this.seed,
-    required this.iterations,
-    required this.timeoutMs,
-    required this.replyTo,
-  });
+  const _WorkerMessage(this.ops, this.replyTo);
 }
 
-/// Result from isolate computation.
-class _CPUIsolateResult {
-  final int completedIterations;
+class _WorkerResult {
+  final int ops;
   final double checksum;
   
-  const _CPUIsolateResult({
-    required this.completedIterations,
-    required this.checksum,
-  });
+  const _WorkerResult(this.ops, this.checksum);
 }
 
-/// CPU benchmark coordinator managing multi-core execution.
 class _CPUBenchmark {
-  static int get _processorCount =>
-      Platform.numberOfProcessors > 0 ? Platform.numberOfProcessors : 8;
-
-  /// Runs CPU benchmark distributed across available processors.
-  static Future<_CPUResult> runParallel({
-    required int targetIterations,
-    Duration? timeLimit,
-  }) async {
-    final int threadCount = _processorCount;
-    final int iterationsPerThread = (targetIterations / threadCount).ceil();
-    final int? timeLimitMs = timeLimit?.inMilliseconds;
-
-    final List<Future<_CPUIsolateResult>> futures = [];
-    
-    for (int i = 0; i < threadCount; i++) {
-      futures.add(
-        _spawnWorkerIsolate(
-          seed: i + 1,
-          iterations: iterationsPerThread,
-          timeoutMs: timeLimitMs,
-        ),
-      );
-    }
-
-    final results = await Future.wait(futures);
-    
-    final int totalIterations = results.fold<int>(
-      0,
-      (sum, r) => sum + r.completedIterations,
-    );
-    final double totalChecksum = results.fold<double>(
-      0.0,
-      (sum, r) => sum + r.checksum,
-    );
-
-    return _CPUResult(
-      threadCount: threadCount,
-      totalIterations: totalIterations,
-      checksum: totalChecksum,
-    );
-  }
-
-  /// Spawns an isolate to perform CPU-intensive calculations.
-  static Future<_CPUIsolateResult> _spawnWorkerIsolate({
-    required int seed,
-    required int iterations,
-    required int? timeoutMs,
-  }) async {
-    final receivePort = ReceivePort();
-    
-    await Isolate.spawn(
-      _cpuWorkerEntryPoint,
-      _CPUIsolateMessage(
-        seed: seed,
-        iterations: iterations,
-        timeoutMs: timeoutMs,
-        replyTo: receivePort.sendPort,
-      ),
-      debugName: 'cpu-worker-$seed',
-    );
-
-    final dynamic response = await receivePort.first;
-    if (response is _CPUIsolateResult) {
-      return response;
-    }
-    throw Exception('Unexpected response from CPU worker');
-  }
-}
-
-/// Entry point for CPU worker isolate.
-/// Performs mathematical operations to simulate CPU load.
-void _cpuWorkerEntryPoint(_CPUIsolateMessage message) {
-  final startTime = DateTime.now().millisecondsSinceEpoch;
-  int iterationCount = 0;
-  double accumulator = 0.0;
-  double value = message.seed.toDouble();
+  final List<Isolate> _isolates = [];
+  final List<SendPort> _sendPorts = [];
   
-  // Perform CPU-intensive calculations
-  for (int i = 0; i < message.iterations; i++) {
-    // Check time limit if specified
-    if (message.timeoutMs != null && i % 1000 == 0) {
-      final elapsed = DateTime.now().millisecondsSinceEpoch - startTime;
-      if (elapsed > message.timeoutMs!) {
-        break;
-      }
-    }
+  int get threadCount => Platform.numberOfProcessors > 0 ? Platform.numberOfProcessors : 4;
 
-    // Complex mathematical operations to stress CPU
-    value = math.sin(value) * math.cos(value) + 
-            math.sqrt((value * value) + 1.234567) +
-            math.tan(value);
-    accumulator += value;
-    iterationCount++;
+  Future<void> initialize() async {
+    final count = threadCount;
+    for (int i = 0; i < count; i++) {
+       final receivePort = ReceivePort();
+       final isolate = await Isolate.spawn(_workerEntry, receivePort.sendPort);
+       _isolates.add(isolate);
+       final sendPort = await receivePort.first as SendPort;
+       _sendPorts.add(sendPort);
+    }
   }
 
-  message.replyTo.send(
-    _CPUIsolateResult(
-      completedIterations: iterationCount,
-      checksum: accumulator,
-    ),
-  );
+  Future<_CPUResult> runBatch({required int samples, required int opsPerSample}) async {
+      int totalOps = samples * opsPerSample;
+      int count = _sendPorts.length;
+      int opsPerThread = (totalOps / count).ceil();
+      
+      List<Future<_WorkerResult>> futures = [];
+      
+      for (int i = 0; i < count; i++) {
+         final rp = ReceivePort();
+         _sendPorts[i].send(_WorkerMessage(opsPerThread, rp.sendPort));
+         futures.add(rp.first.then((v) => v as _WorkerResult));
+      }
+
+      final results = await Future.wait(futures);
+      
+      int actualOps = 0;
+      double checksum = 0.0;
+      for (var r in results) {
+          actualOps += r.ops;
+          checksum += r.checksum;
+      }
+      
+      return _CPUResult(totalIterations: actualOps, checksum: checksum);
+  }
+
+  void dispose() {
+    for (var i in _isolates) {
+      i.kill();
+    }
+    _isolates.clear();
+    _sendPorts.clear();
+  }
+
+  static void _workerEntry(SendPort mainSendPort) {
+     final commandPort = ReceivePort();
+     mainSendPort.send(commandPort.sendPort);
+     
+     commandPort.listen((message) {
+        if (message is _WorkerMessage) {
+            double acc = 0.0;
+            double v = 1.2345; 
+            int processed = 0;
+            for (int i = 0; i < message.ops; i++) {
+                 v = math.sin(v) * math.cos(v) + math.sqrt((v * v) + 1.234567) + math.tan(v);
+                 acc += v;
+                 processed++;
+            }
+            message.replyTo.send(_WorkerResult(processed, acc));
+        }
+     });
+  }
 }
+
 

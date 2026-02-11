@@ -5,13 +5,14 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
-import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -27,7 +28,7 @@ import java.io.File
 
 class ImageLoadingTest : AppCompatActivity() {
     companion object {
-        private const val TAG = "ImageLoadingTest"
+        private const val TAG = "ImageLoadingActivity"
         private val IMAGE_URLS = listOf(
             "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
             "https://fastly.picsum.photos/id/687/300/200.jpg?hmac=4cY--ZSfxEMRzYtVmyvUBPrHqzAqJ3JmMSEmdYqdfMM",
@@ -42,113 +43,168 @@ class ImageLoadingTest : AppCompatActivity() {
         )
     }
 
-    private lateinit var loadingStatus: TextView
-    private lateinit var benchmarkImageView: ImageView
+    private lateinit var recyclerView: RecyclerView
     private var loadedImagesCount = 0
     private var suiteStartTime = 0L
     private var csvPath: String? = null
     private var csvWriter: BufferedCsvWriter? = null
-    private val progressLiveData = MutableLiveData<Int>()
+    private val handler = Handler(Looper.getMainLooper())
+    private var isTestRunning = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initUI()
-        csvPath = intent.getStringExtra("csv_path")
-        benchmarkImageView.post { startBatchTest() }
+        
+        recyclerView = RecyclerView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            layoutManager = LinearLayoutManager(this@ImageLoadingTest)
+            setBackgroundColor(Color.WHITE)
+        }
+        setContentView(recyclerView)
+        
+        parseIntentData()
+        
+        // Start test after layout is ready
+        recyclerView.post { startBatchTest() }
     }
 
-    private fun initUI() {
-        val rootLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(-1, -1)
-            setBackgroundColor(Color.WHITE)
-            gravity = Gravity.CENTER
-        }
-        
-        loadingStatus = TextView(this).apply {
-            textSize = 18f
-            setTextColor(Color.BLACK)
-            gravity = Gravity.CENTER
-            setPadding(0, 20, 0, 20)
-        }
-        
-        benchmarkImageView = ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(900, 600)
-            scaleType = ImageView.ScaleType.CENTER_CROP
-            setBackgroundColor(Color.LTGRAY)
-        }
-
-        rootLayout.addView(loadingStatus)
-        rootLayout.addView(benchmarkImageView)
-        setContentView(rootLayout)
-
-        progressLiveData.observe(this) { count ->
-            loadingStatus.text = "Rendering Image #$count / ${Config.samplesAmount}"
-        }
+    private fun parseIntentData() {
+        csvPath = intent.getStringExtra("csv_path")
+        Log.i(TAG, "Starting Image Batch: ${Config.samplesAmount}")
     }
 
     private fun startBatchTest() {
+        if (isTestRunning) return
+        isTestRunning = true
+        
         suiteStartTime = System.currentTimeMillis()
-        val file = File(csvPath ?: "${filesDir}/image_benchmark.csv")
-        csvWriter = BufferedCsvWriter(file, 1000, 64 * 1024).apply { initialize() }
-        loadNextImage()
+        if (initCsvWriter()) {
+            recyclerView.adapter = ImageAdapter()
+        } else {
+            finish()
+        }
     }
 
-    private fun loadNextImage() {
-        if (loadedImagesCount >= Config.samplesAmount || isFinishing) {
-            finishBatch()
-            return
+    private fun initCsvWriter(): Boolean {
+        return try {
+            val file = File(csvPath ?: "\${filesDir}/temp_image.csv")
+            csvWriter = BufferedCsvWriter(file, 1000, 64 * 1024)
+            csvWriter?.initialize()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Writer init failed", e)
+            false
         }
-        
-        val url = IMAGE_URLS[loadedImagesCount % IMAGE_URLS.size]
-        val startTime = System.currentTimeMillis()
-
-        Glide.with(this)
-            .load(url)
-            .placeholder(ColorDrawable(Color.LTGRAY)) // Widzisz szary? Czeka na sieć.
-            .error(ColorDrawable(Color.RED))         // Widzisz czerwony? Błąd (np. blokada IP).
-            .skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .listener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(e: GlideException?, m: Any?, t: Target<Drawable>, f: Boolean): Boolean {
-                    Log.e(TAG, "Load Error at #$loadedImagesCount: ${e?.message}")
-                    handleLoadResult(startTime, false, "Error: ${e?.message}")
-                    return false
-                }
-
-                override fun onResourceReady(r: Drawable, m: Any, t: Target<Drawable>, d: DataSource, f: Boolean): Boolean {
-                    handleLoadResult(startTime, true, "Success")
-                    return false
-                }
-            })
-            .into(benchmarkImageView)
     }
 
     private fun handleLoadResult(startTime: Long, success: Boolean, details: String) {
+        if (!isTestRunning) return
+
         val duration = System.currentTimeMillis() - startTime
-        
-        try {
-            val tr = TestResult("Image Rendering", duration, details, success)
-            csvWriter?.write(TestEntry(loadedImagesCount, tr, startTime, duration, System.currentTimeMillis() - suiteStartTime))
-        } catch (e: Exception) {}
+        logResult(startTime, duration, success, details)
 
         loadedImagesCount++
-        progressLiveData.postValue(loadedImagesCount)
-        
-        // KLUCZOWE: Dodajemy małe opóźnienie, aby uniknąć "zasypania" UI wątku 
-        // i pozwolić na fizyczne odświeżenie ekranu (min. 16ms dla 60fps).
-        benchmarkImageView.postDelayed({
-            loadNextImage()
-        }, 16) 
+
+        if (loadedImagesCount >= Config.samplesAmount) {
+            finishBatch()
+            return
+        }
+
+        // Scroll to next item to trigger its binding and loading
+        handler.postDelayed({
+            if (isTestRunning) {
+                recyclerView.smoothScrollToPosition(loadedImagesCount)
+            }
+        }, 50)
+    }
+
+    private fun logResult(startTime: Long, duration: Long, success: Boolean, details: String) {
+        try {
+            val tr = TestResult("Image Rendering", duration, details, success)
+            csvWriter?.write(
+                TestEntry(loadedImagesCount, tr, startTime, duration, 
+                System.currentTimeMillis() - suiteStartTime)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Log failed", e)
+        }
     }
 
     private fun finishBatch() {
-        val totalTime = System.currentTimeMillis() - suiteStartTime
-        Log.i(TAG, "Benchmark Finished. Total: $loadedImagesCount, Time: ${totalTime}ms")
-        try { csvWriter?.apply { flush(); close() } } catch (e: Exception) {}
+        if (!isTestRunning) return
+        isTestRunning = false
         
-        val result = TestResult("Image Rendering Test", totalTime, "Rendered $loadedImagesCount images", true)
-        setResult(RESULT_OK, Intent().apply { putExtra(BenchmarkApplication.RESULT, result) })
+        closeWriter()
+        sendResultAndFinish()
+    }
+
+    private fun closeWriter() {
+        try {
+            csvWriter?.flush()
+            csvWriter?.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error closing writer", e)
+        }
+    }
+
+    private fun sendResultAndFinish() {
+        val totalTime = System.currentTimeMillis() - suiteStartTime
+        val result = TestResult("Image Loading Test", totalTime,
+                "Batch completed: $loadedImagesCount", true)
+
+        val intent = Intent()
+        intent.putExtra(BenchmarkApplication.RESULT, result)
+        setResult(RESULT_OK, intent)
         finish()
+    }
+
+    inner class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
+        
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+            val imageView = ImageView(parent.context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, 600
+                )
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setBackgroundColor(Color.LTGRAY)
+                setPadding(0, 0, 0, 4) // Add some margin
+            }
+            return ImageViewHolder(imageView)
+        }
+
+        override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+            val url = IMAGE_URLS[position % IMAGE_URLS.size]
+            val startTime = System.currentTimeMillis()
+
+            Glide.with(this@ImageLoadingTest)
+                .load(url)
+                .placeholder(ColorDrawable(Color.LTGRAY))
+                .error(ColorDrawable(Color.RED))
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>, isFirstResource: Boolean): Boolean {
+                        if (position == loadedImagesCount) {
+                            Log.e(TAG, "Load Error at #$position: \${e?.message}")
+                            handleLoadResult(startTime, false, "Failed")
+                        }
+                        return false
+                    }
+
+                    override fun onResourceReady(resource: Drawable, model: Any, target: Target<Drawable>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
+                        if (position == loadedImagesCount) {
+                            handleLoadResult(startTime, true, "Success")
+                        }
+                        return false
+                    }
+                })
+                .into(holder.imageView)
+        }
+
+        override fun getItemCount(): Int = Config.samplesAmount
+
+        inner class ImageViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
     }
 }

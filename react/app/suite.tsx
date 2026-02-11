@@ -54,6 +54,11 @@ export default function Suite(): React.ReactElement {
   >(null);
   const [error, setError] = React.useState<string | null>(null);
 
+  // Selection state
+  const [selectedTests, setSelectedTests] = React.useState<Record<string, boolean>>(
+    TESTS.reduce((acc, test) => ({ ...acc, [test.name]: true }), {})
+  );
+
   // Configuration - hardcoded to medium (matching other variants)
   const configId = 0;
   const config = getSampleConfig(configId);
@@ -81,9 +86,11 @@ export default function Suite(): React.ReactElement {
       await RNFS.mkdir(dir);
       sessionDir.current = dir;
 
-      // Initialize CSV writers for each test
+      // Initialize CSV writers for each SELECTED test
       csvWriters.current = {};
       for (const test of TESTS) {
+        if (!selectedTests[test.name]) continue;
+
         const safeName = test.name
           .toLowerCase()
           .replace(/ /g, '_');
@@ -100,7 +107,7 @@ export default function Suite(): React.ReactElement {
       setError(`Session init failed: ${errorMsg}`);
       console.error('Failed to initialize session:', err);
     }
-  }, [config.bufferSize]);
+  }, [config.bufferSize, selectedTests]);
 
   const finish = React.useCallback(
     async (acc: TestResult[]): Promise<void> => {
@@ -140,6 +147,10 @@ export default function Suite(): React.ReactElement {
     []
   );
 
+  const BATCH_TESTS = ['Location Test', 'API Test'];
+
+  // ...
+
   const runNext = React.useCallback(
     async (
       iter: number,
@@ -151,48 +162,79 @@ export default function Suite(): React.ReactElement {
         return;
       }
 
-      if (idx >= TESTS.length) {
-        // Move to next iteration
-        return runNext(iter + 1, 0, acc);
+      // Skip unselected tests
+      let currentIdx = idx;
+      while (currentIdx < TESTS.length && !selectedTests[TESTS[currentIdx].name]) {
+        currentIdx++;
       }
 
-      if (iter >= config.sampleCount) {
-        // All iterations complete
-        return finish(acc);
+      if (currentIdx >= TESTS.length) {
+        return finish(acc); // All tests done
+      }
+
+      const testMeta = TESTS[currentIdx];
+      const isBatch = BATCH_TESTS.includes(testMeta.name);
+      const targetIterations = isBatch ? 1 : config.sampleCount;
+
+      if (iter >= targetIterations) {
+        // Move to next test
+        return runNext(0, currentIdx + 1, acc);
       }
 
       setIteration(iter);
-      setTestIndex(idx);
+      setTestIndex(currentIdx);
 
       const key = createResultKey();
-      const testMeta = TESTS[idx];
 
-      // Pass config params to test
+      const testName = testMeta.name;
+      const writer = csvWriters.current[testName];
+      const csvPath = writer ? writer.getPath() : '';
+
+      // Pass config params
+      // For batch tests, we pass the total samples count as 'iterations' or 'batchSize'
+      // Ideally we unify. 'iterations' param traditionally meant "CPU iterations".
+      // Let's pass 'batchSize' for clarity.
       const routeParams = `?key=${encodeURIComponent(
         key
-      )}&iterations=${config.cpuIterations}`;
+      )}&iterations=${config.cpuIterations}&batchSize=${config.sampleCount}&csvPath=${encodeURIComponent(csvPath)}`;
+
       router.push((`${testMeta.route}${routeParams}`) as Href);
 
       const intervalStart = Date.now();
+      // For batch tests, we might wait longer.
       const res = await waitForResult<TestResult | null>(key);
       const intervalEnd = Date.now();
       const intervalDuration = intervalEnd - intervalStart;
 
       if (res && !cancelledRef.current) {
-        // Add FPS metric
         const extendedRes: TestResult = {
           ...res,
           fps: getFps(),
         };
         acc.push(extendedRes);
-        setResults([...acc]); // Update UI
+        setResults([...acc]);
 
         // Write to CSV
-        const writer = csvWriters.current[res.testName];
+        // For batch tests, the test itself writes samples. 
+        // We can optionally write a summary row here, or skip.
+        // If we write, it appears as iteration 0.
+        // Let's write it as a summary/marker. 
+        // BUT beware: if test wrote 1000 lines, and we write 1 line, we have 1001 lines.
+        // The tests (Location) write strict CSV.
+        // Sample analysis expects uniform columns.
+        // If we write one line here, it might break parser if it expects 1000 lines of "sample data" and finds 1 line of "summary".
+        // HOWEVER, BufferedCsvWriter expects specific columns.
+        // LocationTest writes valid columns.
+        // Suite writes valid columns.
+        // So we get 1000 rows + 1 row.
+        // The 1000 rows have `iteration` 1..1000.
+        // This row will have `iteration` 0 (from iter).
+        // This is reasonably safe.
+
         if (writer) {
           try {
             await writer.write(
-              iter,
+              isBatch ? 0 : iter + 1, // Use 0 or 9999 for summary? 0 is fine.
               res.executionTimeMs,
               res.details || '',
               intervalStart,
@@ -205,17 +247,29 @@ export default function Suite(): React.ReactElement {
         }
       }
 
-      // Small pause between tests
       await new Promise<void>((resolve) =>
         setTimeout(resolve, 10)
       );
-      await runNext(iter, idx + 1, acc);
+
+      // Recursion
+      // If batch, we are done with this test (since targetIterations was 1).
+      // Logic above `if (iter >= targetIterations)` handles the next test jump.
+      // So we just increment iter.
+
+      await runNext(iter + 1, currentIdx, acc);
     },
-    [config.sampleCount, config.cpuIterations, router, getFps, finish]
+    [config.sampleCount, config.cpuIterations, router, getFps, finish, selectedTests]
   );
 
   const startSuite = React.useCallback(async (): Promise<void> => {
     if (running) return;
+
+    // Validation
+    const hasSelection = Object.values(selectedTests).some((v) => v);
+    if (!hasSelection) {
+      Alert.alert('Error', 'Please select at least one test');
+      return;
+    }
 
     cancelledRef.current = false;
     setError(null);
@@ -235,12 +289,24 @@ export default function Suite(): React.ReactElement {
       setRunning(false);
       console.error('Test suite error:', err);
     }
-  }, [running, initializeSession, runNext]);
+  }, [running, initializeSession, runNext, selectedTests]);
 
   // UI Helpers
-  const total = config.sampleCount * TESTS.length;
-  const completed = iteration * TESTS.length + testIndex;
-  const progress = total === 0 ? 0 : Math.max(0, Math.min(1, completed / total));
+  const activeTests = TESTS.filter((t) => selectedTests[t.name]);
+  const total = config.sampleCount * activeTests.length;
+  // This is an approximation for progress bar since we skip indices
+  // A better progress would calculate based on completed tests vs total selected tests * iterations
+  // For simplicity, we'll keep it simple or fix it if needed.
+  // Actually, let's just make it 0 if unknown to avoid confusion, or try to estimate.
+  // Let's rely on iteration count.
+  const progress = total === 0 ? 0 : Math.max(0, Math.min(1, (iteration * activeTests.length) / total));
+
+  const toggleTest = (name: string) => {
+    setSelectedTests((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
 
   return (
     <View style={styles.root}>
@@ -250,25 +316,48 @@ export default function Suite(): React.ReactElement {
           : 'Benchmark Suite'}
       </Text>
 
-      <View style={styles.progressBarWrap}>
-        <View style={[styles.progressBarFill, { flex: progress }]} />
-        <View style={{ flex: 1 - progress }} />
-      </View>
+      {running ? (
+        <>
+          <View style={styles.progressBarWrap}>
+            <View style={[styles.progressBarFill, { flex: progress }]} />
+            <View style={{ flex: 1 - progress }} />
+          </View>
 
-      {error && (
-        <Text style={styles.errorText}>{error}</Text>
-      )}
+          {error && (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
 
-      <View style={styles.resultsContainer}>
-        <ScrollView>
-          <Text style={styles.mono}>
-            {results
-              .slice(-50)
-              .map((r) => formatResult(r))
-              .join('\n')}
-          </Text>
+          <View style={styles.resultsContainer}>
+            <ScrollView>
+              <Text style={styles.mono}>
+                {results
+                  .slice(-50)
+                  .map((r) => formatResult(r))
+                  .join('\n')}
+              </Text>
+            </ScrollView>
+          </View>
+        </>
+      ) : (
+        <ScrollView style={styles.selectionContainer}>
+          <Text style={styles.subHeader}>Select Tests:</Text>
+          {TESTS.map((test) => (
+            <View key={test.name} style={styles.optionRow}>
+              <Text style={styles.optionLabel}>{test.name}</Text>
+              <TouchableOpacity
+                onPress={() => toggleTest(test.name)}
+                style={[
+                  styles.checkbox,
+                  selectedTests[test.name] && styles.checkboxSelected,
+                ]}
+              >
+                <View style={selectedTests[test.name] ? styles.checkboxInner : null} />
+              </TouchableOpacity>
+            </View>
+          ))}
+          <View style={{ height: 20 }} />
         </ScrollView>
-      </View>
+      )}
 
       <View style={styles.row}>
         <Pressable
@@ -386,5 +475,44 @@ const styles = StyleSheet.create({
       android: 'monospace',
       default: 'monospace',
     }),
+  },
+  selectionContainer: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+    padding: 16,
+    marginBottom: 16,
+  },
+  subHeader: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  optionLabel: {
+    fontSize: 16,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: '#443FD8',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: '#443FD8',
+  },
+  checkboxInner: {
+    width: 12,
+    height: 12,
+    backgroundColor: '#FFFFFF',
   },
 });

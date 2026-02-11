@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'models/test_result.dart';
+import 'config/sample_configuration.dart';
 
 /// Image loading benchmark page.
 /// Tests network performance with retry logic, caching, and stream management.
@@ -38,7 +39,7 @@ class _ImageLoadingTestState extends State<ImageLoadingTest> {
   int _lastProgressMs = 0;
   
   // Configuration constants
-  static const int _maxDurationMs = 60 * 1000; // 60 second timeout
+  static const int _maxDurationMs = 60 * 1000 * 10; // increase timeout for 10k samples
   static const int _stallTimeoutMs = 10 * 1000; // 10 second watchdog
   static const int _maxRetries = 2;
   static const int _scrollItemHeight = 200;
@@ -61,7 +62,7 @@ class _ImageLoadingTestState extends State<ImageLoadingTest> {
   Timer? _watchdogTimer;
   BaseCacheManager? _cacheManager;
 
-  int get _itemCount => _imageUrls.length;
+  int get _itemCount => SampleConfig.sampleCount;
 
   @override
   void initState() {
@@ -300,7 +301,7 @@ class _ImageLoadingTestState extends State<ImageLoadingTest> {
     return SizedBox(
       height: _scrollItemHeight.toDouble(),
       child: CachedNetworkImage(
-        imageUrl: _imageUrls[index],
+        imageUrl: _imageUrls[index % _imageUrls.length],
         cacheManager: _cacheManager,
         httpHeaders: const {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
