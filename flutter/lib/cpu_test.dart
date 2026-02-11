@@ -6,21 +6,21 @@ import 'models/test_result.dart';
 
 /// CPU benchmark page that distributes computation across isolates.
 /// Uses time-based and iteration-based modes similar to Java CPUTest pattern.
-class CPUTestPage extends StatefulWidget {
+class CpuTest extends StatefulWidget {
   final int iterations;
   final Duration? timeLimitDuration;
   
-  const CPUTestPage({
+  const CpuTest({
     super.key,
     this.iterations = 500000,
     this.timeLimitDuration,
   });
 
   @override
-  State<CPUTestPage> createState() => _CPUTestPageState();
+  State<CpuTest> createState() => _CpuTestState();
 }
 
-class _CPUTestPageState extends State<CPUTestPage> {
+class _CpuTestState extends State<CpuTest> {
   @override
   void initState() {
     super.initState();

@@ -2,13 +2,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
-import CPUTestScreen from './screens/CPUTestScreen';
+import CpuTest from './screens/CpuTest';
 import HomeScreen from './screens/HomeScreen';
-import ImageLoadingTestScreen from './screens/ImageLoadingTestScreen';
-import UITestScreen from './screens/UITestScreen';
-import RAMTestScreen from './screens/RAMTestScreen';
-import APITestScreen from './screens/APITestScreen';
-import LocationTestScreen from './screens/LocationTestScreen';
+import ImageLoadingTest from './screens/ImageLoadingTest';
+import UiTest from './screens/UiTest';
+import RamTest from './screens/RamTest';
+import ApiTest from './screens/ApiTest';
+import LocationTest from './screens/LocationTest';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,12 +38,12 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} initialParams={{ launchTimeMs: launchMs }} options={{ title: 'Benchmark Suite' }} />
-        <Stack.Screen name="UI" component={UITestScreen} options={{ title: 'UI Test' }} />
-        <Stack.Screen name="CPU" component={CPUTestScreen} options={{ title: 'CPU Test' }} />
-        <Stack.Screen name="RAM" component={RAMTestScreen} options={{ title: 'RAM Test' }} />
-        <Stack.Screen name="ImageLoading" component={ImageLoadingTestScreen} options={{ title: 'Image Loading Test' }} />
-        <Stack.Screen name="API" component={APITestScreen} options={{ title: 'API Test' }} />
-        <Stack.Screen name="Location" component={LocationTestScreen} options={{ title: 'Location Test' }} />
+        <Stack.Screen name="UI" component={UiTest} options={{ title: 'UI Test' }} />
+        <Stack.Screen name="CPU" component={CpuTest} options={{ title: 'CPU Test' }} />
+        <Stack.Screen name="RAM" component={RamTest} options={{ title: 'RAM Test' }} />
+        <Stack.Screen name="ImageLoading" component={ImageLoadingTest} options={{ title: 'Image Loading Test' }} />
+        <Stack.Screen name="API" component={ApiTest} options={{ title: 'API Test' }} />
+        <Stack.Screen name="Location" component={LocationTest} options={{ title: 'Location Test' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

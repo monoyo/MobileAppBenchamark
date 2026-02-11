@@ -7,19 +7,19 @@ import 'models/test_result.dart';
 /// Image loading benchmark page.
 /// Tests network performance with retry logic, caching, and stream management.
 /// Similar to Java image loading test with timeout, retry, and batching.
-class ImageLoadingTestPage extends StatefulWidget {
+class ImageLoadingTest extends StatefulWidget {
   final int runId;
   
-  const ImageLoadingTestPage({
+  const ImageLoadingTest({
     super.key,
     required this.runId,
   });
 
   @override
-  State<ImageLoadingTestPage> createState() => _ImageLoadingTestPageState();
+  State<ImageLoadingTest> createState() => _ImageLoadingTestState();
 }
 
-class _ImageLoadingTestPageState extends State<ImageLoadingTestPage> {
+class _ImageLoadingTestState extends State<ImageLoadingTest> {
   static const List<String> _imageUrls = [
     "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
     "https://fastly.picsum.photos/id/687/300/200.jpg?hmac=4cY--ZSfxEMRzYtVmyvUBPrHqzAqJ3JmMSEmdYqdfMM",

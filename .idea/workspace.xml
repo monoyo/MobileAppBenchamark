@@ -52,11 +52,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Add release-key.jks">
-      <change afterPath="$PROJECT_DIR$/flutter/release-key.jks" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/android/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/android/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/consts/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/consts/Config.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/react/android/app/build.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -272,7 +268,7 @@
       <option name="presentableId" value="Default" />
       <updated>1768743805505</updated>
       <workItem from="1770553950760" duration="291000" />
-      <workItem from="1770554260771" duration="9057000" />
+      <workItem from="1770554260771" duration="9687000" />
     </task>
     <task id="LOCAL-00001" summary="Fix the code complexity">
       <option name="closed" value="true" />

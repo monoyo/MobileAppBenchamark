@@ -46,17 +46,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.ImageLoadingActivity"
+            android:name=".activity.ImageLoadingTest"
             android:exported="true" />
         <activity
-            android:name=".activity.ApiTestActivity"
+            android:name=".activity.ApiTest"
             android:exported="true" />
         <activity
-            android:name=".activity.LocationTestActivity"
+            android:name=".activity.LocationTest"
             android:exported="true" />
-        <activity android:name=".activity.RAMTestActivity" android:exported="true" />
-        <activity android:name=".activity.GPUTestActivity" android:exported="true" />
-        <activity android:name=".activity.CPUTestActivity" android:exported="true" />
+        <activity android:name=".activity.RamTest" android:exported="true" />
+        <activity android:name=".activity.UiTest" android:exported="true" />
+        <activity android:name=".activity.CpuTest" android:exported="true" />
     </application>
 
 </manifest>

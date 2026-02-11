@@ -157,7 +157,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     private void updateProgressMax() {
-        testProgress.setMax(Config.samplesAmount  * ALL_TESTS);
+        testProgress.setMax(Config.samplesAmount * ALL_TESTS);
     }
 
     private void startTestSuite() {
@@ -256,23 +256,23 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         Intent intent;
         switch (index) {
             case 0:
-                intent = new Intent(this, GPUTestActivity.class);
+                intent = new Intent(this, UiTest.class);
                 intent.putExtra("session_dir", outputDir.getAbsolutePath());
                 break;
             case 1:
-                intent = new Intent(this, CPUTestActivity.class);
+                intent = new Intent(this, CpuTest.class);
                 break;
             case 2:
-                intent = new Intent(this, RAMTestActivity.class);
+                intent = new Intent(this, RamTest.class);
                 break;
             case 3:
-                intent = new Intent(this, ImageLoadingActivity.class);
+                intent = new Intent(this, ImageLoadingTest.class);
                 break;
             case 4:
-                intent = new Intent(this, ApiTestActivity.class);
+                intent = new Intent(this, ApiTest.class);
                 break;
             default:
-                intent = new Intent(this, LocationTestActivity.class);
+                intent = new Intent(this, LocationTest.class);
                 intent.putExtra("interval", Config.samplesAmount);
                 break;
         }

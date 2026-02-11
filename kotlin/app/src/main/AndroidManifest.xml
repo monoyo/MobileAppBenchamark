@@ -32,13 +32,12 @@
             </intent-filter>
         </activity>
 
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.CPUTestActivity" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.RAMTestActivity" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.ImageLoadingActivity" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.ApiTestActivity" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.UITestActivity" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.LocationTestActivity" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.GPUTestActivity" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.CpuTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.RamTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.ImageLoadingTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.ApiTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.UiTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.LocationTest" android:exported="false" />
 
     </application>
 

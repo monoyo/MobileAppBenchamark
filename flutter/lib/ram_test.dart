@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'models/test_result.dart';
 import 'ram_test_impl.dart';
 
-class RAMTestPage extends StatelessWidget {
-  const RAMTestPage({super.key});
+class RamTest extends StatelessWidget {
+  const RamTest({super.key});
 
   @override
   Widget build(BuildContext context) {

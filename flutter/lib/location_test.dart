@@ -5,19 +5,19 @@ import 'models/test_result.dart';
 
 /// Location test page measuring GPS acquisition and position accuracy.
 /// Tests permission handling, service availability, and position retrieval.
-class LocationTestPage extends StatefulWidget {
+class LocationTest extends StatefulWidget {
   final LocationAccuracy desiredAccuracy;
   
-  const LocationTestPage({
+  const LocationTest({
     super.key,
     this.desiredAccuracy = LocationAccuracy.high,
   });
 
   @override
-  State<LocationTestPage> createState() => _LocationTestPageState();
+  State<LocationTest> createState() => _LocationTestState();
 }
 
-class _LocationTestPageState extends State<LocationTestPage> {
+class _LocationTestState extends State<LocationTest> {
   late final int _startTime;
   String _statusMessage = 'Waiting for location...';
 

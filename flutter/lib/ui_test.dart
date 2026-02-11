@@ -4,17 +4,18 @@ import 'package:flutter/scheduler.dart';
 import 'models/test_result.dart';
 import 'config/sample_configuration.dart';
 
+
 /// UI performance test page rendering animated rectangles.
 /// Tests frame rendering performance and animation smoothness.
 /// Matches Java/Kotlin GPUTestActivity algorithm.
-class UITestPage extends StatefulWidget {
-  const UITestPage({super.key});
+class UiTest extends StatefulWidget {
+  const UiTest({super.key});
 
   @override
-  State<UITestPage> createState() => _UITestPageState();
+  State<UiTest> createState() => _UiTestState();
 }
 
-class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateMixin {
+class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   // Match Java/Kotlin constants (Physical Pixels)
   static const int _initialObjectCount = 250;
   static const int _objectIncrementPerSecond = 250;
@@ -117,7 +118,8 @@ class _UITestPageState extends State<UITestPage> with SingleTickerProviderStateM
 
     _frameCount++;
 
-    if (_frameCount >= SampleConfig.sampleCount) {
+    print('Frame $_frameCount: Objects=$_currentObjectCount, FPS=${_currentFps.toStringAsFixed(1)}'); 
+    if (_frameCount >= SampleConfig.sampleCount || _currentFps < SampleConfig.maxFPS && _currentFps != 0.0) {
       _completeTest();
     } else {
       setState(() {});

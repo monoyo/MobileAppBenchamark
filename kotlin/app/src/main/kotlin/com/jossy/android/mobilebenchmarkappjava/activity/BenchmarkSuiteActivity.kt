@@ -230,14 +230,14 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         }
 
         val intent = when (index) {
-            0 -> Intent(this, GPUTestActivity::class.java).apply {
+            0 -> Intent(this, UiTest::class.java).apply {
                 putExtra("session_dir", outputDir?.absolutePath)
             }
-            1 -> Intent(this, CPUTestActivity::class.java)
-            2 -> Intent(this, RAMTestActivity::class.java)
-            3 -> Intent(this, ImageLoadingActivity::class.java)
-            4 -> Intent(this, ApiTestActivity::class.java)
-            else -> Intent(this, LocationTestActivity::class.java).apply {
+            1 -> Intent(this, CpuTest::class.java)
+            2 -> Intent(this, RamTest::class.java)
+            3 -> Intent(this, ImageLoadingTest::class.java)
+            4 -> Intent(this, ApiTest::class.java)
+            else -> Intent(this, LocationTest::class.java).apply {
                 putExtra("interval", Config.samplesAmount)
             }
         }

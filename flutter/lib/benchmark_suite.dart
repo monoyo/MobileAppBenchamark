@@ -136,110 +136,99 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       return;
     }
 
-    if (_currentIteration < SampleConfig.sampleCount) {
-      final name = _testNames[_currentTestIndex];
-      setState(() {
-        _currentInfo = 'Running: $name (Iteration ${_currentIteration + 1}/${SampleConfig.sampleCount})';
-      });
+    final name = _testNames[_currentTestIndex];
+    setState(() {
+      _currentInfo = 'Running: $name';
+      _currentIteration = 0; // Reset iteration for internal use if needed
+    });
 
-      // Start FPS counter
-      _fpsCounter.start();
-      
-      final intervalStart = DateTime.now().millisecondsSinceEpoch;
-      TestResult? res;
-      
-      // Navigate to test
-      // Note: We modify CPUTest to accept iterations
-      switch (_currentTestIndex) {
-        case 0:
-          res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const UITestPage()),
-          );
-          break;
-        case 1:
-          res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => CPUTestPage(iterations: SampleConfig.cpuIterations)),
-          );
-          break;
-        case 2:
-          res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const RAMTestPage()),
-          );
-          break;
-        case 3:
-          final int runId = DateTime.now().millisecondsSinceEpoch ^ _currentIteration ^ _currentTestIndex;
-          res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => ImageLoadingTestPage(runId: runId)),
-          );
-          break;
-        case 4:
-          res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const ApiTestPage()),
-          );
-          break;
-        case 5:
-          res = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const LocationTestPage()),
-          );
-          break;
-      }
-      
-      final intervalEnd = DateTime.now().millisecondsSinceEpoch;
-      final intervalDuration = intervalEnd - intervalStart;
-      final double currentFps = _fpsCounter.fps;
-      
-      // Stop/Pause FPS counter? Actually persistent callback keeps running, but we grabbed the value.
-      // We can stop it if we want to save resources between tests, but overhead is low.
-      // Let's stop it for cleanliness.
-      _fpsCounter.stop();
+    // Start FPS counter
+    _fpsCounter.start();
+    
+    final intervalStart = DateTime.now().millisecondsSinceEpoch;
+    TestResult? res;
+    
+    // Navigate to test
+    // Tests are responsible for their own internal looping/sampling now (Batch Mode)
+    // We pass the CSV writer to them so they can log per-sample data if needed.
+    // For simple tests, we log the summary result.
+    final writer = _writers[_testNames[_currentTestIndex]];
 
-      if (!mounted) return;
-      
-      if (res != null) {
-        final iterNum = _currentIteration + 1;
-        
-        // Add to memory results (for UI display)
-        // Only keep last 50 entries in memory to avoid OOM on large datasets
-        List<_TestEntry>? list = _perTestResults[res.testName];
-        if (list == null) {
-            list = <_TestEntry>[];
-            _perTestResults[res.testName] = list;
-        }
-        if (list.length >= 50) list.removeAt(0); // keep window
-        list.add(_TestEntry(iterNum, res));
-
-        // Write to CSV immediately
-        final writer = _writers[res.testName];
-        if (writer != null) {
-            final cumulativeMs = DateTime.now().millisecondsSinceEpoch - _suiteStartTime;
-            writer.write(
-                iterNum, 
-                res.executionTimeMs, 
-                res.details, 
-                intervalStartMs: intervalStart, 
-                intervalDurationMs: intervalDuration,
-                cumulativeTimeMs: cumulativeMs,
-            );
-        }
-      }
-
-      setState(() {
-        _currentIteration++;
-        _progress = ((_currentTestIndex * SampleConfig.sampleCount) + _currentIteration) /
-            (SampleConfig.sampleCount * _allTests);
-      });
-
-      // Tiny delay to allow UI to breathe
-      await Future.delayed(const Duration(milliseconds: 10));
-      await _runNext();
-    } else {
-      // Next test group
-      setState(() {
-        _currentTestIndex++;
-        _currentIteration = 0;
-      });
-      await _runNext();
+    switch (_currentTestIndex) {
+      case 0:
+        res = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const UiTest()),
+        );
+        break;
+      case 1:
+        res = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => CpuTest(iterations: SampleConfig.cpuIterations)),
+        );
+        break;
+      case 2:
+        res = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const RamTest()),
+        );
+        break;
+      case 3:
+        final int runId = DateTime.now().millisecondsSinceEpoch ^ _currentTestIndex;
+        res = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ImageLoadingTest(runId: runId)),
+        );
+        break;
+      case 4:
+        res = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const ApiTest()),
+        );
+        break;
+      case 5:
+        res = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const LocationTest()),
+        );
+        break;
     }
+    
+    final intervalEnd = DateTime.now().millisecondsSinceEpoch;
+    final intervalDuration = intervalEnd - intervalStart;
+    
+    _fpsCounter.stop();
+
+    if (!mounted) return;
+    
+    if (res != null) {
+      // Add to memory results (for UI display)
+      List<_TestEntry>? list = _perTestResults[res.testName];
+      if (list == null) {
+          list = <_TestEntry>[];
+          _perTestResults[res.testName] = list;
+      }
+      list.add(_TestEntry(1, res)); // Use 1 as iteration count since we run once
+
+      // Write summary result to CSV if the test didn't write details itself
+      // Note: UiTest now writes details itself. Others might returning summary.
+      // We will write the summary row anyway for now, or we can skip if writer was used?
+      // For now, let's keep writing the summary row to maintain compat with simple tests.
+      if (writer != null) {
+          final cumulativeMs = DateTime.now().millisecondsSinceEpoch - _suiteStartTime;
+          writer.write(
+              1, 
+              res.executionTimeMs, 
+              res.details, 
+              intervalStartMs: intervalStart, 
+              intervalDurationMs: intervalDuration,
+              cumulativeTimeMs: cumulativeMs,
+          );
+      }
+    }
+
+    setState(() {
+      _currentTestIndex++;
+      _progress = (_currentTestIndex) / _allTests;
+    });
+
+    // Tiny delay to allow UI to breathe
+    await Future.delayed(const Duration(milliseconds: 10));
+    await _runNext();
   }
 
   void _appendAverages() {

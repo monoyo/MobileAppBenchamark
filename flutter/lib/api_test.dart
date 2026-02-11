@@ -4,19 +4,19 @@ import 'services/api_service.dart';
 
 /// API benchmark page testing network request performance.
 /// Implements recursive API calling pattern similar to Java API test.
-class ApiTestPage extends StatefulWidget {
+class ApiTest extends StatefulWidget {
   final int? maxDepth;
   
-  const ApiTestPage({
+  const ApiTest({
     super.key,
     this.maxDepth = 1,
   });
 
   @override
-  State<ApiTestPage> createState() => _ApiTestPageState();
+  State<ApiTest> createState() => _ApiTestState();
 }
 
-class _ApiTestPageState extends State<ApiTestPage> {
+class _ApiTestState extends State<ApiTest> {
   final ApiService _apiService = ApiService();
   late final int _startTime;
 
