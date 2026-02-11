@@ -106,6 +106,7 @@ class ImageLoadingTest : AppCompatActivity() {
         logResult(startTime, duration, success, details)
 
         loadedImagesCount++
+        recyclerView.adapter?.notifyItemChanged(loadedImagesCount)
 
         if (loadedImagesCount >= Config.samplesAmount) {
             finishBatch()
