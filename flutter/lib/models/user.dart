@@ -1,5 +1,5 @@
 /// Represents a user entity with demographic information.
-/// Used in RAM and data processing benchmarks.
+/// Used in RAM and models processing benchmarks.
 class User {
   final String name;
   final String surname;
@@ -13,7 +13,7 @@ class User {
     required this.active,
   });
 
-  /// Creates a User instance from JSON data.
+  /// Creates a User instance from JSON models.
   /// Used when deserializing from assets/API responses.
   factory User.fromJson(Map<String, dynamic> json) {
     return User(

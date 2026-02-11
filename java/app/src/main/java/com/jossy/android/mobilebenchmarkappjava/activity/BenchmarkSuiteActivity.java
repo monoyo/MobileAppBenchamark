@@ -47,11 +47,21 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     private static final int TEST_ACTIVITY_REQUEST_CODE = 456;
 
     // UI Components
+    // UI Components
     private TextView currentTestInfo;
     private TextView testResults;
     private ProgressBar testProgress;
     private Button startTestsButton;
     private Button exportResultsButton;
+
+    // CheckBoxes
+    private android.view.View testSelectionContainer;
+    private android.widget.CheckBox checkUi;
+    private android.widget.CheckBox checkCpu;
+    private android.widget.CheckBox checkRam;
+    private android.widget.CheckBox checkImage;
+    private android.widget.CheckBox checkApi;
+    private android.widget.CheckBox checkLocation;
 
     // Test State
     private int currentIteration = 0;
@@ -119,6 +129,14 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
                 Toast.makeText(this, "Failed to restore session: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
+
+        // Restore UI state
+        if (isRunning) {
+            testSelectionContainer.setVisibility(android.view.View.GONE);
+            startTestsButton.setEnabled(false);
+            startTestsButton.setText("Uruchamianie...");
+        }
+
         updateProgressMax();
         updateProgress();
     }
@@ -144,6 +162,14 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         testProgress = findViewById(R.id.testProgress);
         startTestsButton = findViewById(R.id.startTestsButton);
         exportResultsButton = findViewById(R.id.exportResultsButton);
+
+        testSelectionContainer = findViewById(R.id.testSelectionContainer);
+        checkUi = findViewById(R.id.checkUi);
+        checkCpu = findViewById(R.id.checkCpu);
+        checkRam = findViewById(R.id.checkRam);
+        checkImage = findViewById(R.id.checkImage);
+        checkApi = findViewById(R.id.checkApi);
+        checkLocation = findViewById(R.id.checkLocation);
     }
 
     private void setupButtons() {
@@ -161,6 +187,12 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     private void startTestSuite() {
+        // Validation: Check if at least one test is selected
+        if (!isAnyTestSelected()) {
+            Toast.makeText(this, "Please select at least one test", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (!checkPermissions()) {
             requestPermissions();
             return;
@@ -185,11 +217,39 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         testResults.setText("");
         startTestsButton.setText("Uruchamianie...");
         startTestsButton.setEnabled(false);
+
+        // Hide selection, show running state
+        testSelectionContainer.setVisibility(android.view.View.GONE);
+
         updateProgressMax();
 
         Log.i(TAG, "Starting test suite");
 
         runNextTest();
+    }
+
+    private boolean isAnyTestSelected() {
+        return checkUi.isChecked() || checkCpu.isChecked() || checkRam.isChecked() ||
+                checkImage.isChecked() || checkApi.isChecked() || checkLocation.isChecked();
+    }
+
+    private boolean isTestSelected(int index) {
+        switch (index) {
+            case 0:
+                return checkUi.isChecked();
+            case 1:
+                return checkCpu.isChecked();
+            case 2:
+                return checkRam.isChecked();
+            case 3:
+                return checkImage.isChecked();
+            case 4:
+                return checkApi.isChecked();
+            case 5:
+                return checkLocation.isChecked();
+            default:
+                return false;
+        }
     }
 
     /**
@@ -209,6 +269,11 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     private void runNextTest() {
+        // Skip unselected tests
+        while (currentTestIndex < ALL_TESTS && !isTestSelected(currentTestIndex)) {
+            currentTestIndex++;
+        }
+
         if (currentTestIndex < ALL_TESTS) {
             String testName = getTestName(currentTestIndex);
             onTestStarted(testName);
@@ -220,15 +285,23 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     private String getTestName(int index) {
-        return switch (index) {
-            case 0 -> "UI Stress Test"; // Changed from "UI Test"
-            case 1 -> "CPU Test";
-            case 2 -> "RAM Test";
-            case 3 -> "Image Loading Test";
-            case 4 -> "API Test";
-            case 5 -> "Location Test";
-            default -> "Unknown Test";
-        };
+        switch (index) { // Use standard switch for Java 8 compatibility if needed, but expression switch
+                         // is nicer
+            case 0:
+                return "UI Stress Test";
+            case 1:
+                return "CPU Test";
+            case 2:
+                return "RAM Test";
+            case 3:
+                return "Image Loading Test";
+            case 4:
+                return "API Test";
+            case 5:
+                return "Location Test";
+            default:
+                return "Unknown Test";
+        }
     }
 
     private void startSpecificTest(int index) {
@@ -314,6 +387,9 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         isRunning = false;
         startTestsButton.setText("Start Tests");
         startTestsButton.setEnabled(true);
+
+        // Show selection again
+        testSelectionContainer.setVisibility(android.view.View.VISIBLE);
 
         // Generate summary.csv with aggregated statistics
         if (outputDir != null) {

@@ -39,14 +39,65 @@
         app:layout_constraintTop_toBottomOf="@id/testProgress"
         app:layout_constraintBottom_toTopOf="@id/controlButtons">
 
-        <TextView
-            android:id="@+id/testResults"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:textSize="14sp"
-            android:fontFamily="monospace"
-            android:textColor="#000000" />
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/testSelectionContainer"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp">
+
+                <CheckBox
+                    android:id="@+id/checkUi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="UI Stress Test"
+                    android:checked="true"/>
+                <CheckBox
+                    android:id="@+id/checkCpu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="CPU Test"
+                    android:checked="true"/>
+                <CheckBox
+                    android:id="@+id/checkRam"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="RAM Test"
+                    android:checked="true"/>
+                <CheckBox
+                    android:id="@+id/checkImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Image Loading Test"
+                    android:checked="true"/>
+                <CheckBox
+                    android:id="@+id/checkApi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="API Test"
+                    android:checked="true"/>
+                <CheckBox
+                    android:id="@+id/checkLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Location Test"
+                    android:checked="true"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/testResults"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="#000000" />
+        </LinearLayout>
 
     </ScrollView>
 

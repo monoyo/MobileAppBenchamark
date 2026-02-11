@@ -3,7 +3,8 @@ import 'dart:math' as math;
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
-import 'config/sample_configuration.dart';
+import 'consts/config.dart';
+import 'models/cpu_test.dart';
 
 /// CPU benchmark page that distributes computation across isolates.
 /// Uses time-based and iteration-based modes similar to Java CPUTest pattern.
@@ -118,16 +119,6 @@ class _CpuTestState extends State<CpuTest> {
       ),
     );
   }
-}
-
-class _CPUResult {
-  final int totalIterations;
-  final double checksum;
-  
-  const _CPUResult({
-    required this.totalIterations,
-    required this.checksum,
-  });
 }
 
 class _WorkerMessage {

@@ -8,7 +8,7 @@ import 'ram_test.dart';
 import 'image_loading_test.dart';
 import 'api_test.dart';
 import 'location_test.dart';
-import 'config/sample_configuration.dart';
+import 'consts/config.dart';
 import 'utils/buffered_csv_writer.dart';
 import 'utils/fps_counter.dart';
 import 'utils/summary_writer.dart';
@@ -171,7 +171,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     
     // Navigate to test
     // Tests are responsible for their own internal looping/sampling now (Batch Mode)
-    // We pass the CSV writer to them so they can log per-sample data if needed.
+    // We pass the CSV writer to them so they can log per-sample models if needed.
     // For simple tests, we log the summary result.
     final writer = _writers[_testNames[_currentTestIndex]];
 
@@ -411,12 +411,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       ),
     );
   }
-}
-
-class _TestEntry {
-  final int iteration;
-  final TestResult result;
-  _TestEntry(this.iteration, this.result);
 }
 
 String _csv(String v) {

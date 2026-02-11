@@ -15,7 +15,7 @@ class TestResult {
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
-  /// Creates a TestResult from JSON data.
+  /// Creates a TestResult from JSON models.
   factory TestResult.fromJson(Map<String, dynamic> json) {
     return TestResult(
       json['testName'] as String,

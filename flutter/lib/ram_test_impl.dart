@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
 import 'models/test_result.dart';
 import 'models/user.dart';
-import '../config/sample_configuration.dart';
+import '../consts/config.dart';
 
 /// RAM benchmark suite testing memory allocation, manipulation, and management.
 /// Implements patterns from Java RAMTest: sorting, filtering, serialization, and aggregation.
@@ -15,7 +15,7 @@ class RAMTest {
   static final Map<String, int> nameFrequency = {};
   static final Map<String, int> surnameFrequency = {};
 
-  /// Loads user data from assets with proper error handling.
+  /// Loads user models from assets with proper error handling.
   static Future<List<User>> _loadUsersFromAssets(String assetPath) async {
     try {
       final jsonString = await rootBundle.loadString(assetPath);
@@ -72,7 +72,7 @@ class RAMTest {
         final List<dynamic> decodedList = jsonDecode(jsonString);
         final List<User> deserialized = decodedList.map((e) => User.fromJson(e)).toList();
 
-        // 4. Access and use filtered data
+        // 4. Access and use filtered models
         if (deserialized.isNotEmpty) {
            final randomUser = deserialized[random.nextInt(deserialized.length)];
            randomUser.name.length; 

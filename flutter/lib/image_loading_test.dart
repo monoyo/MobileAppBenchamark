@@ -3,7 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'models/test_result.dart';
-import 'config/sample_configuration.dart';
+import 'consts/config.dart';
 
 /// Image loading benchmark page.
 /// Tests network performance with retry logic, caching, and stream management.
@@ -38,7 +38,7 @@ class _ImageLoadingTestState extends State<ImageLoadingTest> {
   late final int _startMs;
   int _lastProgressMs = 0;
   
-  // Configuration constants
+  // Configuration consts
   static const int _maxDurationMs = 60 * 1000 * 10; // increase timeout for 10k samples
   static const int _stallTimeoutMs = 10 * 1000; // 10 second watchdog
   static const int _maxRetries = 2;

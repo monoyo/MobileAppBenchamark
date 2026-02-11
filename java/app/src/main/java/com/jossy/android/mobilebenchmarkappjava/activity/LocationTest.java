@@ -93,7 +93,13 @@ public class LocationTest extends AppCompatActivity {
     }
 
     private void parseIntent() {
-        intervalMs = getIntent().getIntExtra("interval", 1000);
+        // Use 1ms interval for high-speed sampling in "Stream+Poll" mode
+        intervalMs = getIntent().getIntExtra("interval", 1);
+        if (intervalMs > 100) {
+            // If legacy interval was passed, override it to 1ms for standardization
+            intervalMs = 1L;
+        }
+
         csvPath = getIntent().getStringExtra("csv_path");
         if (progressBar != null) {
             progressBar.setMax(Config.samplesAmount);

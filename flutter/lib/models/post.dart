@@ -12,7 +12,7 @@ class Post {
     required this.body,
   });
 
-  /// Creates a Post instance from JSON data.
+  /// Creates a Post instance from JSON models.
   /// Ensures type safety with explicit casts.
   factory Post.fromJson(Map<String, dynamic> json) {
     return Post(

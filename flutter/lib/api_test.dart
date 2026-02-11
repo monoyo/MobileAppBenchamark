@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
 import 'services/api_service.dart';
-import 'config/sample_configuration.dart';
+import 'consts/config.dart';
 
 /// API benchmark page testing network request performance.
 /// Implements recursive API calling pattern similar to Java API test.

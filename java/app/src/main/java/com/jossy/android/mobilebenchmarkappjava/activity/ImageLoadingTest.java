@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,7 +16,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.MutableLiveData;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -39,8 +39,7 @@ import java.util.List;
 public class ImageLoadingTest extends AppCompatActivity {
     private static final String TAG = "ImageLoadingActivity";
 
-    private TextView loadingStatus;
-    private ImageView benchmarkImageView;
+    private RecyclerView recyclerView;
 
     private static final List<String> IMAGE_URLS = Arrays.asList(
             "https://fastly.picsum.photos/id/861/300/200.jpg?hmac=SePZxFhkEpm4mmZIJke4z7ghH-2l0PsNAtEm_2vq2W4",
@@ -59,42 +58,24 @@ public class ImageLoadingTest extends AppCompatActivity {
     private String csvPath;
     private BufferedCsvWriter csvWriter;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private final MutableLiveData<Integer> progressLiveData = new MutableLiveData<>();
+    private boolean isTestRunning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initUI();
-        parseIntentData();
-        mainHandler.post(this::startBatchTest);
-    }
 
-    private void initUI() {
-        LinearLayout rootLayout = new LinearLayout(this);
-        rootLayout.setOrientation(LinearLayout.VERTICAL);
-        rootLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        recyclerView = new RecyclerView(this);
+        recyclerView.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
-        rootLayout.setBackgroundColor(Color.WHITE);
-        rootLayout.setGravity(Gravity.CENTER);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setBackgroundColor(Color.WHITE);
+        setContentView(recyclerView);
 
-        loadingStatus = new TextView(this);
-        loadingStatus.setTextSize(18f);
-        loadingStatus.setTextColor(Color.BLACK);
-        loadingStatus.setGravity(Gravity.CENTER);
-        loadingStatus.setPadding(0, 20, 0, 20);
-        loadingStatus.setText(R.string.initializing_image_batch);
+        parseIntentData();
 
-        benchmarkImageView = new ImageView(this);
-        benchmarkImageView.setLayoutParams(new LinearLayout.LayoutParams(900, 600));
-        benchmarkImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        benchmarkImageView.setBackgroundColor(Color.LTGRAY);
-
-        rootLayout.addView(loadingStatus);
-        rootLayout.addView(benchmarkImageView);
-        setContentView(rootLayout);
-
-        progressLiveData.observe(this, currentIteration -> loadingStatus
-                .setText(getString(R.string.image_test_progress, currentIteration, Config.samplesAmount)));
+        // Start test after layout is ready
+        recyclerView.post(this::startBatchTest);
     }
 
     private void parseIntentData() {
@@ -103,9 +84,13 @@ public class ImageLoadingTest extends AppCompatActivity {
     }
 
     private void startBatchTest() {
+        if (isTestRunning)
+            return;
+        isTestRunning = true;
+
         suiteStartTime = System.currentTimeMillis();
         if (initCsvWriter()) {
-            loadNextImage();
+            recyclerView.setAdapter(new ImageAdapter());
         } else {
             finish();
         }
@@ -123,61 +108,34 @@ public class ImageLoadingTest extends AppCompatActivity {
         }
     }
 
-    private void loadNextImage() {
-        if (loadedImagesCount >= Config.samplesAmount) {
-            finishBatch();
-            return;
-        }
-        performImageLoad();
-    }
-
-    private void performImageLoad() {
-        String url = IMAGE_URLS.get(loadedImagesCount % IMAGE_URLS.size());
-        long startTime = System.currentTimeMillis();
-
-        Glide.with(this)
-                .load(url)
-                .placeholder(new ColorDrawable(Color.LTGRAY))
-                .error(new ColorDrawable(Color.RED))
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .listener(createRequestListener(startTime))
-                .into(benchmarkImageView);
-    }
-
-    private RequestListener<Drawable> createRequestListener(long startTime) {
-        return new RequestListener<>() {
-            @Override
-            public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model,
-                    @NonNull Target<Drawable> target, boolean isFirstResource) {
-                Log.e(TAG,
-                        "Load Error at #" + loadedImagesCount + ": " + (e != null ? e.getMessage() : "Unknown error"));
-                handleLoadResult(startTime, false, "Failed");
-                return false;
-            }
-
-            @Override
-            public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model,
-                    @NonNull Target<Drawable> target, @NonNull DataSource dataSource,
-                    boolean isFirstResource) {
-                handleLoadResult(startTime, true, "Success");
-                return false;
-            }
-        };
-    }
-
     private void handleLoadResult(long startTime, boolean success, String details) {
+        if (!isTestRunning)
+            return;
+
         long duration = System.currentTimeMillis() - startTime;
         logResult(startTime, duration, success, details);
 
         loadedImagesCount++;
-        progressLiveData.postValue(loadedImagesCount);
-        scheduleNextLoad();
+        if (recyclerView.getAdapter() != null) {
+            recyclerView.getAdapter().notifyItemChanged(loadedImagesCount);
+        }
+
+        if (loadedImagesCount >= Config.samplesAmount) {
+            finishBatch();
+            return;
+        }
+
+        // Scroll to next item to trigger its binding and loading
+        mainHandler.postDelayed(() -> {
+            if (isTestRunning) {
+                recyclerView.smoothScrollToPosition(loadedImagesCount);
+            }
+        }, 50);
     }
 
     private void logResult(long startTime, long duration, boolean success, String details) {
         try {
-            TestResult tr = new TestResult("Image Loading", duration, details, success);
+            TestResult tr = new TestResult("Image Rendering", duration, details, success);
             TestEntry entry = new TestEntry(loadedImagesCount, tr, startTime, duration,
                     System.currentTimeMillis() - suiteStartTime);
 
@@ -189,11 +147,11 @@ public class ImageLoadingTest extends AppCompatActivity {
         }
     }
 
-    private void scheduleNextLoad() {
-        mainHandler.postDelayed(this::loadNextImage, 16);
-    }
-
     private void finishBatch() {
+        if (!isTestRunning)
+            return;
+        isTestRunning = false;
+
         closeWriter();
         sendResultAndFinish();
     }
@@ -218,5 +176,69 @@ public class ImageLoadingTest extends AppCompatActivity {
         intent.putExtra(BenchmarkApplication.RESULT, result);
         setResult(RESULT_OK, intent);
         finish();
+    }
+
+    private class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
+
+        @NonNull
+        @Override
+        public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ImageView imageView = new ImageView(parent.getContext());
+            imageView.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, 600));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setBackgroundColor(Color.LTGRAY);
+            imageView.setPadding(0, 0, 0, 4); // Add some margin
+            return new ImageViewHolder(imageView);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
+            String url = IMAGE_URLS.get(position % IMAGE_URLS.size());
+            long startTime = System.currentTimeMillis();
+
+            Glide.with(ImageLoadingTest.this)
+                    .load(url)
+                    .placeholder(new ColorDrawable(Color.LTGRAY))
+                    .error(new ColorDrawable(Color.RED))
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target,
+                                boolean isFirstResource) {
+                            if (position == loadedImagesCount) {
+                                Log.e(TAG, "Load Error at #" + position + ": "
+                                        + (e != null ? e.getMessage() : "Unknown error"));
+                                handleLoadResult(startTime, false, "Failed");
+                            }
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
+                                DataSource dataSource, boolean isFirstResource) {
+                            if (position == loadedImagesCount) {
+                                handleLoadResult(startTime, true, "Success");
+                            }
+                            return false;
+                        }
+                    })
+                    .into(holder.imageView);
+        }
+
+        @Override
+        public int getItemCount() {
+            return Config.samplesAmount;
+        }
+
+        class ImageViewHolder extends RecyclerView.ViewHolder {
+            ImageView imageView;
+
+            ImageViewHolder(ImageView itemView) {
+                super(itemView);
+                this.imageView = itemView;
+            }
+        }
     }
 }

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'models/test_result.dart';
-import 'config/sample_configuration.dart';
+import 'consts/config.dart';
 
-/// Location test page measuring data access overhead from a continuous GPS stream.
+/// Location test page measuring models access overhead from a continuous GPS stream.
 /// Uses "Stream + Poll" architecture:
 /// - Background: Listens to GPS stream.
 /// - Foreground: Polls the latest value in a tight loop (10,000 times).
@@ -174,7 +174,7 @@ class _LocationTestState extends State<LocationTest> {
     return permission;
   }
 
-  /// Formats position data into readable string.
+  /// Formats position models into readable string.
   String _formatPositionDetails(Position? position) {
     if (position == null) return 'No fixes acquired';
     return 'Lat: ${position.latitude.toStringAsFixed(6)}, '

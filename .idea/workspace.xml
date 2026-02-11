@@ -52,7 +52,82 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Add release-key.jks">
+      <change afterPath="$PROJECT_DIR$/flutter/lib/models/cpu_result.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flutter/lib/models/test_entry.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/api_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/api_test.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/benchmark_suite.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/benchmark_suite.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/config/sample_configuration.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/consts/config.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/cpu_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/cpu_test.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/image_loading_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/image_loading_test.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/location_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/location_test.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/models/post.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/models/post.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/models/test_result.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/models/test_result.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/models/user.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/models/user.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/ram_test_impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/ram_test_impl.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/services/api_service.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/services/api_service.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter/lib/ui_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/ui_test.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/java/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/CPUTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/CPUTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/CpuTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/CpuTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/LocationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/LocationTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/consts/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/consts/Config.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/data/CpuResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/CpuResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/data/Post.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/Post.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/data/TestEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/TestEntry.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/data/TestResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/TestResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/data/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/service/ApiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/services/ApiService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/res/layout/activity_benchmark_suite.xml" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/res/layout/activity_benchmark_suite.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/java/app/src/main/res/xml/data_extraction_rules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/res/xml/data_extraction_rules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/consts/Config.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/consts/Config.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/data/CpuResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/CpuResult.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/data/Post.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/Post.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/data/TestEntry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/TestEntry.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/data/TestResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/TestResult.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/data/User.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/User.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/service/ApiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/services/ApiService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/res/xml/data_extraction_rules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/res/xml/data_extraction_rules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/__mocks__/expoClipboardMock.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/__tests__/csv.test.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/__tests__/stats.test.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/react/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/react/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/react/android/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/app/constants/SampleConfiguration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/consts/Config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/app/constants/testConfig.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/.xcode.env" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative.xcodeproj/project.pbxproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative.xcodeproj/xcshareddata/xcschemes/MobileBenchmarkAppReactNative.xcscheme" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative.xcworkspace/contents.xcworkspacedata" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/AppDelegate.swift" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/AppIcon.appiconset/App-Icon-1024x1024@1x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/AppIcon.appiconset/Contents.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/Contents.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/SplashScreenBackground.colorset/Contents.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/SplashScreenLogo.imageset/Contents.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/SplashScreenLogo.imageset/image.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/SplashScreenLogo.imageset/image@2x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Images.xcassets/SplashScreenLogo.imageset/image@3x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Info.plist" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/MobileBenchmarkAppReactNative-Bridging-Header.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/MobileBenchmarkAppReactNative.entitlements" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/PrivacyInfo.xcprivacy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/SplashScreen.storyboard" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/MobileBenchmarkAppReactNative/Supporting/Expo.plist" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/Podfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/Podfile.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/Podfile.properties.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/Runner/GeneratedPluginRegistrant.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/ios/Runner/GeneratedPluginRegistrant.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/react-native/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/react/react-native/android/app/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/react-native/android/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/react/react-native/android/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/react/react-native/android/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/react/react-native/android/settings.gradle" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +140,7 @@
   <component name="EmbeddingIndexingInfo">
     <option name="cachedIndexableFilesCount" value="4401" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\jozek\.android\avd\Pixel_9_Pro.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -114,7 +189,7 @@
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/monoyo/MobileAppBenchamark.git",
-    "accountId": "04bdb3e9-951c-491b-b4c4-8f01d9879cde"
+    "accountId": "e937ff43-ae13-40ce-9c52-1fd3039beaa6"
   }
 }]]></component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\jozek\.gradle\wrapper\dists\gradle-8.14-bin\38aieal9i53h9rfe7vjup95b9\gradle-8.14" javaHome="E:\Android Studio\jbr" gradleVersion="8.14" />
@@ -156,7 +231,7 @@
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "E:/PC/Dokumenty/MobileAppBenchamark/flutter",
+    "last_opened_file_path": "E:/PC/Dokumenty/MobileAppBenchamark",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",

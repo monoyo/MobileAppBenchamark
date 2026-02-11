@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'models/test_result.dart';
-import 'config/sample_configuration.dart';
+import 'consts/config.dart';
 
 
 /// UI performance test page rendering animated rectangles.
@@ -16,7 +16,7 @@ class UiTest extends StatefulWidget {
 }
 
 class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
-  // Match Java/Kotlin constants (Physical Pixels)
+  // Match Java/Kotlin consts (Physical Pixels)
   static const int _initialObjectCount = 250;
   static const int _objectIncrementPerSecond = 250;
   static const double _nativeObjectSizePx = 50.0; // 50 physical pixels
@@ -32,7 +32,7 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   int _framesSinceFpsUpdate = 0;
   int _lastFrameTime = 0;
   
-  // Object data
+  // Object models
   final List<Rect> _objects = [];
   final List<Color> _colors = [];
   final List<double> _velocitiesX = [];
@@ -66,7 +66,7 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   void _addObjects(int count) {
     if (count <= 0 || _viewSize.isEmpty) return;
     
-    // Logic uses logical pixels, so we convert physical constants to logical
+    // Logic uses logical pixels, so we convert physical consts to logical
     final objectSizeLogical = _nativeObjectSizePx / _devicePixelRatio;
     final maxVelocityLogical = _nativeMaxVelocityPx / _devicePixelRatio;
 

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/post.dart';
 
-/// API service for fetching and managing network requests.
+/// API services for fetching and managing network requests.
 /// Implements HTTP client pooling and proper resource cleanup.
 class ApiService {
   static const String _apiBaseUrl = 'https://jsonplaceholder.typicode.com';
