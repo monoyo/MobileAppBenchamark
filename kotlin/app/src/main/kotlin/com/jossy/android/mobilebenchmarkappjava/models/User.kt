@@ -1,8 +1,8 @@
 package com.jossy.android.mobilebenchmarkappjava.data
 
 data class User(
-    var name: String? = null,
-    var surname: String? = null,
+    var name: String = "",
+    var surname: String = "",
     var age: Int = 0,
     var active: Boolean = false
 ) {

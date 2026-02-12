@@ -151,21 +151,12 @@ public class UiTest extends AppCompatActivity implements Choreographer.FrameCall
         Choreographer.getInstance().postFrameCallback(this);
     }
 
-    private long lastRenderTimeNanos = 0;
-
     @Override
     public void doFrame(long frameTimeNanos) {
         if (!isRunning)
             return;
 
         long currentNano = System.nanoTime();
-
-        // Limit to 5 FPS (200ms = 200,000,000ns)
-        if (lastRenderTimeNanos != 0 && (currentNano - lastRenderTimeNanos) < 200_000_000) {
-            Choreographer.getInstance().postFrameCallback(this);
-            return;
-        }
-        lastRenderTimeNanos = currentNano;
         double frameTimeMs = (currentNano - lastFrameTimeNanos) / 1_000_000.0;
         lastFrameTimeNanos = currentNano;
         double fps = frameTimeMs > 0 ? 1000.0 / frameTimeMs : 0;
@@ -179,7 +170,7 @@ public class UiTest extends AppCompatActivity implements Choreographer.FrameCall
 
         frameCount++;
 
-        if (frameCount >= Config.samplesAmount) {
+        if (frameCount >= Config.sampleCount) {
             finishTest(true);
         } else {
             Choreographer.getInstance().postFrameCallback(this);
@@ -209,7 +200,7 @@ public class UiTest extends AppCompatActivity implements Choreographer.FrameCall
     private void updateUI(double fps, long elapsedMs) {
         stressTestView.setObjects(objects, colors);
         infoText.setText(String.format(Locale.US, "Samples: %d / %d\nObjects: %d\nFPS: %.1f",
-                frameCount, Config.samplesAmount, currentObjectCount, fps));
+                frameCount, Config.sampleCount, currentObjectCount, fps));
     }
 
     private void updatePositions() {

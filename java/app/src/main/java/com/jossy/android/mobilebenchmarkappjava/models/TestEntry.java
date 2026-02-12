@@ -30,14 +30,14 @@ public class TestEntry {
      */
     public TestEntry(int iteration, TestResult result) {
         this(iteration, result, System.currentTimeMillis(),
-                result.getExecutionTime(), result.getExecutionTime());
+                result.getExecutionTimeMs(), result.getExecutionTimeMs());
     }
 
     @Override
     public String toString() {
         return "TestEntry{" +
                 "iteration=" + iteration +
-                ", executionTime=" + result.getExecutionTime() +
+                ", executionTime=" + result.getExecutionTimeMs() +
                 ", intervalDuration=" + intervalDurationMs +
                 ", cumulative=" + cumulativeTimeMs +
                 '}';

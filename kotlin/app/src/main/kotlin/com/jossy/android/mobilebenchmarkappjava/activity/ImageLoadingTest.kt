@@ -72,7 +72,7 @@ class ImageLoadingTest : AppCompatActivity() {
 
     private fun parseIntentData() {
         csvPath = intent.getStringExtra("csv_path")
-        Log.i(TAG, "Starting Image Batch: ${Config.samplesAmount}")
+        Log.i(TAG, "Starting Image Batch: ${Config.sampleCount}")
     }
 
     private fun startBatchTest() {
@@ -108,7 +108,7 @@ class ImageLoadingTest : AppCompatActivity() {
         loadedImagesCount++
         recyclerView.adapter?.notifyItemChanged(loadedImagesCount)
 
-        if (loadedImagesCount >= Config.samplesAmount) {
+        if (loadedImagesCount >= Config.sampleCount) {
             finishBatch()
             return
         }
@@ -204,7 +204,7 @@ class ImageLoadingTest : AppCompatActivity() {
                 .into(holder.imageView)
         }
 
-        override fun getItemCount(): Int = Config.samplesAmount
+        override fun getItemCount(): Int = Config.sampleCount
 
         inner class ImageViewHolder(val imageView: ImageView) : RecyclerView.ViewHolder(imageView)
     }

@@ -23,8 +23,9 @@ object CPUTest {
                 priority = THREAD_PRIORITY
                 name = "cpu-worker-$threadIndex"
             }
-        }.forEach { thread ->
+        }.onEach { thread ->
             thread.start()
+        }.forEach { thread ->
             thread.join()
         }
 
@@ -50,8 +51,9 @@ object CPUTest {
                 priority = THREAD_PRIORITY
                 name = "cpu-worker-$threadIndex"
             }
-        }.forEach { thread ->
+        }.onEach { thread ->
             thread.start()
+        }.forEach { thread ->
             thread.join()
         }
 

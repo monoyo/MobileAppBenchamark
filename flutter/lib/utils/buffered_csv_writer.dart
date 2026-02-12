@@ -41,8 +41,8 @@ class BufferedCsvWriter {
   }) async {
     if (!_initialized) return;
 
-    final safeDetails = _csvSafe(details);
-    final line = '$platform,${_csvSafe(testName)},$iteration,$executionTimeMs,$safeDetails,$intervalStartMs,$intervalDurationMs,$cumulativeTimeMs';
+    final safeDetails = csvEscape(details);
+    final line = '$platform,${csvEscape(testName)},$iteration,$executionTimeMs,$safeDetails,$intervalStartMs,$intervalDurationMs,$cumulativeTimeMs';
     _buffer.add(line);
 
     if (_buffer.length >= bufferSize) {
@@ -68,7 +68,7 @@ class BufferedCsvWriter {
     _initialized = false;
   }
 
-  String _csvSafe(String v) {
+  String csvEscape(String v) {
     if (v.contains(',') || v.contains('"') || v.contains('\n')) {
       return '"${v.replaceAll('"', '""')}"';
     }

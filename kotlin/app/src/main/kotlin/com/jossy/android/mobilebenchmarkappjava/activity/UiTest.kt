@@ -140,19 +140,12 @@ class UiTest : AppCompatActivity(), Choreographer.FrameCallback {
         Choreographer.getInstance().postFrameCallback(this)
     }
 
-    private var lastRenderTimeNanos = 0L
+
 
     override fun doFrame(frameTimeNanos: Long) {
         if (!isRunning) return
 
         val currentNano = System.nanoTime()
-
-        // Limit to 5 FPS (200ms = 200,000,000ns)
-        if (lastRenderTimeNanos != 0L && (currentNano - lastRenderTimeNanos) < 200_000_000) {
-            Choreographer.getInstance().postFrameCallback(this)
-            return
-        }
-        lastRenderTimeNanos = currentNano
         val frameTimeMs = (currentNano - lastFrameTimeNanos) / 1_000_000.0
         lastFrameTimeNanos = currentNano
         val fps = if (frameTimeMs > 0) 1000.0 / frameTimeMs else 0.0
@@ -166,7 +159,7 @@ class UiTest : AppCompatActivity(), Choreographer.FrameCallback {
 
         frameCount++
 
-        if (frameCount >= Config.samplesAmount) {
+        if (frameCount >= Config.sampleCount) {
             finishTest(true)
         } else {
             Choreographer.getInstance().postFrameCallback(this)
@@ -224,7 +217,7 @@ class UiTest : AppCompatActivity(), Choreographer.FrameCallback {
         infoText.text = String.format(
             Locale.US,
             "Samples: %d / %d\nObjects: %d\nFPS: %.1f",
-            frameCount, Config.samplesAmount, currentObjectCount, fps
+            frameCount, Config.sampleCount, currentObjectCount, fps
         )
     }
 

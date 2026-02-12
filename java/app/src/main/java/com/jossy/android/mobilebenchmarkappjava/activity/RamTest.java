@@ -22,9 +22,9 @@ public class RamTest extends BaseTestActivity {
         initializeCsvWriter();
         int runsPerSample = calculateRunsPerSample();
 
-        Log.i(TAG, "Starting RAM Batch: samples=" + Config.samplesAmount + ", runs/sample=" + runsPerSample);
+        Log.i(TAG, "Starting RAM Batch: samples=" + Config.sampleCount + ", runs/sample=" + runsPerSample);
 
-        for (int i = 0; i < Config.samplesAmount; i++) {
+        for (int i = 0; i < Config.sampleCount; i++) {
             executeSingleIteration(i, runsPerSample);
         }
         csvWriter.flush();
@@ -50,7 +50,7 @@ public class RamTest extends BaseTestActivity {
 
     @Override
     protected String getProgressDisplayText(int currentIteration) {
-        return getString(R.string.ram_test_progress, currentIteration, Config.samplesAmount);
+        return getString(R.string.ram_test_progress, currentIteration, Config.sampleCount);
     }
 
     @Override

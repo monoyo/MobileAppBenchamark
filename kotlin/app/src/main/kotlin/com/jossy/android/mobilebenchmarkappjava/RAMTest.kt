@@ -49,7 +49,7 @@ object RAMTest {
             .filter { it.active && it.age > 18 }
             .map { user ->
                 User(
-                    name = user.name?.uppercase(Locale.ROOT),
+                    name = user.name.uppercase(Locale.ROOT),
                     surname = user.surname,
                     age = user.age,
                     active = user.active
@@ -68,13 +68,12 @@ object RAMTest {
         surnameCounter.clear()
 
         users.forEach { user ->
-            user.name?.split(" ")?.let { parts ->
-                if (parts.isNotEmpty() && parts[0].isNotEmpty()) {
-                    nameCounter[parts[0]] = nameCounter.getOrDefault(parts[0], 0) + 1
-                }
-                if (parts.size > 1 && parts[1].isNotEmpty()) {
-                    surnameCounter[parts[1]] = surnameCounter.getOrDefault(parts[1], 0) + 1
-                }
+            val parts = user.name.split(" ")
+            if (parts.isNotEmpty() && parts[0].isNotEmpty()) {
+                nameCounter[parts[0]] = nameCounter.getOrDefault(parts[0], 0) + 1
+            }
+            if (parts.size > 1 && parts[1].isNotEmpty()) {
+                surnameCounter[parts[1]] = surnameCounter.getOrDefault(parts[1], 0) + 1
             }
         }
     }

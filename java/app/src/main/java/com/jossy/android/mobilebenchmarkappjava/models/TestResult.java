@@ -4,13 +4,13 @@ import java.io.Serializable;
 
 public class TestResult implements Serializable {
     private String testName;
-    private long executionTime;
+    private long executionTimeMs;
     private String details;
     private boolean success;
 
-    public TestResult(String testName, long executionTime, String details, boolean success) {
+    public TestResult(String testName, long executionTimeMs, String details, boolean success) {
         this.testName = testName;
-        this.executionTime = executionTime;
+        this.executionTimeMs = executionTimeMs;
         this.details = details;
         this.success = success;
     }
@@ -19,8 +19,8 @@ public class TestResult implements Serializable {
         return testName;
     }
 
-    public long getExecutionTime() {
-        return executionTime;
+    public long getExecutionTimeMs() {
+        return executionTimeMs;
     }
 
     public String getDetails() {

@@ -3,15 +3,15 @@ import { Href } from 'expo-router';
 import React from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { EXPORT_FILE_PREFIX } from './constants/testConfig';
-import type { AggregatedStats, GroupAverage, TestResult } from './types';
-import { aggregatePerTest, computeGroupAverages, formatResult } from './types';
+import type { AggregatedStats, TestResult } from './types';
+import { aggregatePerTest, formatResult } from './types';
 import { exportAllPerTestCsv } from './utils/csvExport';
 import { getLaunchTime, markSuiteReady } from './utils/launchTime';
 import { createResultKey, waitForResult } from './utils/navResult';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;
 let Clipboard: { setStringAsync?: (s: string) => Promise<void> } = {} as any;
-try { Clipboard = require('expo-clipboard'); } catch {}
+try { Clipboard = require('expo-clipboard'); } catch { }
 
 // Test definicje (zachowane z poprzedniego ekranu suite)
 const TESTS: { name: string; route: Href; group: string }[] = [
@@ -81,12 +81,10 @@ export default function Benchmark() {
   };
 
   const buildExportPayload = (res: TestResult[]) => {
-    const groupAverages = computeGroupAverages(res);
     const aggregated: AggregatedStats[] = aggregatePerTest(res);
     return {
       launchTimeMs: launchTimeRef.current,
       tests: res,
-      groupAverages,
       aggregatedStats: aggregated,
       iterationsPlanned: iterations,
       generatedAt: new Date().toISOString(),
@@ -109,7 +107,7 @@ export default function Benchmark() {
     const path = await saveToFile(results);
     if (path && Clipboard?.setStringAsync) {
       const payload = buildExportPayload(results);
-      try { await Clipboard.setStringAsync(JSON.stringify(payload)); } catch {}
+      try { await Clipboard.setStringAsync(JSON.stringify(payload)); } catch { }
     }
     setLastSavedPath(path);
     Alert.alert(path ? 'Export complete' : 'Export failed', path ?? '');
@@ -120,12 +118,11 @@ export default function Benchmark() {
   const completed = testIndex * iterations + iteration;
   const progress = total === 0 ? 0 : Math.max(0, Math.min(1, completed / total));
 
-  const groupAverages: GroupAverage[] = computeGroupAverages(results);
   const aggregated: AggregatedStats[] = React.useMemo(() => aggregatePerTest(results), [results]);
 
   return (
     <View style={styles.root}>
-  <Text style={styles.headerLine}>App Launched in: {launchMs != null ? `${launchMs}ms` : '...'}{'\n'}{ready ? 'Ready to start tests.' : 'Preparing...'}{running ? `\nRunning: ${TESTS[testIndex]?.name} (${iteration + 1}/${iterations})` : ''}</Text>
+      <Text style={styles.headerLine}>App Launched in: {launchMs != null ? `${launchMs}ms` : '...'}{'\n'}{ready ? 'Ready to start tests.' : 'Preparing...'}{running ? `\nRunning: ${TESTS[testIndex]?.name} (${iteration + 1}/${iterations})` : ''}</Text>
       <View style={styles.progressBarWrap}>
         <View style={[styles.progressBarFill, { flex: progress }]} />
         <View style={{ flex: 1 - progress }} />
@@ -142,27 +139,12 @@ export default function Benchmark() {
         </Pressable>
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }}>
-  <Text style={styles.iterInfo}>Per-test repetitions: {iterations} (fixed)</Text>
+        <Text style={styles.iterInfo}>Per-test repetitions: {iterations} (fixed)</Text>
         <Text style={styles.sectionTitle}>Results</Text>
         <Text style={styles.mono}>
           {results.length === 0 ? 'No results yet.' : results.map((r: TestResult) => formatResult(r)).join('\n')}
         </Text>
-        {groupAverages.length > 0 && (
-          <View style={{ marginTop: 16 }}>
-            <Text style={styles.sectionTitle}>Group Averages</Text>
-            {groupAverages.map(g => (
-              <Text key={g.group} style={styles.avgLine}>{g.group}: {g.averageMs.toFixed(2)} ms ({g.samples})</Text>
-            ))}
-          </View>
-        )}
-        {aggregated.length > 0 && (
-          <View style={{ marginTop: 16 }}>
-            <Text style={styles.sectionTitle}>Per-Test Stats (median / p95)</Text>
-            {aggregated.map(a => (
-              <Text key={a.testName} style={styles.avgLine}>{a.testName}: n={a.samples} avg={a.avgMs.toFixed(1)} ms med={a.medianMs.toFixed(1)} p95={a.p95Ms.toFixed(1)} min={a.minMs.toFixed(0)} max={a.maxMs.toFixed(0)} ok={a.successes}/{a.samples}</Text>
-            ))}
-          </View>
-        )}
+
         {lastSavedPath && (
           <Text style={{ marginTop: 12, fontSize: 12, color: '#555' }}>Last export: {lastSavedPath}</Text>
         )}

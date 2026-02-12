@@ -20,20 +20,20 @@ import type { TestResult } from './types';
 import { formatResult } from './types';
 import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
 import { getLaunchTime, markSuiteReady } from './utils/launchTime';
-import { exportSummary } from './utils/summaryExport';
+import { exportSummary } from './utils/SummaryWriter';
 import {
   createResultKey,
   waitForResult,
 } from './utils/navResult';
 
 // Define test groups - order matters for sequential execution
-const TESTS: Array<{ name: string; route: Href; group: string }> = [
-  { name: 'UI Test', route: '/ui-test', group: 'ui' },
-  { name: 'CPU Test', route: '/cpu-test', group: 'cpu' },
-  { name: 'RAM Test', route: '/ram-test', group: 'memory' },
-  { name: 'Image Loading Test', route: '/image-test', group: 'io' },
-  { name: 'API Test', route: '/api-test', group: 'network' },
-  { name: 'Location Test', route: '/location-test', group: 'sensors' },
+const TESTS: Array<{ name: string; route: Href }> = [
+  { name: 'UI Test', route: '/ui-test' },
+  { name: 'CPU Test', route: '/cpu-test' },
+  { name: 'RAM Test', route: '/ram-test' },
+  { name: 'Image Loading Test', route: '/image-test' },
+  { name: 'API Test', route: '/api-test' },
+  { name: 'Location Test', route: '/location-test' },
 ];
 
 /**
@@ -209,7 +209,6 @@ export default function Suite(): React.ReactElement {
       if (res && !cancelledRef.current) {
         const extendedRes: TestResult = {
           ...res,
-          fps: getFps(),
         };
         acc.push(extendedRes);
         setResults([...acc]);

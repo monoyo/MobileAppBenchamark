@@ -182,7 +182,6 @@ export default function RAMTest(): React.ReactElement {
 
         const res: TestResult = {
           testName: 'RAM Test',
-          group: 'memory',
           executionTimeMs: Math.round(timing.total),
           details: `runs=${RUNS}; shuffle=${timing.shuffle.toFixed(1)}ms; sfm=${timing.sortFilterMap.toFixed(1)}ms; json=${timing.json.toFixed(1)}ms; counting=${timing.counting.toFixed(1)}ms`,
           success: true,
@@ -198,7 +197,6 @@ export default function RAMTest(): React.ReactElement {
           console.error('RAM Test error:', error);
           const res: TestResult = {
             testName: 'RAM Test',
-            group: 'memory',
             executionTimeMs: -1,
             details: String(error),
             success: false,

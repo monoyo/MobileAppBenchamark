@@ -70,7 +70,7 @@ abstract class BaseTestActivity : AppCompatActivity() {
             }
 
             val start = System.currentTimeMillis()
-            val duration = result.executionTime
+            val duration = result.executionTimeMs
             val elapsed = System.currentTimeMillis() - suiteStartTime
 
             val entry = TestEntry(iteration, result, start, duration, elapsed)
@@ -103,8 +103,8 @@ abstract class BaseTestActivity : AppCompatActivity() {
         runOnUiThread {
             val result = TestResult(
                 testName = getTestName(),
-                executionTime = totalTime,
-                details = "Batch completed: ${Config.samplesAmount} samples",
+                executionTimeMs = totalTime,
+                details = "Batch completed: ${Config.sampleCount} samples",
                 success = true
             )
             closeCsvWriter()
@@ -117,7 +117,7 @@ abstract class BaseTestActivity : AppCompatActivity() {
         runOnUiThread {
             val result = TestResult(
                 testName = getTestName(),
-                executionTime = 0,
+                executionTimeMs = 0,
                 details = "Error: ${e.message}",
                 success = false
             )

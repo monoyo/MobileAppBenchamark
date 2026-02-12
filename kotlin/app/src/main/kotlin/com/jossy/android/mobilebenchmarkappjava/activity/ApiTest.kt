@@ -79,7 +79,7 @@ class ApiTest : BaseTestActivity() {
     }
 
     private fun makeApiRequest() {
-        if (currentSampleIndex >= Config.samplesAmount) {
+        if (currentSampleIndex >= Config.sampleCount) {
             finishBatch()
             return
         }
@@ -123,7 +123,7 @@ class ApiTest : BaseTestActivity() {
         val totalTime = System.currentTimeMillis() - suiteStartTime
         val result = TestResult(
             testName = "API Test",
-            executionTime = totalTime,
+            executionTimeMs = totalTime,
             details = "Batch completed: $currentSampleIndex",
             success = true
         )
@@ -137,7 +137,7 @@ class ApiTest : BaseTestActivity() {
     }
 
     override fun getProgressDisplayText(currentIteration: Int): String =
-        "API Test: $currentIteration / ${Config.samplesAmount}"
+        "API Test: $currentIteration / ${Config.sampleCount}"
 
     override fun getTestName(): String = "API Test"
 }

@@ -4,7 +4,7 @@ import java.io.Serializable
 
 data class TestResult(
     val testName: String,
-    val executionTime: Long,
+    val executionTimeMs: Long,
     val details: String,
     val success: Boolean
 ) : Serializable

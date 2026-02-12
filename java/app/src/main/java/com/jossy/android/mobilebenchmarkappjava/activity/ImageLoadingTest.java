@@ -80,7 +80,7 @@ public class ImageLoadingTest extends AppCompatActivity {
 
     private void parseIntentData() {
         csvPath = getIntent().getStringExtra("csv_path");
-        Log.i(TAG, "Starting Image Batch: " + Config.samplesAmount);
+        Log.i(TAG, "Starting Image Batch: " + Config.sampleCount);
     }
 
     private void startBatchTest() {
@@ -120,7 +120,7 @@ public class ImageLoadingTest extends AppCompatActivity {
             recyclerView.getAdapter().notifyItemChanged(loadedImagesCount);
         }
 
-        if (loadedImagesCount >= Config.samplesAmount) {
+        if (loadedImagesCount >= Config.sampleCount) {
             finishBatch();
             return;
         }
@@ -229,7 +229,7 @@ public class ImageLoadingTest extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return Config.samplesAmount;
+            return Config.sampleCount;
         }
 
         class ImageViewHolder extends RecyclerView.ViewHolder {

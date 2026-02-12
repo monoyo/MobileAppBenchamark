@@ -39,7 +39,7 @@ public class CpuTest extends BaseTestActivity {
             long startTime = System.currentTimeMillis();
             updateStatus("Starting CPU benchmark...");
 
-            for (int i = 0; i < Config.samplesAmount; i++) {
+            for (int i = 0; i < Config.sampleCount; i++) {
                 // if (executorService.isShutdown()) return;
 
                 int currentIteration = i + 1;
@@ -64,7 +64,7 @@ public class CpuTest extends BaseTestActivity {
 
     private CpuResult executeSingleIteration(int index) {
         long start = System.currentTimeMillis();
-        CpuResult result = CPUTest.runBenchmarkIterations(Config.samplesAmount, null);
+        CpuResult result = CPUTest.runBenchmarkIterations(Config.sampleCount, null);
         long duration = System.currentTimeMillis() - start;
 
         TestResult testResult = new TestResult(
@@ -80,7 +80,7 @@ public class CpuTest extends BaseTestActivity {
     @Override
     @SuppressLint("SetTextI18n")
     protected String getProgressDisplayText(int currentIteration) {
-        return "CPU Test: " + currentIteration + " / " + Config.samplesAmount;
+        return "CPU Test: " + currentIteration + " / " + Config.sampleCount;
     }
 
     @Override

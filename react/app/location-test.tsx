@@ -4,6 +4,7 @@ import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import type { TestResult } from './types';
 import { resolveResult } from './utils/navResult';
+import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
 import { getSampleConfig } from './constants/SampleConfiguration';
 
 /**
@@ -149,7 +150,6 @@ export default function LocationTest(): React.ReactElement {
 
         const res: TestResult = {
           testName: 'Location Test',
-          group: 'sensors',
           executionTimeMs: elapsedMs,
           details,
           success: true,
@@ -163,7 +163,6 @@ export default function LocationTest(): React.ReactElement {
         const errorMsg = error instanceof Error ? error.message : String(error);
         const res: TestResult = {
           testName: 'Location Test',
-          group: 'sensors',
           executionTimeMs: -1,
           details: `Error: ${errorMsg}`,
           success: false,

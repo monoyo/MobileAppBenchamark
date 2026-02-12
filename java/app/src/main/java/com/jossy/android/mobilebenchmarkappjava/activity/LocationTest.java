@@ -102,7 +102,7 @@ public class LocationTest extends AppCompatActivity {
 
         csvPath = getIntent().getStringExtra("csv_path");
         if (progressBar != null) {
-            progressBar.setMax(Config.samplesAmount);
+            progressBar.setMax(Config.sampleCount);
         }
     }
 
@@ -137,7 +137,7 @@ public class LocationTest extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void startBenchmark() {
-        Log.i(TAG, "Starting Benchmark: " + Config.samplesAmount + " samples @ " + intervalMs + "ms");
+        Log.i(TAG, "Starting Benchmark: " + Config.sampleCount + " samples @ " + intervalMs + "ms");
 
         LocationRequest locationRequest = new LocationRequest.Builder(1000)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
@@ -160,11 +160,11 @@ public class LocationTest extends AppCompatActivity {
 
             sampleCount++;
 
-            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= Config.samplesAmount) {
+            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= Config.sampleCount) {
                 updateUI();
             }
 
-            if (sampleCount >= Config.samplesAmount) {
+            if (sampleCount >= Config.sampleCount) {
                 finishBenchmark();
             }
         } catch (Exception e) {
@@ -189,7 +189,7 @@ public class LocationTest extends AppCompatActivity {
     private void updateUI() {
         runOnUiThread(() -> {
             if (statusText != null) {
-                statusText.setText(String.format(Locale.US, "Progress: %d / %d", sampleCount, Config.samplesAmount));
+                statusText.setText(String.format(Locale.US, "Progress: %d / %d", sampleCount, Config.sampleCount));
             }
             if (progressBar != null) {
                 progressBar.setProgress(sampleCount);

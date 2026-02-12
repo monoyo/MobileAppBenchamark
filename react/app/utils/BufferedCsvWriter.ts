@@ -33,7 +33,7 @@ export class BufferedCsvWriter {
         }
     }
 
-    private csvSafe(value: string): string {
+    private csvEscape(value: string): string {
         const escaped = value.replace(/"/g, '""');
         const needsQuote = escaped.includes(',') || escaped.includes('\n') || escaped.includes('"');
         return needsQuote ? `"${escaped}"` : escaped;
@@ -47,8 +47,8 @@ export class BufferedCsvWriter {
         intervalDurationMs: number = 0,
         cumulativeTimeMs: number = 0
     ) {
-        const safeDetails = this.csvSafe(details);
-        const safeTestName = this.csvSafe(this.testName);
+        const safeDetails = this.csvEscape(details);
+        const safeTestName = this.csvEscape(this.testName);
         const line = `${PLATFORM},${safeTestName},${iteration},${executionTimeMs},${safeDetails},${intervalStartMs},${intervalDurationMs},${cumulativeTimeMs}`;
         this.buffer.push(line);
 

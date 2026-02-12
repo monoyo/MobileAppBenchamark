@@ -49,7 +49,6 @@ export default function ImageTest(): React.ReactElement {
       const failed = completed - succeeded;
       const res: TestResult = {
         testName: 'Image Loading Test',
-        group: 'io',
         executionTimeMs: elapsedMs,
         details:
           failed > 0

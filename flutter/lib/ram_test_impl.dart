@@ -9,7 +9,7 @@ import '../consts/config.dart';
 /// Implements patterns from Java RAMTest: sorting, filtering, serialization, and aggregation.
 class RAMTest {
   /// Number of iterations for each test variant.
-  static const int runs = SampleConfig.sampleCount;
+  static const int runs = Config.sampleCount;
   
   /// Counters for name frequency analysis.
   static final Map<String, int> nameFrequency = {};

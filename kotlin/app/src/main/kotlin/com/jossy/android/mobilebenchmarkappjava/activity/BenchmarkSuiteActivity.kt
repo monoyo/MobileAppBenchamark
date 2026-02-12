@@ -166,7 +166,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun updateProgressMax() {
-        testProgress.max = Config.samplesAmount * ALL_TESTS
+        testProgress.max = Config.sampleCount * ALL_TESTS
     }
 
     private fun startTestSuite() {
@@ -304,7 +304,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
             3 -> Intent(this, ImageLoadingTest::class.java)
             4 -> Intent(this, ApiTest::class.java)
             else -> Intent(this, LocationTest::class.java).apply {
-                putExtra("interval", Config.samplesAmount)
+                putExtra("interval", Config.sampleCount)
             }
         }
 
@@ -323,7 +323,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
         Log.i(TAG, "Test ${result.testName} completed in ${duration}ms")
 
         if (result.success) {
-            totalSamplesCollected += Config.samplesAmount
+            totalSamplesCollected += Config.sampleCount
         }
 
         currentTestIndex++
@@ -366,7 +366,7 @@ class BenchmarkSuiteActivity : AppCompatActivity() {
     }
 
     private fun updateProgress() {
-        val progress = (currentTestIndex + 1) * Config.samplesAmount
+        val progress = (currentTestIndex + 1) * Config.sampleCount
         testProgress.progress = progress
     }
 

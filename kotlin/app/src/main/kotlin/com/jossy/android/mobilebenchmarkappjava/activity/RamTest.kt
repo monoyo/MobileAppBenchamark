@@ -41,9 +41,9 @@ class RamTest : BaseTestActivity() {
         initializeCsvWriter()
         val runsPerSample = calculateRunsPerSample()
 
-        Log.i(TAG, "Starting RAM Batch: samples=${Config.samplesAmount}, runs/sample=$runsPerSample")
+        Log.i(TAG, "Starting RAM Batch: samples=${Config.sampleCount}, runs/sample=$runsPerSample")
 
-        repeat(Config.samplesAmount) { i ->
+        repeat(Config.sampleCount) { i ->
             executeSingleIteration(i, runsPerSample)
         }
         csvWriter?.flush()
@@ -58,7 +58,7 @@ class RamTest : BaseTestActivity() {
 
         val result = TestResult(
             testName = "RAM Test",
-            executionTime = duration,
+            executionTimeMs = duration,
             details = "RAM benchmark",
             success = true
         )
@@ -67,7 +67,7 @@ class RamTest : BaseTestActivity() {
     }
 
     override fun getProgressDisplayText(currentIteration: Int): String =
-        "RAM Test: $currentIteration / ${Config.samplesAmount}"
+        "RAM Test: $currentIteration / ${Config.sampleCount}"
 
     override fun getTestName(): String = "RAM Test"
 }

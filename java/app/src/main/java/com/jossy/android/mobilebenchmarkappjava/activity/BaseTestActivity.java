@@ -91,7 +91,7 @@ public abstract class BaseTestActivity extends AppCompatActivity {
             }
             
             long start = System.currentTimeMillis();
-            long duration = result.getExecutionTime();
+            long duration = result.getExecutionTimeMs();
             long elapsed = System.currentTimeMillis() - suiteStartTime;
             
             TestEntry entry = new TestEntry(iteration, result, start, duration, elapsed);
@@ -144,7 +144,7 @@ public abstract class BaseTestActivity extends AppCompatActivity {
             TestResult result = new TestResult(
                 getTestName(),
                 totalTime,
-                "Batch completed: " + Config.samplesAmount + " samples",
+                "Batch completed: " + Config.sampleCount + " samples",
                 true
             );
             closeCsvWriter();

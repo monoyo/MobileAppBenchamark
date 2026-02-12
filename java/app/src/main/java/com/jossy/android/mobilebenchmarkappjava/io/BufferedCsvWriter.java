@@ -153,7 +153,7 @@ public class BufferedCsvWriter implements AutoCloseable {
             sb.append(PLATFORM).append(',')
                     .append(csvEscape(testName)).append(',')
                     .append(entry.iteration).append(',')
-                    .append(entry.result.getExecutionTime()).append(',')
+                    .append(entry.result.getExecutionTimeMs()).append(',')
                     .append(csvEscape(entry.result.getDetails())).append(',')
                     .append(entry.intervalStartMs).append(',')
                     .append(entry.intervalDurationMs).append(',')
@@ -181,7 +181,7 @@ public class BufferedCsvWriter implements AutoCloseable {
         if (entries == null || entries.isEmpty()) return;
         try (BufferedWriter cpWriter = new BufferedWriter(new FileWriter(checkpointFile, true))) {
             for (TestEntry entry : entries) {
-                cpWriter.write(PLATFORM + "," + csvEscape(testName) + "," + entry.iteration + "," + entry.result.getExecutionTime() + "," +
+                cpWriter.write(PLATFORM + "," + csvEscape(testName) + "," + entry.iteration + "," + entry.result.getExecutionTimeMs() + "," +
                         csvEscape(entry.result.getDetails()) + "," + entry.intervalStartMs + "," +
                         entry.intervalDurationMs + "," + entry.cumulativeTimeMs + "\n");
             }

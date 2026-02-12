@@ -183,7 +183,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
     }
 
     private void updateProgressMax() {
-        testProgress.setMax(Config.samplesAmount * ALL_TESTS);
+        testProgress.setMax(Config.sampleCount * ALL_TESTS);
     }
 
     private void startTestSuite() {
@@ -346,7 +346,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
                 break;
             default:
                 intent = new Intent(this, LocationTest.class);
-                intent.putExtra("interval", Config.samplesAmount);
+                intent.putExtra("interval", Config.sampleCount);
                 break;
         }
 
@@ -373,7 +373,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         Log.i(TAG, "Test " + result.getTestName() + " completed in " + duration + "ms");
 
         if (result.isSuccess()) {
-            totalSamplesCollected += Config.samplesAmount;
+            totalSamplesCollected += Config.sampleCount;
         }
 
         // Advance to next test
@@ -424,7 +424,7 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
 
     private void updateProgress() {
         // Simplified progress: just showing which test we are on
-        int progress = (currentTestIndex + 1) * Config.samplesAmount;
+        int progress = (currentTestIndex + 1) * Config.sampleCount;
         testProgress.setProgress(progress);
     }
 

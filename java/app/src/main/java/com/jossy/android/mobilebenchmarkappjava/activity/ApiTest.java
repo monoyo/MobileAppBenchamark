@@ -60,7 +60,7 @@ public class ApiTest extends BaseTestActivity {
     }
 
     private void makeApiRequest() {
-        if (currentSampleIndex >= Config.samplesAmount) {
+        if (currentSampleIndex >= Config.sampleCount) {
             finishBatch();
             return;
         }
@@ -123,7 +123,7 @@ public class ApiTest extends BaseTestActivity {
 
     @Override
     protected String getProgressDisplayText(int currentIteration) {
-        return "API Test: " + currentIteration + " / " + Config.samplesAmount;
+        return "API Test: " + currentIteration + " / " + Config.sampleCount;
     }
 
     @Override

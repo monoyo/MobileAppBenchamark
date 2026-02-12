@@ -79,7 +79,6 @@ export default function ApiTest(): React.ReactElement {
 
         const res: TestResult = {
           testName: 'API Test',
-          group: 'network',
           executionTimeMs: elapsedMs,
           details,
           success: true,
@@ -91,7 +90,6 @@ export default function ApiTest(): React.ReactElement {
         const errorMsg = error instanceof Error ? error.message : String(error);
         const res: TestResult = {
           testName: 'API Test',
-          group: 'network',
           executionTimeMs: -1,
           details: `Failed: ${errorMsg}`,
           success: false,

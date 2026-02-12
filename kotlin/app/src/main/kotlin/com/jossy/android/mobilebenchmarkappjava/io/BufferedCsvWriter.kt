@@ -129,7 +129,7 @@ class BufferedCsvWriter(
             sb.append(PLATFORM).append(',')
                 .append(csvEscape(testName)).append(',')
                 .append(entry.iteration).append(',')
-                .append(entry.result.executionTime).append(',')
+                .append(entry.result.executionTimeMs).append(',')
                 .append(csvEscape(entry.result.details)).append(',')
                 .append(entry.intervalStartMs).append(',')
                 .append(entry.intervalDurationMs).append(',')
@@ -154,7 +154,7 @@ class BufferedCsvWriter(
             BufferedWriter(FileWriter(checkpointFile, true)).use { cpWriter ->
                 entries.forEach { entry ->
                     cpWriter.write(
-                        "$PLATFORM,${csvEscape(testName)},${entry.iteration},${entry.result.executionTime}," +
+                        "$PLATFORM,${csvEscape(testName)},${entry.iteration},${entry.result.executionTimeMs}," +
                                 "${csvEscape(entry.result.details)},${entry.intervalStartMs}," +
                                 "${entry.intervalDurationMs},${entry.cumulativeTimeMs}\n"
                     )

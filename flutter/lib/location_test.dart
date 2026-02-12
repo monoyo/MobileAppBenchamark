@@ -92,7 +92,7 @@ class _LocationTestState extends State<LocationTest> {
       // 3. Benchmark Loop (Foreground Consumer)
       int samples = 0;
       int successCount = 0;
-      final int targetSamples = SampleConfig.sampleCount; // 10,000
+      final int targetSamples = Config.sampleCount; // 10,000
 
       _updateStatus('Testing access overhead...');
       

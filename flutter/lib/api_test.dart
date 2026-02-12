@@ -35,7 +35,7 @@ class _ApiTestState extends State<ApiTest> {
       int successCount = 0;
       int errorCount = 0;
       
-      for (int i = 0; i < SampleConfig.sampleCount; i++) {
+      for (int i = 0; i < Config.sampleCount; i++) {
         try {
            // Fetch posts from remote API
            await _apiService.fetchPosts(timeout: const Duration(seconds: 30));
@@ -57,7 +57,7 @@ class _ApiTestState extends State<ApiTest> {
       final result = TestResult(
         'API Test',
         elapsedMs,
-        'Executed ${SampleConfig.sampleCount} calls. Success: $successCount, Errors: $errorCount',
+        'Executed ${Config.sampleCount} calls. Success: $successCount, Errors: $errorCount',
         true,
       );
 
@@ -83,7 +83,7 @@ class _ApiTestState extends State<ApiTest> {
     return Scaffold(
       body: Center(
         child: Text(
-          'API Test: $_currentIteration / ${SampleConfig.sampleCount}',
+          'API Test: $_currentIteration / ${Config.sampleCount}',
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 16),
         ),

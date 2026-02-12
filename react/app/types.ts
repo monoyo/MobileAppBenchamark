@@ -1,19 +1,11 @@
 export type TestResult = {
   testName: string;
-  group?: string; // logical group identifier
   executionTimeMs: number; // -1 indicates failure or not applicable
+  details: string;
   success: boolean;
-  details?: string;
-  fps?: number; // Added FPS field
 };
 
-export type GroupAverage = {
-  group: string;
-  averageMs: number;
-  samples: number;
-};
-
-// Extended aggregated statistics (kept separate to avoid breaking existing flows)
+// Extended aggregated statistics
 export type AggregatedStats = {
   testName: string;
   samples: number;
@@ -21,24 +13,14 @@ export type AggregatedStats = {
   maxMs: number;
   avgMs: number;
   medianMs: number;
+  stdMs: number;
+  p25Ms: number;
+  p75Ms: number;
   p95Ms: number;
   p99Ms: number;
   successes: number;
   failures: number;
 };
-
-export function computeGroupAverages(results: TestResult[]): GroupAverage[] {
-  const byGroup: Record<string, { sum: number; count: number }> = {};
-  for (const r of results) {
-    if (!r.group) continue; // skip un-grouped
-    if (!byGroup[r.group]) byGroup[r.group] = { sum: 0, count: 0 };
-    if (r.executionTimeMs >= 0) {
-      byGroup[r.group].sum += r.executionTimeMs;
-      byGroup[r.group].count += 1;
-    }
-  }
-  return Object.entries(byGroup).map(([group, v]) => ({ group, averageMs: v.count ? v.sum / v.count : 0, samples: v.count }));
-}
 
 export type User = {
   name: string;
@@ -55,8 +37,7 @@ export type Post = {
 };
 
 export function formatResult(r: TestResult): string {
-  const fpsStr = r.fps ? ` [FPS: ${r.fps.toFixed(1)}]` : '';
-  return `${r.testName}${r.group ? ' [' + r.group + ']' : ''}: ${r.executionTimeMs}ms${fpsStr}`;
+  return `${r.testName}: ${r.executionTimeMs}ms`;
 }
 
 // Helper: compute median from sorted list
@@ -84,13 +65,18 @@ export function aggregatePerTest(results: TestResult[]): AggregatedStats[] {
     const times = arr.filter(a => a.executionTimeMs >= 0).map(a => a.executionTimeMs).sort((a, b) => a - b);
     const successes = arr.filter(a => a.success).length;
     const failures = arr.length - successes;
+    const avgMs = times.length ? times.reduce((s, v) => s + v, 0) / times.length : 0;
+    const stdMs = times.length ? Math.sqrt(times.reduce((s, v) => s + (v - avgMs) * (v - avgMs), 0) / times.length) : 0;
     return {
       testName,
       samples: arr.length,
       minMs: times[0] ?? 0,
       maxMs: times[times.length - 1] ?? 0,
-      avgMs: times.length ? times.reduce((s, v) => s + v, 0) / times.length : 0,
+      avgMs,
       medianMs: median(times),
+      stdMs,
+      p25Ms: percentile(times, 0.25),
+      p75Ms: percentile(times, 0.75),
       p95Ms: percentile(times, 0.95),
       p99Ms: percentile(times, 0.99),
       successes,

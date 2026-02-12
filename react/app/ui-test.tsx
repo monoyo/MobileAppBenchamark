@@ -154,7 +154,6 @@ export default function UITest(): React.ReactElement {
         const duration = Date.now() - startTime;
         const res: TestResult = {
           testName: 'UI Test',
-          group: 'ui',
           executionTimeMs: duration,
           details: `Max Objects: ${objCount}, Samples: ${frame}`,
           success: true,

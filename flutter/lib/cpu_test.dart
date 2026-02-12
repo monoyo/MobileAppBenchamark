@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
 import 'consts/config.dart';
-import 'models/cpu_test.dart';
+import 'models/cpu_result.dart';
 
 /// CPU benchmark page that distributes computation across isolates.
 /// Uses time-based and iteration-based modes similar to Java CPUTest pattern.
@@ -14,7 +14,7 @@ class CpuTest extends StatefulWidget {
   
   const CpuTest({
     super.key,
-    this.iterations = SampleConfig.sampleCount,
+    this.iterations = Config.sampleCount,
     this.timeLimitDuration,
   });
 
@@ -41,7 +41,7 @@ class _CpuTestState extends State<CpuTest> {
 
   Future<void> _startBenchmark() async {
     final start = DateTime.now().millisecondsSinceEpoch;
-    int totalIterationsProcessed = 0;
+    int iterationsProcessed = 0;
     double totalChecksum = 0.0;
     int threadCount = 0;
 
@@ -61,13 +61,13 @@ class _CpuTestState extends State<CpuTest> {
           int currentBatch = remaining > batchSize ? batchSize : remaining;
           
           // Distribute this batch of "Samples" across workers.
-          // Each sample involves [SampleConfig.cpuIterations] ops.
+          // Each sample involves [Config.cpuIterations] ops.
           // So we ask workers to perform (currentBatch * cpuIterations) / threads ops?
           // No, to strictly match Kotlin:
           // Kotlin: 10,000 outer loops. Each loop calls runBenchmarkIterations(10,000).
           // So Total Ops = 10,000 * 10,000.
           // Our `_benchmark.runBatch` should distribute (currentBatch * widget.iterations) ops.
-          // Wait, widget.iterations IS SampleConfig.sampleCount (10,000).
+          // Wait, widget.iterations IS Config.sampleCount (10,000).
           // So we need to run (currentBatch * 10,000) ops distributed across threads.
           
           final result = await _benchmark!.runBatch(
@@ -75,7 +75,7 @@ class _CpuTestState extends State<CpuTest> {
              opsPerSample: widget.iterations // 10,000 ops per sample
           );
 
-          totalIterationsProcessed += result.totalIterations;
+          iterationsProcessed += result.iterations;
           totalChecksum += result.checksum;
 
           setState(() {
@@ -95,7 +95,7 @@ class _CpuTestState extends State<CpuTest> {
         TestResult(
           'CPU Test',
           elapsed,
-          'threads=$threadCount, total_ops=$totalIterationsProcessed, checksum=${totalChecksum.toStringAsFixed(2)}',
+          'threads=$threadCount, total_ops=$iterationsProcessed, checksum=${totalChecksum.toStringAsFixed(2)}',
           true,
         ),
       );
@@ -123,9 +123,10 @@ class _CpuTestState extends State<CpuTest> {
 
 class _WorkerMessage {
   final int ops;
+  final int threadIndex;
   final SendPort replyTo;
   
-  const _WorkerMessage(this.ops, this.replyTo);
+  const _WorkerMessage(this.ops, this.threadIndex, this.replyTo);
 }
 
 class _WorkerResult {
@@ -152,7 +153,7 @@ class _CPUBenchmark {
     }
   }
 
-  Future<_CPUResult> runBatch({required int samples, required int opsPerSample}) async {
+  Future<CpuResult> runBatch({required int samples, required int opsPerSample}) async {
       int totalOps = samples * opsPerSample;
       int count = _sendPorts.length;
       int opsPerThread = (totalOps / count).ceil();
@@ -161,7 +162,7 @@ class _CPUBenchmark {
       
       for (int i = 0; i < count; i++) {
          final rp = ReceivePort();
-         _sendPorts[i].send(_WorkerMessage(opsPerThread, rp.sendPort));
+         _sendPorts[i].send(_WorkerMessage(opsPerThread, i, rp.sendPort));
          futures.add(rp.first.then((v) => v as _WorkerResult));
       }
 
@@ -174,7 +175,7 @@ class _CPUBenchmark {
           checksum += r.checksum;
       }
       
-      return _CPUResult(totalIterations: actualOps, checksum: checksum);
+      return CpuResult(threads: _sendPorts.length, durationMs: 0, iterations: actualOps, checksum: checksum);
   }
 
   void dispose() {
@@ -192,10 +193,10 @@ class _CPUBenchmark {
      commandPort.listen((message) {
         if (message is _WorkerMessage) {
             double acc = 0.0;
-            double v = 1.2345; 
+            double v = (message.threadIndex + 1).toDouble();
             int processed = 0;
             for (int i = 0; i < message.ops; i++) {
-                 v = math.sin(v) * math.cos(v) + math.sqrt((v * v) + 1.234567) + math.tan(v);
+                 v = math.sin(v) * math.cos(v) + math.sqrt((v * v) + 1.234567);
                  acc += v;
                  processed++;
             }

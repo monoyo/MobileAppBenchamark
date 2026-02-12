@@ -35,7 +35,7 @@ class CpuTest : BaseTestActivity() {
 
     override fun executeBenchmark() {
         initializeCsvWriter()
-        repeat(Config.samplesAmount) { i ->
+        repeat(Config.sampleCount) { i ->
             executeSingleIteration(i)
         }
         csvWriter?.flush()
@@ -43,12 +43,12 @@ class CpuTest : BaseTestActivity() {
 
     private fun executeSingleIteration(index: Int) {
         val start = System.currentTimeMillis()
-        val result = CPUTest.runBenchmarkIterations(Config.samplesAmount.toLong(), null)
+        val result = CPUTest.runBenchmarkIterations(Config.sampleCount.toLong(), null)
         val duration = System.currentTimeMillis() - start
 
         val testResult = TestResult(
             testName = "CPU Test",
-            executionTime = duration,
+            executionTimeMs = duration,
             details = "threads=${result.threads}",
             success = true
         )
@@ -57,7 +57,7 @@ class CpuTest : BaseTestActivity() {
     }
 
     override fun getProgressDisplayText(currentIteration: Int): String =
-        "CPU Test: $currentIteration / ${Config.samplesAmount}"
+        "CPU Test: $currentIteration / ${Config.sampleCount}"
 
     override fun getTestName(): String = "CPU Test"
 }

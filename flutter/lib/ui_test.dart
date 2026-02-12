@@ -7,7 +7,7 @@ import 'consts/config.dart';
 
 /// UI performance test page rendering animated rectangles.
 /// Tests frame rendering performance and animation smoothness.
-/// Matches Java/Kotlin GPUTestActivity algorithm.
+/// Matches Java/Kotlin UiTest algorithm.
 class UiTest extends StatefulWidget {
   const UiTest({super.key});
 
@@ -19,27 +19,29 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   // Match Java/Kotlin consts (Physical Pixels)
   static const int _initialObjectCount = 250;
   static const int _objectIncrementPerSecond = 250;
-  static const double _nativeObjectSizePx = 50.0; // 50 physical pixels
-  static const double _nativeMaxVelocityPx = 10.0; // 10 physical pixels
+  static const double _nativeObjectSizePx = 50.0;
+  static const double _nativeMaxVelocityPx = 10.0;
 
   late final int _startTime;
   late Ticker _ticker;
+  late final _StressNotifier _notifier;
   
   int _frameCount = 0;
   int _currentObjectCount = 0;
   double _currentFps = 0.0;
-  int _lastFpsUpdateMs = 0;
-  int _framesSinceFpsUpdate = 0;
   int _lastFrameTime = 0;
+  int _lastUiUpdateFrame = 0;
   
-  // Object models
-  final List<Rect> _objects = [];
-  final List<Color> _colors = [];
+  // Object models — use Float64Lists for better cache locality
+  final List<double> _posX = [];
+  final List<double> _posY = [];
   final List<double> _velocitiesX = [];
   final List<double> _velocitiesY = [];
+  final List<Color> _colors = [];
   final Random _random = Random();
   
-  Size _viewSize = Size.zero; // Size of the rendering area in logical pixels
+  double _objectSize = 50.0;
+  Size _viewSize = Size.zero;
   double _devicePixelRatio = 1.0;
   bool _disposed = false;
   bool _initialized = false;
@@ -48,17 +50,16 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _startTime = DateTime.now().millisecondsSinceEpoch;
-    _lastFpsUpdateMs = _startTime;
-    
+    _notifier = _StressNotifier();
     _ticker = createTicker(_onFrame);
-    // Ticker will be started when we have valid size from LayoutBuilder
   }
 
   void _initObjects(int count) {
-    _objects.clear();
-    _colors.clear();
+    _posX.clear();
+    _posY.clear();
     _velocitiesX.clear();
     _velocitiesY.clear();
+    _colors.clear();
     _currentObjectCount = 0;
     _addObjects(count);
   }
@@ -66,28 +67,28 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   void _addObjects(int count) {
     if (count <= 0 || _viewSize.isEmpty) return;
     
-    // Logic uses logical pixels, so we convert physical consts to logical
-    final objectSizeLogical = _nativeObjectSizePx / _devicePixelRatio;
-    final maxVelocityLogical = _nativeMaxVelocityPx / _devicePixelRatio;
-
     final maxW = _viewSize.width;
     final maxH = _viewSize.height;
 
     for (int i = 0; i < count; i++) {
-        // Random position within bounds
-        // Ensure we don't spawn outside if size is small, though maxW should be >> objectSize
-        final x = _random.nextDouble() * (maxW - objectSizeLogical);
-        final y = _random.nextDouble() * (maxH - objectSizeLogical);
+        final x = _random.nextDouble() * (maxW - _objectSize);
+        final y = _random.nextDouble() * (maxH - _objectSize);
 
-        _objects.add(Rect.fromLTWH(x, y, objectSizeLogical, objectSizeLogical));
+        _posX.add(x);
+        _posY.add(y);
         
-        // Deterministic color
-        final hue = ((_currentObjectCount + i) % 12) * 30.0;
-        _colors.add(HSVColor.fromAHSV(1.0, hue, 0.8, 0.9).toColor());
+        // Match Java: Color.rgb(random.nextInt(256), ...)
+        _colors.add(Color.fromARGB(
+          255,
+          _random.nextInt(256),
+          _random.nextInt(256),
+          _random.nextInt(256),
+        ));
         
-        // Random velocity: (random - 0.5) * 2 * maxVelocity
-        _velocitiesX.add((_random.nextDouble() - 0.5) * 2 * maxVelocityLogical);
-        _velocitiesY.add((_random.nextDouble() - 0.5) * 2 * maxVelocityLogical);
+        // Match Java: (random.nextFloat() - 0.5f) * 20
+        final maxVelocity = _nativeMaxVelocityPx / _devicePixelRatio;
+        _velocitiesX.add((_random.nextDouble() - 0.5) * 2 * maxVelocity);
+        _velocitiesY.add((_random.nextDouble() - 0.5) * 2 * maxVelocity);
     }
     _currentObjectCount += count;
   }
@@ -107,12 +108,6 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
     }
     _lastFrameTime = now;
 
-    // Update FPS every 500ms for overlay (optional, but requested 16ms sampling)
-    // User requested "sampling" to be 16ms.
-    // If we just update _currentFps every frame, the print log will use it.
-    
-    /* Removed 500ms averaging block */
-
     // Manage object count
     final secondsElapsed = elapsedMs ~/ 1000;
     final desiredObjects = _initialObjectCount + (secondsElapsed * _objectIncrementPerSecond);
@@ -120,57 +115,48 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
       _addObjects(desiredObjects - _currentObjectCount);
     }
 
-    // Update positions
+    // Update positions in-place
     _updatePositions();
 
     _frameCount++;
 
-    print('Frame $_frameCount: Objects=$_currentObjectCount, FPS=${_currentFps.toStringAsFixed(1)}'); 
-    if (_frameCount >= SampleConfig.sampleCount || _currentFps < SampleConfig.maxFPS && _currentFps != 0.0) {
-      _completeTest();
-    } else {
+    // Notify painter to repaint (bypasses widget tree rebuild)
+    _notifier.repaint();
+
+    // Update text overlay only every 10 frames to avoid widget rebuild overhead
+    if (_frameCount - _lastUiUpdateFrame >= 10) {
+      _lastUiUpdateFrame = _frameCount;
       setState(() {});
+    }
+
+    if (_frameCount >= Config.sampleCount) {
+      _completeTest();
     }
   }
 
   void _updatePositions() {
     if (_viewSize.isEmpty) return;
     
-    // Bounds in logical pixels
     final width = _viewSize.width;
     final height = _viewSize.height;
+    final size = _objectSize;
 
-    for (int i = 0; i < _objects.length; i++) {
-      var rect = _objects[i];
-      var vx = _velocitiesX[i];
-      var vy = _velocitiesY[i];
+    for (int i = 0; i < _currentObjectCount; i++) {
+      var x = _posX[i] + _velocitiesX[i];
+      var y = _posY[i] + _velocitiesY[i];
 
-      // Move
-      rect = rect.translate(vx, vy);
-
-      // Bounce off walls
-      // Note: rect.left/right/top/bottom are in logical pixels
-      if (rect.left < 0 || rect.right > width) {
-        vx = -vx;
-        _velocitiesX[i] = vx;
-        // Correct position to stay in bounds
-        if (rect.left < 0) {
-            rect = rect.shift(Offset(-rect.left * 2, 0)); // reflect
-        } else {
-             rect = rect.shift(Offset(-(rect.right - width) * 2, 0));
-        }
+      // Bounce off walls — matches Java handleBoundsCollision
+      if (x < 0 || x + size > width) {
+        _velocitiesX[i] = -_velocitiesX[i];
+        x += _velocitiesX[i] * 2;
       }
-      if (rect.top < 0 || rect.bottom > height) {
-        vy = -vy;
-        _velocitiesY[i] = vy;
-        if (rect.top < 0) {
-            rect = rect.shift(Offset(0, -rect.top * 2));
-        } else {
-            rect = rect.shift(Offset(0, -(rect.bottom - height) * 2));
-        }
+      if (y < 0 || y + size > height) {
+        _velocitiesY[i] = -_velocitiesY[i];
+        y += _velocitiesY[i] * 2;
       }
 
-      _objects[i] = rect;
+      _posX[i] = x;
+      _posY[i] = y;
     }
   }
 
@@ -181,7 +167,7 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
     if (!mounted) return;
 
     final elapsedMs = DateTime.now().millisecondsSinceEpoch - _startTime;
-    final details = 'Max Objects: $_currentObjectCount, Samples: $_frameCount, FPS: ${_currentFps.toStringAsFixed(1)}';
+    final details = 'Max Objects: $_currentObjectCount, Samples: $_frameCount';
 
     final result = TestResult('UI Test', elapsedMs, details, true);
     Navigator.pop(context, result);
@@ -191,28 +177,26 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   void dispose() {
     _disposed = true;
     _ticker.dispose();
+    _notifier.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get device pixel ratio for physical <-> logical conversion
     _devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    _objectSize = _nativeObjectSizePx / _devicePixelRatio;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: LayoutBuilder(
         builder: (context, constraints) {
-            // Update view size based on actual layout constraints
             final newSize = Size(constraints.maxWidth, constraints.maxHeight);
             
             if (newSize != _viewSize) {
                 _viewSize = newSize;
                 
-                // If this is the first time we have a valid size, start the test
                 if (!_initialized && !_viewSize.isEmpty) {
                     _initialized = true;
-                    // Initialize objects now that we know the size and pixel ratio
                     _initObjects(_initialObjectCount);
                     _ticker.start();
                 }
@@ -220,9 +204,15 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
 
             return Stack(
                 children: [
-                CustomPaint(
-                    size: _viewSize,
-                    painter: _SquaresPainter(_objects, _colors),
+                // RepaintBoundary isolates the CustomPaint from the text overlay
+                RepaintBoundary(
+                  child: CustomPaint(
+                      size: _viewSize,
+                      painter: _SquaresPainter(
+                        _posX, _posY, _colors,
+                        _objectSize, _notifier,
+                      ),
+                  ),
                 ),
                 Positioned(
                     left: 20,
@@ -231,7 +221,7 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
                     padding: const EdgeInsets.all(8),
                     color: Colors.white.withOpacity(0.8),
                     child: Text(
-                        'Samples: $_frameCount / ${SampleConfig.sampleCount}\n'
+                        'Samples: $_frameCount / ${Config.sampleCount}\n'
                         'Objects: $_currentObjectCount\n'
                         'FPS: ${_currentFps.toStringAsFixed(1)}',
                         style: const TextStyle(fontSize: 14, color: Colors.black),
@@ -246,24 +236,42 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   }
 }
 
-/// Custom painter for efficient rendering of many rectangles.
-class _SquaresPainter extends CustomPainter {
-  final List<Rect> objects;
-  final List<Color> colors;
+/// Notifier to trigger repaint without widget tree rebuild.
+class _StressNotifier extends ChangeNotifier {
+  void repaint() {
+    notifyListeners();
+  }
+}
 
-  _SquaresPainter(this.objects, this.colors);
+/// Custom painter that listens to a ChangeNotifier for repaint signals.
+/// This avoids the overhead of setState/widget rebuild on every frame.
+class _SquaresPainter extends CustomPainter {
+  final List<double> posX;
+  final List<double> posY;
+  final List<Color> colors;
+  final double objectSize;
+
+  _SquaresPainter(this.posX, this.posY, this.colors, this.objectSize,
+      _StressNotifier notifier)
+      : super(repaint: notifier);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..style = PaintingStyle.fill;
-    
-    for (int i = 0; i < objects.length; i++) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = false; // Match Java: paint.setAntiAlias(false)
+
+    final count = posX.length;
+    for (int i = 0; i < count; i++) {
       paint.color = colors[i];
-      canvas.drawRect(objects[i], paint);
+      canvas.drawRect(
+        Rect.fromLTWH(posX[i], posY[i], objectSize, objectSize),
+        paint,
+      );
     }
   }
 
   @override
-  bool shouldRepaint(covariant _SquaresPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _SquaresPainter oldDelegate) => false;
+  // Repainting is driven by the ChangeNotifier, not by shouldRepaint
 }
-

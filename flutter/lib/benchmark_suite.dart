@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'models/test_result.dart';
+import 'models/test_entry.dart';
 import 'ui_test.dart';
 import 'cpu_test.dart';
 import 'ram_test.dart';
@@ -34,7 +35,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   String? _averagesBlock;
 
   final Map<String, bool> _selectedTests = {};
-  final Map<String, List<_TestEntry>> _perTestResults = {};
+  final Map<String, List<TestEntry>> _perTestResults = {};
   
   // Resources
   final Map<String, BufferedCsvWriter> _writers = {};
@@ -82,7 +83,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         if (_selectedTests[name] != true) continue;
         
         final safeName = name.toLowerCase().replaceAll(' ', '_');
-        final writer = BufferedCsvWriter('${dir.path}/$safeName.csv', bufferSize: SampleConfig.bufferSize);
+        final writer = BufferedCsvWriter('${dir.path}/$safeName.csv', bufferSize: Config.bufferSize);
         await writer.initialize();
         _writers[name] = writer;
       }
@@ -183,7 +184,7 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         break;
       case 1:
         res = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => CpuTest(iterations: SampleConfig.cpuIterations)),
+          MaterialPageRoute(builder: (_) => CpuTest(iterations: Config.cpuIterations)),
         );
         break;
       case 2:
@@ -218,12 +219,12 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     
     if (res != null) {
       // Add to memory results (for UI display)
-      List<_TestEntry>? list = _perTestResults[res.testName];
+      List<TestEntry>? list = _perTestResults[res.testName];
       if (list == null) {
-          list = <_TestEntry>[];
+          list = <TestEntry>[];
           _perTestResults[res.testName] = list;
       }
-      list.add(_TestEntry(1, res)); // Use 1 as iteration count since we run once
+      list.add(TestEntry(1, res)); // Use 1 as iteration count since we run once
 
       // Write summary result to CSV if the test didn't write details itself
       // Note: UiTest now writes details itself. Others might returning summary.
@@ -419,7 +420,7 @@ String _csv(String v) {
   return needs ? '"$esc"' : esc;
 }
 
-String _buildCsvDisplayFrom(Map<String, List<_TestEntry>> data, String? averagesBlock) {
+String _buildCsvDisplayFrom(Map<String, List<TestEntry>> data, String? averagesBlock) {
   final sb = StringBuffer();
   final keys = data.keys.toList();
   for (final testName in keys) {

@@ -131,7 +131,7 @@ class LocationTest : AppCompatActivity() {
         }
         
         csvPath = intent.getStringExtra("csv_path")
-        progressBar.max = Config.samplesAmount
+        progressBar.max = Config.sampleCount
     }
 
     private fun initCsv() {
@@ -160,7 +160,7 @@ class LocationTest : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun startBenchmark() {
-        Log.i(TAG, "Starting Benchmark: ${Config.samplesAmount} samples @ ${intervalMs}ms")
+        Log.i(TAG, "Starting Benchmark: ${Config.sampleCount} samples @ ${intervalMs}ms")
 
         val locationRequest = LocationRequest.Builder(1000)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
@@ -180,11 +180,11 @@ class LocationTest : AppCompatActivity() {
 
             sampleCount++
 
-            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= Config.samplesAmount) {
+            if (sampleCount % UI_UPDATE_FREQUENCY == 0 || sampleCount >= Config.sampleCount) {
                 updateUI()
             }
 
-            if (sampleCount >= Config.samplesAmount) {
+            if (sampleCount >= Config.sampleCount) {
                 finishBenchmark()
             }
         } catch (e: Exception) {
@@ -210,7 +210,7 @@ class LocationTest : AppCompatActivity() {
 
     private fun updateUI() {
         runOnUiThread {
-            statusText.text = String.format(Locale.US, "Progress: %d / %d", sampleCount, Config.samplesAmount)
+            statusText.text = String.format(Locale.US, "Progress: %d / %d", sampleCount, Config.sampleCount)
             progressBar.progress = sampleCount
             metricsText.text = "System metrics disabled"
         }

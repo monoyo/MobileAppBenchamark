@@ -84,9 +84,9 @@ object SummaryWriter {
                         if (testName == null) {
                             testName = parts[1]
                         }
-                        val executionTime = parts[3].toLongOrNull()
-                        if (executionTime != null && executionTime >= 0) {
-                            times.add(executionTime)
+                        val executionTimeMs = parts[3].toLongOrNull()
+                        if (executionTimeMs != null && executionTimeMs >= 0) {
+                            times.add(executionTimeMs)
                         } else {
                             failures++
                         }
@@ -95,9 +95,9 @@ object SummaryWriter {
                         if (testName == null) {
                             testName = csvFile.nameWithoutExtension.replace("_", " ")
                         }
-                        val executionTime = parts[1].toLongOrNull()
-                        if (executionTime != null && executionTime >= 0) {
-                            times.add(executionTime)
+                        val executionTimeMs = parts[1].toLongOrNull()
+                        if (executionTimeMs != null && executionTimeMs >= 0) {
+                            times.add(executionTimeMs)
                         } else {
                             failures++
                         }

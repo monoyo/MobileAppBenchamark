@@ -85,7 +85,6 @@ export default function CPUTest(): React.ReactElement {
         const elapsedMs = Date.now() - startTimeMs;
         const res: TestResult = {
           testName: 'CPU Test',
-          group: 'cpu',
           executionTimeMs: Math.round(elapsedMs),
           details: `samples=${targetSamples} ops/sample=${opsPerSample} checksum=${checksum.toFixed(2)}`,
           success: true,
@@ -102,7 +101,6 @@ export default function CPUTest(): React.ReactElement {
         console.error('CPU Test error:', error);
         const res: TestResult = {
           testName: 'CPU Test',
-          group: 'cpu',
           executionTimeMs: -1,
           details: String(error),
           success: false,
