@@ -84,7 +84,7 @@ abstract class BaseTestActivity : AppCompatActivity() {
         if (csvWriter != null) return
 
         val file = File(csvPath ?: getDefaultCsvPath())
-        csvWriter = BufferedCsvWriter(file, 1000, 64 * 1024).apply { initialize() }
+        csvWriter = BufferedCsvWriter(file, Config.bufferSize, 64 * 1024).apply { initialize() }
     }
 
     protected fun getDefaultCsvPath(): String =

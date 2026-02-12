@@ -1,0 +1,1159 @@
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar UP-TO-DATE
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :expo-module-gradle-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :expo-module-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-module-gradle-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:pluginDescriptors UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:processResources UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:jar UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :expo-module-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-module-gradle-plugin:classes UP-TO-DATE
+> Task :expo-module-gradle-plugin:jar UP-TO-DATE
+
+> Configure project :
+[32m[ExpoRootProject][0m Using the following versions:
+  - buildTools:  [32m35.0.0[0m
+  - minSdk:      [32m24[0m
+  - compileSdk:  [32m35[0m
+  - targetSdk:   [32m35[0m
+  - ndk:         [32m27.1.12297006[0m
+  - kotlin:      [32m2.0.21[0m
+  - ksp:         [32m2.0.21-1.0.28[0m
+
+> Configure project :expo
+
+Using expo modules
+  - [32mexpo-constants[0m (17.1.7)
+  - [32mexpo-modules-core[0m (2.5.0)
+  - [33m[📦][0m [32mexpo-asset[0m (11.1.7)
+  - [33m[📦][0m [32mexpo-blur[0m (14.1.5)
+  - [33m[📦][0m [32mexpo-file-system[0m (18.1.11)
+  - [33m[📦][0m [32mexpo-font[0m (13.3.2)
+  - [33m[📦][0m [32mexpo-haptics[0m (14.1.4)
+  - [33m[📦][0m [32mexpo-image[0m (2.4.0)
+  - [33m[📦][0m [32mexpo-keep-awake[0m (14.1.4)
+  - [33m[📦][0m [32mexpo-linking[0m (7.1.7)
+  - [33m[📦][0m [32mexpo-location[0m (18.1.6)
+  - [33m[📦][0m [32mexpo-sharing[0m (13.1.5)
+  - [33m[📦][0m [32mexpo-splash-screen[0m (0.30.10)
+  - [33m[📦][0m [32mexpo-system-ui[0m (5.0.11)
+  - [33m[📦][0m [32mexpo-web-browser[0m (14.2.0)
+
+
+> Configure project :react-native-reanimated
+Android gradle plugin: 8.8.2
+Gradle: 8.14
+
+> Task :app:generateAutolinkingNewArchitectureFiles UP-TO-DATE
+> Task :app:generateAutolinkingPackageList UP-TO-DATE
+> Task :app:generateCodegenSchemaFromJavaScript SKIPPED
+> Task :app:generateCodegenArtifactsFromSchema SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :expo:generatePackagesList UP-TO-DATE
+> Task :expo:preBuild UP-TO-DATE
+> Task :expo:preDebugBuild UP-TO-DATE
+> Task :expo:writeDebugAarMetadata UP-TO-DATE
+
+> Task :expo-constants:createExpoConfig
+The NODE_ENV environment variable is required but was not specified. Ensure the project is bundled with Expo CLI or NODE_ENV is set. Using only .env.local and .env
+
+> Task :expo-constants:preBuild
+> Task :expo-constants:preDebugBuild
+> Task :expo-constants:writeDebugAarMetadata UP-TO-DATE
+> Task :expo-modules-core:preBuild UP-TO-DATE
+> Task :expo-modules-core:preDebugBuild UP-TO-DATE
+> Task :expo-modules-core:writeDebugAarMetadata UP-TO-DATE
+> Task :react-native-edge-to-edge:generateCodegenSchemaFromJavaScript UP-TO-DATE
+> Task :react-native-edge-to-edge:generateCodegenArtifactsFromSchema UP-TO-DATE
+> Task :react-native-edge-to-edge:preBuild UP-TO-DATE
+> Task :react-native-edge-to-edge:preDebugBuild UP-TO-DATE
+> Task :react-native-edge-to-edge:writeDebugAarMetadata UP-TO-DATE
+> Task :react-native-fs:preBuild UP-TO-DATE
+> Task :react-native-fs:preDebugBuild UP-TO-DATE
+> Task :react-native-fs:writeDebugAarMetadata UP-TO-DATE
+> Task :react-native-gesture-handler:generateCodegenSchemaFromJavaScript UP-TO-DATE
+> Task :react-native-gesture-handler:generateCodegenArtifactsFromSchema UP-TO-DATE
+> Task :react-native-gesture-handler:preBuild UP-TO-DATE
+> Task :react-native-gesture-handler:preDebugBuild UP-TO-DATE
+> Task :react-native-gesture-handler:writeDebugAarMetadata UP-TO-DATE
+> Task :react-native-reanimated:assertMinimalReactNativeVersionTask SKIPPED
+> Task :react-native-reanimated:generateCodegenSchemaFromJavaScript UP-TO-DATE
+> Task :react-native-reanimated:generateCodegenArtifactsFromSchema UP-TO-DATE
+> Task :react-native-reanimated:prepareReanimatedHeadersForPrefabs UP-TO-DATE
+> Task :react-native-reanimated:prepareWorkletsHeadersForPrefabs UP-TO-DATE
+> Task :react-native-reanimated:preBuild UP-TO-DATE
+> Task :react-native-reanimated:preDebugBuild UP-TO-DATE
+> Task :react-native-reanimated:writeDebugAarMetadata UP-TO-DATE
+> Task :react-native-safe-area-context:generateCodegenSchemaFromJavaScript UP-TO-DATE
+> Task :react-native-safe-area-context:generateCodegenArtifactsFromSchema UP-TO-DATE
+> Task :react-native-safe-area-context:preBuild UP-TO-DATE
+> Task :react-native-safe-area-context:preDebugBuild UP-TO-DATE
+> Task :react-native-safe-area-context:writeDebugAarMetadata UP-TO-DATE
+> Task :react-native-screens:generateCodegenSchemaFromJavaScript UP-TO-DATE
+> Task :react-native-screens:generateCodegenArtifactsFromSchema UP-TO-DATE
+> Task :react-native-screens:preBuild UP-TO-DATE
+> Task :react-native-screens:preDebugBuild UP-TO-DATE
+> Task :react-native-screens:writeDebugAarMetadata UP-TO-DATE
+> Task :react-native-webview:generateCodegenSchemaFromJavaScript UP-TO-DATE
+> Task :react-native-webview:generateCodegenArtifactsFromSchema UP-TO-DATE
+> Task :react-native-webview:preBuild UP-TO-DATE
+> Task :react-native-webview:preDebugBuild UP-TO-DATE
+> Task :react-native-webview:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :expo:generateDebugResValues UP-TO-DATE
+> Task :expo:generateDebugResources UP-TO-DATE
+> Task :expo:packageDebugResources UP-TO-DATE
+> Task :expo-constants:generateDebugResValues UP-TO-DATE
+> Task :expo-constants:generateDebugResources UP-TO-DATE
+> Task :expo-constants:packageDebugResources UP-TO-DATE
+> Task :expo-modules-core:generateDebugResValues UP-TO-DATE
+> Task :expo-modules-core:generateDebugResources UP-TO-DATE
+> Task :expo-modules-core:packageDebugResources UP-TO-DATE
+> Task :react-native-edge-to-edge:generateDebugResValues UP-TO-DATE
+> Task :react-native-edge-to-edge:generateDebugResources UP-TO-DATE
+> Task :react-native-edge-to-edge:packageDebugResources UP-TO-DATE
+> Task :react-native-fs:generateDebugResValues UP-TO-DATE
+> Task :react-native-fs:generateDebugResources UP-TO-DATE
+> Task :react-native-fs:packageDebugResources UP-TO-DATE
+> Task :react-native-gesture-handler:generateDebugResValues UP-TO-DATE
+> Task :react-native-gesture-handler:generateDebugResources UP-TO-DATE
+> Task :react-native-gesture-handler:packageDebugResources UP-TO-DATE
+> Task :react-native-reanimated:generateDebugResValues UP-TO-DATE
+> Task :react-native-reanimated:generateDebugResources UP-TO-DATE
+> Task :react-native-reanimated:packageDebugResources UP-TO-DATE
+> Task :react-native-safe-area-context:generateDebugResValues UP-TO-DATE
+> Task :react-native-safe-area-context:generateDebugResources UP-TO-DATE
+> Task :react-native-safe-area-context:packageDebugResources UP-TO-DATE
+> Task :react-native-screens:generateDebugResValues UP-TO-DATE
+> Task :react-native-screens:generateDebugResources UP-TO-DATE
+> Task :react-native-screens:packageDebugResources UP-TO-DATE
+> Task :react-native-webview:generateDebugResValues UP-TO-DATE
+> Task :react-native-webview:generateDebugResources UP-TO-DATE
+> Task :react-native-webview:packageDebugResources UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :expo:extractDeepLinksDebug UP-TO-DATE
+> Task :expo:processDebugManifest UP-TO-DATE
+> Task :expo-constants:extractDeepLinksDebug UP-TO-DATE
+> Task :expo-constants:processDebugManifest UP-TO-DATE
+> Task :expo-modules-core:extractDeepLinksDebug UP-TO-DATE
+> Task :expo-modules-core:processDebugManifest UP-TO-DATE
+> Task :react-native-edge-to-edge:extractDeepLinksDebug UP-TO-DATE
+> Task :react-native-edge-to-edge:processDebugManifest UP-TO-DATE
+> Task :react-native-fs:extractDeepLinksDebug UP-TO-DATE
+> Task :react-native-fs:processDebugManifest UP-TO-DATE
+> Task :react-native-gesture-handler:extractDeepLinksDebug UP-TO-DATE
+> Task :react-native-gesture-handler:processDebugManifest UP-TO-DATE
+> Task :react-native-reanimated:extractDeepLinksDebug UP-TO-DATE
+> Task :react-native-reanimated:processDebugManifest UP-TO-DATE
+> Task :react-native-safe-area-context:extractDeepLinksDebug UP-TO-DATE
+> Task :react-native-safe-area-context:processDebugManifest UP-TO-DATE
+> Task :react-native-screens:extractDeepLinksDebug UP-TO-DATE
+> Task :react-native-screens:processDebugManifest UP-TO-DATE
+> Task :react-native-webview:extractDeepLinksDebug UP-TO-DATE
+> Task :react-native-webview:processDebugManifest UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :expo:compileDebugLibraryResources UP-TO-DATE
+> Task :expo:parseDebugLocalResources UP-TO-DATE
+> Task :expo:generateDebugRFile UP-TO-DATE
+> Task :expo-constants:compileDebugLibraryResources UP-TO-DATE
+> Task :expo-constants:parseDebugLocalResources UP-TO-DATE
+> Task :expo-constants:generateDebugRFile UP-TO-DATE
+> Task :expo-modules-core:compileDebugLibraryResources UP-TO-DATE
+> Task :expo-modules-core:parseDebugLocalResources UP-TO-DATE
+> Task :expo-modules-core:generateDebugRFile UP-TO-DATE
+> Task :react-native-edge-to-edge:compileDebugLibraryResources UP-TO-DATE
+> Task :react-native-edge-to-edge:parseDebugLocalResources UP-TO-DATE
+> Task :react-native-edge-to-edge:generateDebugRFile UP-TO-DATE
+> Task :react-native-fs:compileDebugLibraryResources UP-TO-DATE
+> Task :react-native-fs:parseDebugLocalResources UP-TO-DATE
+> Task :react-native-fs:generateDebugRFile UP-TO-DATE
+> Task :react-native-gesture-handler:compileDebugLibraryResources UP-TO-DATE
+> Task :react-native-gesture-handler:parseDebugLocalResources UP-TO-DATE
+> Task :react-native-gesture-handler:generateDebugRFile UP-TO-DATE
+> Task :react-native-reanimated:compileDebugLibraryResources UP-TO-DATE
+> Task :react-native-reanimated:parseDebugLocalResources UP-TO-DATE
+> Task :react-native-reanimated:generateDebugRFile UP-TO-DATE
+> Task :react-native-safe-area-context:compileDebugLibraryResources UP-TO-DATE
+> Task :react-native-safe-area-context:parseDebugLocalResources UP-TO-DATE
+> Task :react-native-safe-area-context:generateDebugRFile UP-TO-DATE
+> Task :react-native-screens:compileDebugLibraryResources UP-TO-DATE
+> Task :react-native-screens:parseDebugLocalResources UP-TO-DATE
+> Task :react-native-screens:generateDebugRFile UP-TO-DATE
+> Task :react-native-webview:compileDebugLibraryResources UP-TO-DATE
+> Task :react-native-webview:parseDebugLocalResources UP-TO-DATE
+> Task :react-native-webview:generateDebugRFile UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :expo:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo:generateDebugBuildConfig UP-TO-DATE
+> Task :expo-constants:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-constants:generateDebugBuildConfig UP-TO-DATE
+> Task :expo-modules-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-modules-core:generateDebugBuildConfig UP-TO-DATE
+> Task :expo-modules-core:compileDebugKotlin UP-TO-DATE
+> Task :expo-modules-core:javaPreCompileDebug UP-TO-DATE
+> Task :expo-modules-core:compileDebugJavaWithJavac UP-TO-DATE
+> Task :expo-modules-core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :expo-constants:compileDebugKotlin UP-TO-DATE
+> Task :expo-constants:javaPreCompileDebug UP-TO-DATE
+> Task :expo-constants:compileDebugJavaWithJavac UP-TO-DATE
+> Task :expo-constants:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :expo:compileDebugKotlin UP-TO-DATE
+> Task :expo:javaPreCompileDebug UP-TO-DATE
+> Task :expo:compileDebugJavaWithJavac UP-TO-DATE
+> Task :expo:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :react-native-edge-to-edge:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-edge-to-edge:generateDebugBuildConfig UP-TO-DATE
+> Task :react-native-edge-to-edge:compileDebugKotlin UP-TO-DATE
+> Task :react-native-edge-to-edge:javaPreCompileDebug UP-TO-DATE
+> Task :react-native-edge-to-edge:compileDebugJavaWithJavac UP-TO-DATE
+> Task :react-native-edge-to-edge:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :react-native-fs:generateDebugBuildConfig UP-TO-DATE
+> Task :react-native-fs:javaPreCompileDebug UP-TO-DATE
+> Task :react-native-fs:compileDebugJavaWithJavac UP-TO-DATE
+> Task :react-native-fs:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :react-native-gesture-handler:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-gesture-handler:generateDebugBuildConfig UP-TO-DATE
+> Task :react-native-reanimated:generateDebugBuildConfig UP-TO-DATE
+> Task :react-native-reanimated:javaPreCompileDebug UP-TO-DATE
+> Task :react-native-reanimated:packageNdkLibs NO-SOURCE
+> Task :react-native-reanimated:compileDebugJavaWithJavac UP-TO-DATE
+> Task :react-native-reanimated:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :react-native-gesture-handler:compileDebugKotlin UP-TO-DATE
+> Task :react-native-gesture-handler:javaPreCompileDebug UP-TO-DATE
+> Task :react-native-gesture-handler:compileDebugJavaWithJavac UP-TO-DATE
+> Task :react-native-gesture-handler:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :react-native-safe-area-context:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-safe-area-context:generateDebugBuildConfig UP-TO-DATE
+> Task :react-native-safe-area-context:compileDebugKotlin UP-TO-DATE
+> Task :react-native-safe-area-context:javaPreCompileDebug UP-TO-DATE
+> Task :react-native-safe-area-context:compileDebugJavaWithJavac UP-TO-DATE
+> Task :react-native-safe-area-context:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :react-native-screens:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-screens:generateDebugBuildConfig UP-TO-DATE
+> Task :react-native-screens:compileDebugKotlin UP-TO-DATE
+> Task :react-native-screens:javaPreCompileDebug UP-TO-DATE
+> Task :react-native-screens:compileDebugJavaWithJavac UP-TO-DATE
+> Task :react-native-screens:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :react-native-webview:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :react-native-webview:generateDebugBuildConfig UP-TO-DATE
+> Task :react-native-webview:compileDebugKotlin UP-TO-DATE
+> Task :react-native-webview:javaPreCompileDebug UP-TO-DATE
+> Task :react-native-webview:compileDebugJavaWithJavac UP-TO-DATE
+> Task :react-native-webview:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:compileDebugKotlin UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :expo:mergeDebugShaders UP-TO-DATE
+> Task :expo:compileDebugShaders NO-SOURCE
+> Task :expo:generateDebugAssets UP-TO-DATE
+> Task :expo:packageDebugAssets UP-TO-DATE
+> Task :expo-constants:mergeDebugShaders UP-TO-DATE
+> Task :expo-constants:compileDebugShaders NO-SOURCE
+> Task :expo-constants:generateDebugAssets UP-TO-DATE
+> Task :expo-constants:packageDebugAssets UP-TO-DATE
+> Task :expo-modules-core:mergeDebugShaders UP-TO-DATE
+> Task :expo-modules-core:compileDebugShaders NO-SOURCE
+> Task :expo-modules-core:generateDebugAssets UP-TO-DATE
+> Task :expo-modules-core:packageDebugAssets UP-TO-DATE
+> Task :react-native-edge-to-edge:mergeDebugShaders UP-TO-DATE
+> Task :react-native-edge-to-edge:compileDebugShaders NO-SOURCE
+> Task :react-native-edge-to-edge:generateDebugAssets UP-TO-DATE
+> Task :react-native-edge-to-edge:packageDebugAssets UP-TO-DATE
+> Task :react-native-fs:mergeDebugShaders UP-TO-DATE
+> Task :react-native-fs:compileDebugShaders NO-SOURCE
+> Task :react-native-fs:generateDebugAssets UP-TO-DATE
+> Task :react-native-fs:packageDebugAssets UP-TO-DATE
+> Task :react-native-gesture-handler:mergeDebugShaders UP-TO-DATE
+> Task :react-native-gesture-handler:compileDebugShaders NO-SOURCE
+> Task :react-native-gesture-handler:generateDebugAssets UP-TO-DATE
+> Task :react-native-gesture-handler:packageDebugAssets UP-TO-DATE
+> Task :react-native-reanimated:mergeDebugShaders UP-TO-DATE
+> Task :react-native-reanimated:compileDebugShaders NO-SOURCE
+> Task :react-native-reanimated:generateDebugAssets UP-TO-DATE
+> Task :react-native-reanimated:packageDebugAssets UP-TO-DATE
+> Task :react-native-safe-area-context:mergeDebugShaders UP-TO-DATE
+> Task :react-native-safe-area-context:compileDebugShaders NO-SOURCE
+> Task :react-native-safe-area-context:generateDebugAssets UP-TO-DATE
+> Task :react-native-safe-area-context:packageDebugAssets UP-TO-DATE
+> Task :react-native-screens:mergeDebugShaders UP-TO-DATE
+> Task :react-native-screens:compileDebugShaders NO-SOURCE
+> Task :react-native-screens:generateDebugAssets UP-TO-DATE
+> Task :react-native-screens:packageDebugAssets UP-TO-DATE
+> Task :react-native-webview:mergeDebugShaders UP-TO-DATE
+> Task :react-native-webview:compileDebugShaders NO-SOURCE
+> Task :react-native-webview:generateDebugAssets UP-TO-DATE
+> Task :react-native-webview:packageDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :react-native-gesture-handler:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :react-native-safe-area-context:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :react-native-screens:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :react-native-webview:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :react-native-edge-to-edge:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :expo:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :react-native-fs:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :react-native-reanimated:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :expo-modules-core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :expo-constants:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :expo:processDebugJavaRes UP-TO-DATE
+> Task :expo-constants:processDebugJavaRes UP-TO-DATE
+> Task :expo-modules-core:processDebugJavaRes UP-TO-DATE
+> Task :react-native-edge-to-edge:processDebugJavaRes UP-TO-DATE
+> Task :react-native-fs:processDebugJavaRes NO-SOURCE
+> Task :react-native-gesture-handler:processDebugJavaRes UP-TO-DATE
+> Task :react-native-reanimated:processDebugJavaRes NO-SOURCE
+> Task :react-native-safe-area-context:processDebugJavaRes UP-TO-DATE
+> Task :react-native-screens:processDebugJavaRes UP-TO-DATE
+> Task :react-native-webview:processDebugJavaRes UP-TO-DATE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :react-native-gesture-handler:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :react-native-safe-area-context:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :react-native-screens:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :react-native-webview:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :react-native-edge-to-edge:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :expo:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :react-native-fs:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :react-native-reanimated:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :expo-modules-core:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :expo-constants:bundleLibRuntimeToDirDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :react-native-reanimated:configureCMakeDebug[arm64-v8a]
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :react-native-reanimated:configureCMakeDebug[armeabi-v7a]
+> Task :react-native-reanimated:configureCMakeDebug[x86]
+> Task :react-native-reanimated:configureCMakeDebug[x86_64]
+> Task :react-native-reanimated:generateJsonModelDebug
+> Task :react-native-reanimated:prefabDebugConfigurePackage UP-TO-DATE
+> Task :app:configureCMakeDebug[arm64-v8a]
+
+> Task :react-native-reanimated:buildCMakeDebug[arm64-v8a][reanimated,worklets]
+C/C++: ninja: Entering directory `E:\PC\Dokumenty\MobileAppBenchamark\react\node_modules\react-native-reanimated\android\.cxx\Debug\3t1u2h2o\arm64-v8a'
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/58eb6a2fb675dfe1a537a4dde17508b8/Common/cpp/reanimated/Fabric/PropsRegistry.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\58eb6a2fb675dfe1a537a4dde17508b8\Common\cpp\reanimated\Fabric\PropsRegistry.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/58eb6a2fb675dfe1a537a4dde17508b8/Common/cpp/reanimated/Fabric/PropsRegistry.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/PropsRegistry.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/PropsRegistry.cpp:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsUtils.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\LayoutAnimations\LayoutAnimationsUtils.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsUtils.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsUtils.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsUtils.cpp:2:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsUtils.h:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ShadowTreeCloner.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\reanimated\Fabric\ShadowTreeCloner.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ShadowTreeCloner.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ShadowTreeCloner.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ShadowTreeCloner.cpp:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/ShadowTreeCloner.h:5:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/UIManager.h:16:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/componentregistry/ComponentDescriptorRegistry.h:14:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/componentregistry/ComponentDescriptorProvider.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ComponentDescriptor.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^~~~~~
+C/C++:       |            const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^~~~~~
+C/C++:       |                       const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++:       |              ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++:       |                   ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++:       |                        ;
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dworklets_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/worklets/CMakeFiles/worklets.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp.o -MF src\main\cpp\worklets\CMakeFiles\worklets.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\worklets\NativeModules\WorkletsModuleProxy.cpp.o.d -o src/main/cpp/worklets/CMakeFiles/worklets.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/UIManagerBinding.h:13:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/PointerEventsProcessor.h:13:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/PointerHoverTracker.h:16:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ShadowNode.h:17:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^~~~~~
+C/C++:       |            const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^~~~~~
+C/C++:       |                       const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++:       |              ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++:       |                   ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++:       |                        ;
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/RuntimeDecorators/RNRuntimeDecorator.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\RuntimeDecorators\RNRuntimeDecorator.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/RuntimeDecorators/RNRuntimeDecorator.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.cpp:1:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.h:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedMountHook.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\reanimated\Fabric\ReanimatedMountHook.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedMountHook.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedMountHook.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedMountHook.cpp:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/ReanimatedCommitShadowNode.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ShadowNode.h:17:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^~~~~~
+C/C++:       |            const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^~~~~~
+C/C++:       |                       const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++:       |              ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++:       |                   ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++:       |                        ;
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\reanimated\Fabric\ReanimatedCommitHook.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/ReanimatedCommitHook.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dworklets_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsOnLoad.cpp.o -MF src\main\cpp\worklets\CMakeFiles\worklets.dir\android\WorkletsOnLoad.cpp.o.d -o src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsOnLoad.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsOnLoad.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsOnLoad.cpp:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsModule.h:6:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/scheduler/Scheduler.h:15:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/componentregistry/ComponentDescriptorFactory.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ComponentDescriptor.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^~~~~~
+C/C++:       |            const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^~~~~~
+C/C++:       |                       const
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++:       |              ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++:       |                   ;
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++:       |                        ;
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsProxy.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\LayoutAnimations\LayoutAnimationsProxy.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy.cpp:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dworklets_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsModule.cpp.o -MF src\main\cpp\worklets\CMakeFiles\worklets.dir\android\WorkletsModule.cpp.o.d -o src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsModule.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsModule.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsModule.cpp:9:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/fabric/Binding.h:12:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/fabric/FabricUIManagerBinding.h:19:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/scheduler/SchedulerDelegate.h:13:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/mounting/MountingCoordinator.h:15:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/mounting/Differentiator.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ShadowNode.h:17:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/OnLoad.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\android\OnLoad.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/OnLoad.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/OnLoad.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/OnLoad.cpp:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/NativeProxy.h:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/NativeModules/ReanimatedModuleProxy.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\NativeModules\ReanimatedModuleProxy.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/NativeModules/ReanimatedModuleProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp:2:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+C/C++: C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/NativeProxy.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\android\NativeProxy.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/NativeProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/NativeProxy.cpp
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/NativeProxy.cpp:2:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.h:3:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+C/C++: In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+C/C++: In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    64 |   Sealable(consts Sealable& other);
+C/C++:       |            ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+C/C++:    67 |   Sealable& operator=(consts Sealable& other);
+C/C++:       |                       ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+C/C++:    74 |   void seal() consts;
+C/C++:       |              ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+C/C++:    79 |   bool getSealed() consts;
+C/C++:       |                   ^
+C/C++: E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+C/C++:    85 |   void ensureUnsealed() consts;
+C/C++:       |                        ^
+C/C++: 5 errors generated.
+
+> Task :react-native-reanimated:buildCMakeDebug[arm64-v8a][reanimated,worklets] FAILED
+
+[Incubating] Problems report is available at: file:///E:/PC/Dokumenty/MobileAppBenchamark/react/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':react-native-reanimated:buildCMakeDebug[arm64-v8a][reanimated,worklets]'.
+> com.android.ide.common.process.ProcessException: ninja: Entering directory `E:\PC\Dokumenty\MobileAppBenchamark\react\node_modules\react-native-reanimated\android\.cxx\Debug\3t1u2h2o\arm64-v8a'
+  [0/2] Re-checking globbed directories...
+  [1/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/58eb6a2fb675dfe1a537a4dde17508b8/Common/cpp/reanimated/Fabric/PropsRegistry.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/58eb6a2fb675dfe1a537a4dde17508b8/Common/cpp/reanimated/Fabric/PropsRegistry.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/58eb6a2fb675dfe1a537a4dde17508b8/Common/cpp/reanimated/Fabric/PropsRegistry.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\58eb6a2fb675dfe1a537a4dde17508b8\Common\cpp\reanimated\Fabric\PropsRegistry.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/58eb6a2fb675dfe1a537a4dde17508b8/Common/cpp/reanimated/Fabric/PropsRegistry.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/PropsRegistry.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/PropsRegistry.cpp:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [2/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/LayoutAnimations.cpp.o
+  [3/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsUtils.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsUtils.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsUtils.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\LayoutAnimations\LayoutAnimationsUtils.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsUtils.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsUtils.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsUtils.cpp:2:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsUtils.h:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [4/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ShadowTreeCloner.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ShadowTreeCloner.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ShadowTreeCloner.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\reanimated\Fabric\ShadowTreeCloner.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ShadowTreeCloner.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ShadowTreeCloner.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ShadowTreeCloner.cpp:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/ShadowTreeCloner.h:5:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/UIManager.h:16:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/componentregistry/ComponentDescriptorRegistry.h:14:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/componentregistry/ComponentDescriptorProvider.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ComponentDescriptor.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^~~~~~
+        |            const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^~~~~~
+        |                       const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+        |              ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+        |                   ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+        |                        ;
+  5 errors generated.
+  [5/16] Building CXX object src/main/cpp/worklets/CMakeFiles/worklets.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp.o
+  FAILED: src/main/cpp/worklets/CMakeFiles/worklets.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dworklets_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/worklets/CMakeFiles/worklets.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp.o -MF src\main\cpp\worklets\CMakeFiles\worklets.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\worklets\NativeModules\WorkletsModuleProxy.cpp.o.d -o src/main/cpp/worklets/CMakeFiles/worklets.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/worklets/NativeModules/WorkletsModuleProxy.cpp:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/UIManagerBinding.h:13:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/PointerEventsProcessor.h:13:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/uimanager/PointerHoverTracker.h:16:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ShadowNode.h:17:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^~~~~~
+        |            const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^~~~~~
+        |                       const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+        |              ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+        |                   ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+        |                        ;
+  5 errors generated.
+  [6/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/RuntimeDecorators/RNRuntimeDecorator.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/RuntimeDecorators/RNRuntimeDecorator.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/RuntimeDecorators/RNRuntimeDecorator.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\RuntimeDecorators\RNRuntimeDecorator.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/RuntimeDecorators/RNRuntimeDecorator.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.cpp:1:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.h:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [7/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedMountHook.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedMountHook.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedMountHook.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\reanimated\Fabric\ReanimatedMountHook.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedMountHook.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedMountHook.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedMountHook.cpp:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/ReanimatedCommitShadowNode.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ShadowNode.h:17:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^~~~~~
+        |            const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^~~~~~
+        |                       const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+        |              ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+        |                   ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+        |                        ;
+  5 errors generated.
+  [8/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\a4947e4b396c2d6ac726f16b105e8adb\cpp\reanimated\Fabric\ReanimatedCommitHook.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/a4947e4b396c2d6ac726f16b105e8adb/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/Fabric/ReanimatedCommitHook.cpp:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/ReanimatedCommitHook.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [9/16] Building CXX object src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsOnLoad.cpp.o
+  FAILED: src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsOnLoad.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dworklets_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsOnLoad.cpp.o -MF src\main\cpp\worklets\CMakeFiles\worklets.dir\android\WorkletsOnLoad.cpp.o.d -o src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsOnLoad.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsOnLoad.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsOnLoad.cpp:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsModule.h:6:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/scheduler/Scheduler.h:15:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/componentregistry/ComponentDescriptorFactory.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ComponentDescriptor.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^~~~~~
+        |            const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^~~~~~
+        |                       const
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+        |              ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+        |                   ;
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+        |                        ;
+  5 errors generated.
+  [10/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsProxy.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsProxy.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsProxy.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\LayoutAnimations\LayoutAnimationsProxy.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/LayoutAnimations/LayoutAnimationsProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy.cpp:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/LayoutAnimations/LayoutAnimationsProxy.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [11/16] Building CXX object src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsModule.cpp.o
+  FAILED: src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsModule.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dworklets_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsModule.cpp.o -MF src\main\cpp\worklets\CMakeFiles\worklets.dir\android\WorkletsModule.cpp.o.d -o src/main/cpp/worklets/CMakeFiles/worklets.dir/android/WorkletsModule.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsModule.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/worklets/android/WorkletsModule.cpp:9:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/fabric/Binding.h:12:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/fabric/FabricUIManagerBinding.h:19:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/scheduler/SchedulerDelegate.h:13:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/mounting/MountingCoordinator.h:15:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/mounting/Differentiator.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/ShadowNode.h:17:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [12/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/OnLoad.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/OnLoad.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/OnLoad.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\android\OnLoad.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/OnLoad.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/OnLoad.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/OnLoad.cpp:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/NativeProxy.h:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [13/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/NativeModules/ReanimatedModuleProxy.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/NativeModules/ReanimatedModuleProxy.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/NativeModules/ReanimatedModuleProxy.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\7c9c2db2601ae74dc53204572b824cd6\NativeModules\ReanimatedModuleProxy.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/7c9c2db2601ae74dc53204572b824cd6/NativeModules/ReanimatedModuleProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.cpp:2:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  [14/16] Building CXX object src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/NativeProxy.cpp.o
+  FAILED: src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/NativeProxy.cpp.o 
+  C:\Users\jozek\AppData\Local\Android\Sdk\ndk\27.1.12297006\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/jozek/AppData/Local/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dreanimated_EXPORTS -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactAndroid/src/main/jni/react/turbomodule -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/callinvoker -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/runtimeexecutor -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/yoga -IE:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/graphics/platform/cxx -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/jsi/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/df33006f36a9a8ff8430bc372c74192d/transformed/fbjni-0.7.0/prefab/modules/fbjni/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/deb7d416f3305abd051c0afbc5f4a685/transformed/hermes-android-0.79.5-debug/prefab/modules/libhermes/include -isystem C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/hermestooling/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D__BIONIC_NO_PAGE_SIZE_MACRO -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREACT_NATIVE_MINOR_VERSION=79   -DREANIMATED_VERSION=3.17.5    -DHERMES_ENABLE_DEBUGGER=1 -fexceptions -fno-omit-frame-pointer -frtti -fstack-protector-all   -std=c++20 -Wall -Werror -DRCT_NEW_ARCH_ENABLED -DJS_RUNTIME_HERMES=1 -fno-limit-debug-info  -fPIC -DFOLLY_NO_CONFIG=1 -DFOLLY_HAVE_CLOCK_GETTIME=1 -DFOLLY_USE_LIBCPP=1 -DFOLLY_CFG_NO_COROUTINES=1 -DFOLLY_MOBILE=1 -DFOLLY_HAVE_RECVMMSG=1 -DFOLLY_HAVE_PTHREAD=1 -DFOLLY_HAVE_XSI_STRERROR_R=1 -std=gnu++20 -MD -MT src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/NativeProxy.cpp.o -MF src\main\cpp\reanimated\CMakeFiles\reanimated.dir\android\NativeProxy.cpp.o.d -o src/main/cpp/reanimated/CMakeFiles/reanimated.dir/android/NativeProxy.cpp.o -c E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/NativeProxy.cpp
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/src/main/cpp/reanimated/android/NativeProxy.cpp:2:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/RuntimeDecorators/RNRuntimeDecorator.h:3:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/NativeModules/ReanimatedModuleProxy.h:9:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native-reanimated/android/../Common/cpp/reanimated/Fabric/PropsRegistry.h:4:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootShadowNode.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/root/RootProps.h:12:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/ViewProps.h:10:
+  In file included from C:/Users/jozek/.gradle/caches/8.14/transforms/1883b445c381366433bd1ec4406bd247/transformed/react-android-0.79.5-debug/prefab/modules/reactnative/include/react/renderer/components/view/HostPlatformViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/BaseViewProps.h:10:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/components/view/AccessibilityProps.h:11:
+  In file included from E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Props.h:14:
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:64:12: error: unknown type name 'consts'; did you mean 'const'?
+     64 |   Sealable(consts Sealable& other);
+        |            ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:67:23: error: unknown type name 'consts'; did you mean 'const'?
+     67 |   Sealable& operator=(consts Sealable& other);
+        |                       ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:74:14: error: expected ';' at end of declaration list
+     74 |   void seal() consts;
+        |              ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:79:19: error: expected ';' at end of declaration list
+     79 |   bool getSealed() consts;
+        |                   ^
+  E:/PC/Dokumenty/MobileAppBenchamark/react/node_modules/react-native/ReactCommon/react/renderer/core/Sealable.h:85:24: error: expected ';' at end of declaration list
+     85 |   void ensureUnsealed() consts;
+        |                        ^
+  5 errors generated.
+  ninja: build stopped: subcommand failed.
+  
+  C++ build system [build] failed while executing:
+      @echo off
+      "C:\\Users\\jozek\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe" ^
+        -C ^
+        "E:\\PC\\Dokumenty\\MobileAppBenchamark\\react\\node_modules\\react-native-reanimated\\android\\.cxx\\Debug\\3t1u2h2o\\arm64-v8a" ^
+        reanimated ^
+        worklets
+    from E:\PC\Dokumenty\MobileAppBenchamark\react\node_modules\react-native-reanimated\android
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.14/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 14s
+268 actionable tasks: 11 executed, 257 up-to-date

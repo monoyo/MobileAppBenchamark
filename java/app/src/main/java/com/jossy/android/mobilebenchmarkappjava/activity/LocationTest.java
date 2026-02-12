@@ -112,7 +112,7 @@ public class LocationTest extends AppCompatActivity {
         String path = csvPath != null ? csvPath : getFilesDir() + "/location_benchmark_" + suiteStartTime + ".csv";
         try {
             // Buffer capacity 500 for high volume
-            csvWriter = new BufferedCsvWriter(new File(path), 500, 128 * 1024);
+            csvWriter = new BufferedCsvWriter(new File(path), Config.bufferSize, 128 * 1024);
             csvWriter.initialize();
         } catch (Exception e) {
             Log.e(TAG, "CSV Writer initialization failed", e);

@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 public abstract class BaseTestActivity extends AppCompatActivity {
 
     private static final String TAG = "BaseTestActivity";
-    
+
     protected TextView statusText;
     protected final MutableLiveData<Integer> progressLiveData = new MutableLiveData<>();
     protected BufferedCsvWriter csvWriter;
@@ -37,12 +37,12 @@ public abstract class BaseTestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializeActivity();
-        
+
         progressLiveData.observe(this, this::updateProgressText);
-        
+
         csvPath = getIntent().getStringExtra("csv_path");
         Log.d(TAG, "Test activity initialized");
-        
+
         startBenchmarkAsync();
     }
 
@@ -89,11 +89,11 @@ public abstract class BaseTestActivity extends AppCompatActivity {
             if (csvWriter == null) {
                 initializeCsvWriter();
             }
-            
+
             long start = System.currentTimeMillis();
             long duration = result.getExecutionTimeMs();
             long elapsed = System.currentTimeMillis() - suiteStartTime;
-            
+
             TestEntry entry = new TestEntry(iteration, result, start, duration, elapsed);
             csvWriter.write(entry);
         } catch (Exception e) {
@@ -105,10 +105,11 @@ public abstract class BaseTestActivity extends AppCompatActivity {
      * Initialize CSV writer with default settings.
      */
     protected void initializeCsvWriter() throws Exception {
-        if (csvWriter != null) return;
-        
+        if (csvWriter != null)
+            return;
+
         File file = new File(csvPath != null ? csvPath : getDefaultCsvPath());
-        csvWriter = new BufferedCsvWriter(file, 1000, 64 * 1024);
+        csvWriter = new BufferedCsvWriter(file, Config.bufferSize, 64 * 1024);
         csvWriter.initialize();
     }
 
@@ -142,11 +143,10 @@ public abstract class BaseTestActivity extends AppCompatActivity {
         Log.i(TAG, "Benchmark completed in " + totalTime + "ms");
         runOnUiThread(() -> {
             TestResult result = new TestResult(
-                getTestName(),
-                totalTime,
-                "Batch completed: " + Config.sampleCount + " samples",
-                true
-            );
+                    getTestName(),
+                    totalTime,
+                    "Batch completed: " + Config.sampleCount + " samples",
+                    true);
             closeCsvWriter();
             returnResult(result);
         });
@@ -159,11 +159,10 @@ public abstract class BaseTestActivity extends AppCompatActivity {
         Log.e(TAG, "Benchmark failed: " + e.getMessage(), e);
         runOnUiThread(() -> {
             TestResult result = new TestResult(
-                getTestName(),
-                0,
-                "Error: " + e.getMessage(),
-                false
-            );
+                    getTestName(),
+                    0,
+                    "Error: " + e.getMessage(),
+                    false);
             closeCsvWriter();
             returnResult(result);
         });

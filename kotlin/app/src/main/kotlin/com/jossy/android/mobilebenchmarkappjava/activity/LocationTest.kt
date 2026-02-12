@@ -139,7 +139,7 @@ class LocationTest : AppCompatActivity() {
         lastSampleTime = suiteStartTime
         val path = csvPath ?: "${filesDir}/location_benchmark_${suiteStartTime}.csv"
         try {
-            csvWriter = BufferedCsvWriter(File(path), 500, 128 * 1024).apply { initialize() }
+            csvWriter = BufferedCsvWriter(File(path), Config.bufferSize, 128 * 1024).apply { initialize() }
         } catch (e: Exception) {
             Log.e(TAG, "CSV Writer initialization failed", e)
         }

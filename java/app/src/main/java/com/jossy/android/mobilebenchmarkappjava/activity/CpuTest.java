@@ -64,7 +64,7 @@ public class CpuTest extends BaseTestActivity {
 
     private CpuResult executeSingleIteration(int index) {
         long start = System.currentTimeMillis();
-        CpuResult result = CPUTest.runBenchmarkIterations(Config.sampleCount, null);
+        CpuResult result = CPUTest.runBenchmarkIterations(Config.cpuIterations, null);
         long duration = System.currentTimeMillis() - start;
 
         TestResult testResult = new TestResult(

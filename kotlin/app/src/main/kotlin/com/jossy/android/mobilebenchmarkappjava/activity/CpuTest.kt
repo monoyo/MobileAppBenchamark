@@ -43,7 +43,7 @@ class CpuTest : BaseTestActivity() {
 
     private fun executeSingleIteration(index: Int) {
         val start = System.currentTimeMillis()
-        val result = CPUTest.runBenchmarkIterations(Config.sampleCount.toLong(), null)
+        val result = CPUTest.runBenchmarkIterations(Config.cpuIterations.toLong(), null)
         val duration = System.currentTimeMillis() - start
 
         val testResult = TestResult(

@@ -1,15 +1,19 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Text, View } from 'react-native';
+import { Dimensions, PixelRatio, Text, View } from 'react-native';
 import type { TestResult } from './types';
 import { resolveResult } from './utils/navResult';
 import { getSampleConfig } from './constants/SampleConfiguration';
 
-// Match Java/Kotlin constants
+// Match Java/Kotlin constants (Physical Pixels)
 const INITIAL_OBJECT_COUNT = 250;
 const OBJECT_INCREMENT_PER_SECOND = 250;
-const OBJECT_SIZE = 50; // 50px like Java
-const MAX_VELOCITY = 10; // ±10 px/frame like Java
+const NATIVE_OBJECT_SIZE = 50; // 50 physical px
+const NATIVE_MAX_VELOCITY = 10; // 10 physical px/frame
+
+const scale = PixelRatio.get();
+const OBJECT_SIZE = NATIVE_OBJECT_SIZE / scale;
+const MAX_VELOCITY = NATIVE_MAX_VELOCITY / scale;
 
 interface Square {
   id: number;

@@ -90,7 +90,7 @@ class ImageLoadingTest : AppCompatActivity() {
     private fun initCsvWriter(): Boolean {
         return try {
             val file = File(csvPath ?: "\${filesDir}/temp_image.csv")
-            csvWriter = BufferedCsvWriter(file, 1000, 64 * 1024)
+            csvWriter = BufferedCsvWriter(file, Config.bufferSize, 64 * 1024)
             csvWriter?.initialize()
             true
         } catch (e: Exception) {

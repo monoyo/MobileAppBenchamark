@@ -99,7 +99,7 @@ public class ImageLoadingTest extends AppCompatActivity {
     private boolean initCsvWriter() {
         try {
             File file = new File(csvPath != null ? csvPath : getFilesDir() + "/temp_image.csv");
-            csvWriter = new BufferedCsvWriter(file, 1000, 64 * 1024);
+            csvWriter = new BufferedCsvWriter(file, Config.bufferSize, 64 * 1024);
             csvWriter.initialize();
             return true;
         } catch (Exception e) {
