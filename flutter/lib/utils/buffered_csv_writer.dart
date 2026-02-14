@@ -4,14 +4,13 @@ class BufferedCsvWriter {
   final String filePath;
   final int bufferSize;
   final String testName;
-  final String platform;
   final List<String> _buffer = [];
   bool _initialized = false;
   IOSink? _sink;
 
-  BufferedCsvWriter(this.filePath, {this.bufferSize = 1000, this.testName = 'unknown', this.platform = 'flutter'});
+  BufferedCsvWriter(this.filePath, {this.bufferSize = 1000, this.testName = 'unknown'});
 
-  Future<void> initialize({String header = 'platform,test_name,iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms'}) async {
+  Future<void> initialize({String header = 'iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms'}) async {
     if (_initialized) return;
     try {
       final file = File(filePath);
@@ -42,7 +41,7 @@ class BufferedCsvWriter {
     if (!_initialized) return;
 
     final safeDetails = csvEscape(details);
-    final line = '$platform,${csvEscape(testName)},$iteration,$executionTimeMs,$safeDetails,$intervalStartMs,$intervalDurationMs,$cumulativeTimeMs';
+    final line = '$iteration,$executionTimeMs,$safeDetails,$intervalStartMs,$intervalDurationMs,$cumulativeTimeMs';
     _buffer.add(line);
 
     if (_buffer.length >= bufferSize) {

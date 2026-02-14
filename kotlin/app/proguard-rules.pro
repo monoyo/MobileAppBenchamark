@@ -24,7 +24,7 @@
 -keep class androidx.lifecycle.** { *; }
 
 # Keep all benchmark classes to prevent stripping and ensure performance consistency
--keep class com.jossy.android.mobilebenchmarkappjava.** { *; }
+-keep class com.jossy.android.mobilebenchmarkappkotlin.** { *; }
 -keep class com.jossy.android.mobilebenchmarkappkotlin.** { *; }
 
 # Gson requirements
@@ -35,4 +35,4 @@
 -dontwarn com.google.gson.internal.bind.util.ISO8601Utils
 
 # Keep model classes used for JSON serialization
--keepclassmembers class com.jossy.android.mobilebenchmarkappjava.data.** { <fields>; }
+-keepclassmembers class com.jossy.android.mobilebenchmarkappkotlin.data.** { <fields>; }

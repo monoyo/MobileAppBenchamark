@@ -14,7 +14,7 @@
         tools:targetApi="30" />
 
     <application
-        android:name="com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication"
+        android:name="com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -25,19 +25,19 @@
         android:theme="@style/Theme.MobileBenchmarkAppKotlin"
         tools:targetApi="31">
 
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.BenchmarkSuiteActivity" android:exported="true">
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.BenchmarkSuiteActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.CpuTest" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.RamTest" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.ImageLoadingTest" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.ApiTest" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.UiTest" android:exported="false" />
-    <activity android:name="com.jossy.android.mobilebenchmarkappjava.activity.LocationTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.CpuTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.RamTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.ImageLoadingTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.ApiTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.UiTest" android:exported="false" />
+    <activity android:name="com.jossy.android.mobilebenchmarkappkotlin.activity.LocationTest" android:exported="false" />
 
     </application>
 

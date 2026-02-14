@@ -51,59 +51,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Refactor benchmark suite architecture and enhance cross-platform configuration standardization&#10;&#10;This commit introduces significant improvements to the benchmark execution logic, specifically focusing on CPU test performance, UI test selection, and unified project structure across Java, Kotlin, Flutter, and React Native.&#10;&#10;The following changes were made:&#10;&#10;- **Core Architecture &amp; Performance**:&#10;    - Implemented a persistent thread pool in `CPUTest.java` to eliminate thread creation overhead during high-frequency sampling.&#10;    - Optimized `ImageLoadingTest.java` by replacing simple `ImageView` logic with a `RecyclerView` implementation to better simulate real-world rendering performance.&#10;    - Updated `LocationTest.java` to use a 1ms sampling interval for standardized high-speed polling.&#10;    - Standardized naming by renaming &quot;config&quot; to &quot;consts&quot; and &quot;data&quot; to &quot;models&quot; across several directories in Flutter, Java, and Kotlin.&#10;&#10;- **UI &amp; User Experience (Java/Android)**:&#10;    - Added a test selection interface with `CheckBox` components to `BenchmarkSuiteActivity`, allowing users to toggle specific benchmarks (UI, CPU, RAM, Image, API, Location).&#10;    - Improved state management in `BenchmarkSuiteActivity` to preserve UI state during test execution and prevent multiple simultaneous runs.&#10;&#10;- **Flutter Implementation**:&#10;    - Migrated `SampleConfig` to a unified `Config` class in `lib/consts/config.dart`.&#10;    - Refactored `CPUTest` and `UITest` to reference standardized physical-to-logical pixel conversion and unified sample counts.&#10;    - Introduced explicit model classes (`CPUResult`, `TestEntry`) for better type safety.&#10;&#10;- **React Native &amp; Workspace Cleanup**:&#10;    - Removed legacy iOS project files, Xcode workspaces, and CocoaPods artifacts to focus on the core benchmark logic.&#10;    - Updated Android Gradle configurations and settings to align with the new directory structure and constants naming convention.&#10;    - Cleaned up obsolete mocks and test files in the React implementation.&#10;&#10;- **Environment &amp; IDE**:&#10;    - Updated `.idea/workspace.xml` and `deviceStreaming.xml` with expanded Android device profiles (Galaxy A13, S24 Ultra, S25+, etc.) for internal testing.">
-      <change beforePath="$PROJECT_DIR$/flutter/lib/api_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/api_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/benchmark_suite.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/benchmark_suite.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/consts/config.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/consts/config.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/cpu_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/cpu_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/image_loading_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/image_loading_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/location_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/location_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/models/cpu_result.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/models/cpu_result.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/models/test_entry.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/models/test_entry.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/models/test_result.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/models/test_result.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/ram_test_impl.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/ram_test_impl.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/ui_test.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/ui_test.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/flutter/lib/utils/buffered_csv_writer.dart" beforeDir="false" afterPath="$PROJECT_DIR$/flutter/lib/utils/buffered_csv_writer.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ApiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ApiTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/BaseTestActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/BaseTestActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/CpuTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/CpuTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/LocationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/LocationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/RamTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/RamTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/UiTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/activity/UiTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/consts/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/consts/Config.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/io/BufferedCsvWriter.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/io/BufferedCsvWriter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/TestEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/TestEntry.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/TestResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/java/app/src/main/java/com/jossy/android/mobilebenchmarkappjava/models/TestResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/CPUTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/CPUTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/RAMTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/RAMTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/ApiTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/ApiTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/BaseTestActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/BaseTestActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/BenchmarkSuiteActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/CpuTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/CpuTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/ImageLoadingTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/LocationTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/LocationTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/RamTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/RamTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/UiTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/activity/UiTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/consts/Config.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/consts/Config.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/io/BufferedCsvWriter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/io/BufferedCsvWriter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/TestEntry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/TestEntry.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/TestResult.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/TestResult.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/User.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/models/User.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/utils/SummaryWriter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin/app/src/main/kotlin/com/jossy/android/mobilebenchmarkappjava/utils/SummaryWriter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/Benchmark.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/Benchmark.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/api-test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/api-test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/consts/Config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/consts/Config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/cpu-test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/cpu-test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/image-test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/image-test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/location-test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/location-test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/ram-test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/ram-test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/suite.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/suite.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/ui-test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/ui-test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/utils/BufferedCsvWriter.ts" beforeDir="false" afterPath="$PROJECT_DIR$/react/app/utils/BufferedCsvWriter.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/react/app/utils/summaryExport.ts" beforeDir="false" />
+    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Standardize benchmark configurations and physical unit scaling across platforms&#10;&#10;This commit synchronizes configuration usage across Java, Kotlin, and React Native implementations to ensure consistent benchmark execution and data collection.&#10;&#10;The following changes were made:&#10;- Standardized `BufferedCsvWriter` initialization across all Android activities (Java/Kotlin) to use `Config.bufferSize` instead of hardcoded values.&#10;- Updated `CpuTest` in both Java and Kotlin to use `Config.cpuIterations` for benchmark loops instead of `sampleCount`.&#10;- Adjusted React Native `ui-test.tsx` to use physical pixel scaling for object size and velocity, ensuring visual consistency with native implementations by dividing constants by `PixelRatio`.&#10;- Refactored `BaseTestActivity` in Java for improved readability and consistent CSV writer initialization.&#10;- Unified CSV buffer settings for `LocationTest` across Java and Kotlin to follow the global configuration.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -162,12 +111,12 @@
     &quot;assignee&quot;: &quot;monoyo&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/monoyo/MobileAppBenchamark.git",
-    "accountId": "e937ff43-ae13-40ce-9c52-1fd3039beaa6"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/monoyo/MobileAppBenchamark.git&quot;,
+    &quot;accountId&quot;: &quot;e937ff43-ae13-40ce-9c52-1fd3039beaa6&quot;
   }
-}]]></component>
+}</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\jozek\.gradle\wrapper\dists\gradle-8.14-bin\38aieal9i53h9rfe7vjup95b9\gradle-8.14" javaHome="E:\Android Studio\jbr" gradleVersion="8.14" />
   <component name="McpProjectServerCommands">
     <commands />
@@ -185,39 +134,39 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "Android App.Unnamed.executor": "Run",
-    "Android App.app.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "android.gradle.sync.needed": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "master-consolidated",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "E:/PC/Dokumenty/MobileAppBenchamark",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "ml.llm.LLMConfigurable",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;Android App.Unnamed.executor&quot;: &quot;Run&quot;,
+    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;android.gradle.sync.needed&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master-consolidated&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/PC/Dokumenty/MobileAppBenchamark&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="E:\PC\Dokumenty\MobileAppBenchamark\flutter" />
@@ -681,7 +630,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770849533965</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="Standardize benchmark configurations and physical unit scaling across platforms&#10;&#10;This commit synchronizes configuration usage across Java, Kotlin, and React Native implementations to ensure consistent benchmark execution and data collection.&#10;&#10;The following changes were made:&#10;- Standardized `BufferedCsvWriter` initialization across all Android activities (Java/Kotlin) to use `Config.bufferSize` instead of hardcoded values.&#10;- Updated `CpuTest` in both Java and Kotlin to use `Config.cpuIterations` for benchmark loops instead of `sampleCount`.&#10;- Adjusted React Native `ui-test.tsx` to use physical pixel scaling for object size and velocity, ensuring visual consistency with native implementations by dividing constants by `PixelRatio`.&#10;- Refactored `BaseTestActivity` in Java for improved readability and consistent CSV writer initialization.&#10;- Unified CSV buffer settings for `LocationTest` across Java and Kotlin to follow the global configuration.">
+      <option name="closed" value="true" />
+      <created>1770859552798</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1770859552798</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -716,7 +673,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="refactor ImageLoadingActivity to use constant sample size and improve code structure&#10;&#10;This commit refactors `ImageLoadingActivity` to use a fixed sample size of 10,000 instead of an intent-provided value and reorganizes the logic into smaller, more maintainable methods.&#10;&#10;The following changes were made:&#10;- Introduced `CONSTANT_SAMPLES` set to 10,000 for image loading tests.&#10;- Extracted UI initialization and intent parsing into `initUI` and `parseIntentData`.&#10;- Refactored image loading logic into dedicated methods: `performImageLoad`, `createRequestListener`, and `handleLoadResult`.&#10;- Improved resource management by centralizing CSV writer initialization and closure logic.&#10;- Simplified imports and utilized `TAG` for consistent logging.&#10;- Enhanced code readability by breaking down the monolithic `recordResult` and `finishBatch` methods into smaller functional units." />
     <MESSAGE value="refactor ImageLoadingActivity to use string resources for UI messages&#10;&#10;This commit replaces hardcoded strings in `ImageLoadingActivity` with values from `strings.xml` to follow Android best practices.&#10;&#10;The following changes were made:&#10;- Added `initializing_image_batch` and `image_test_progress` to `strings.xml`.&#10;- Updated `initUI` to use `R.string.initializing_image_batch`.&#10;- Updated `updateProgressUI` to use formatted string `R.string.image_test_progress`." />
     <MESSAGE value="refactor image loading progress updates to use LiveData&#10;&#10;This commit replaces manual UI thread updates with `MutableLiveData` to handle progress reporting during image loading benchmarks.&#10;&#10;The following changes were made:&#10;- Introduced `progressLiveData` to track the number of loaded images.&#10;- Added an observer in `initUI` to update the `loadingStatus` text whenever the progress changes.&#10;- Replaced the throttled `updateProgressUI` method with direct calls to `progressLiveData.postValue`.&#10;- Removed the `runOnUiThread` logic in favor of the lifecycle-aware `LiveData` observer." />
     <MESSAGE value="refactor location benchmark to include system metrics collection and improved UI&#10;&#10;This commit integrates the `SystemMetricsCollector` into the location test, allowing for real-time monitoring of CPU and RAM usage during benchmarking. The UI has been updated to display these metrics and a progress bar.&#10;&#10;The following changes were made:&#10;- Updated `SystemMetricsCollector` to expose current CPU, RAM, and FPS values via getter methods and removed redundant comments.&#10;- Refactored `LocationTestActivity` to utilize `SystemMetricsCollector` for background resource monitoring.&#10;- Added a watchdog timer to `LocationTestActivity` to handle GPS signal loss and timeouts gracefully.&#10;- Enhanced `LocationTestActivity` UI logic to update progress and metrics every 50 samples.&#10;- Updated `activity_location_test.xml` with a `ProgressBar` and a `TextView` for displaying real-time system metrics.&#10;- Optimized CSV logging in the location test with larger buffer capacities for high-frequency sampling.&#10;- Improved cleanup and resource management in `LocationTestActivity` lifecycle methods." />
@@ -741,7 +697,8 @@
     <MESSAGE value="Refactor UI performance tests to match the Java/Kotlin GPUTestActivity implementation&#10;&#10;This commit synchronizes the UI test logic across Flutter and React Native platforms to match the native Android implementation's physics-based animation algorithm.&#10;&#10;The following changes were made:&#10;- Replaced simple looping animations with a physics-based movement system featuring wall-bouncing logic.&#10;- Implemented a dynamic object count system that starts at 250 objects and increments by 250 every second.&#10;- Standardized object size to 50px and maximum velocity to ±10 px/frame.&#10;- Switched Flutter implementation to use `CustomPaint` and a single `Ticker` for improved performance rendering many objects.&#10;- Switched React Native implementation to use `requestAnimationFrame` and `View` transforms instead of the `Animated` library.&#10;- Added an on-screen overlay to display real-time metrics including frame samples, object count, and FPS.&#10;- Standardized test completion to trigger based on reaching a target sample count from `SampleConfiguration`." />
     <MESSAGE value="Add release-key.jks" />
     <MESSAGE value="Refactor benchmark suite architecture and enhance cross-platform configuration standardization&#10;&#10;This commit introduces significant improvements to the benchmark execution logic, specifically focusing on CPU test performance, UI test selection, and unified project structure across Java, Kotlin, Flutter, and React Native.&#10;&#10;The following changes were made:&#10;&#10;- **Core Architecture &amp; Performance**:&#10;    - Implemented a persistent thread pool in `CPUTest.java` to eliminate thread creation overhead during high-frequency sampling.&#10;    - Optimized `ImageLoadingTest.java` by replacing simple `ImageView` logic with a `RecyclerView` implementation to better simulate real-world rendering performance.&#10;    - Updated `LocationTest.java` to use a 1ms sampling interval for standardized high-speed polling.&#10;    - Standardized naming by renaming &quot;config&quot; to &quot;consts&quot; and &quot;data&quot; to &quot;models&quot; across several directories in Flutter, Java, and Kotlin.&#10;&#10;- **UI &amp; User Experience (Java/Android)**:&#10;    - Added a test selection interface with `CheckBox` components to `BenchmarkSuiteActivity`, allowing users to toggle specific benchmarks (UI, CPU, RAM, Image, API, Location).&#10;    - Improved state management in `BenchmarkSuiteActivity` to preserve UI state during test execution and prevent multiple simultaneous runs.&#10;&#10;- **Flutter Implementation**:&#10;    - Migrated `SampleConfig` to a unified `Config` class in `lib/consts/config.dart`.&#10;    - Refactored `CPUTest` and `UITest` to reference standardized physical-to-logical pixel conversion and unified sample counts.&#10;    - Introduced explicit model classes (`CPUResult`, `TestEntry`) for better type safety.&#10;&#10;- **React Native &amp; Workspace Cleanup**:&#10;    - Removed legacy iOS project files, Xcode workspaces, and CocoaPods artifacts to focus on the core benchmark logic.&#10;    - Updated Android Gradle configurations and settings to align with the new directory structure and constants naming convention.&#10;    - Cleaned up obsolete mocks and test files in the React implementation.&#10;&#10;- **Environment &amp; IDE**:&#10;    - Updated `.idea/workspace.xml` and `deviceStreaming.xml` with expanded Android device profiles (Galaxy A13, S24 Ultra, S25+, etc.) for internal testing." />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactor benchmark suite architecture and enhance cross-platform configuration standardization&#10;&#10;This commit introduces significant improvements to the benchmark execution logic, specifically focusing on CPU test performance, UI test selection, and unified project structure across Java, Kotlin, Flutter, and React Native.&#10;&#10;The following changes were made:&#10;&#10;- **Core Architecture &amp; Performance**:&#10;    - Implemented a persistent thread pool in `CPUTest.java` to eliminate thread creation overhead during high-frequency sampling.&#10;    - Optimized `ImageLoadingTest.java` by replacing simple `ImageView` logic with a `RecyclerView` implementation to better simulate real-world rendering performance.&#10;    - Updated `LocationTest.java` to use a 1ms sampling interval for standardized high-speed polling.&#10;    - Standardized naming by renaming &quot;config&quot; to &quot;consts&quot; and &quot;data&quot; to &quot;models&quot; across several directories in Flutter, Java, and Kotlin.&#10;&#10;- **UI &amp; User Experience (Java/Android)**:&#10;    - Added a test selection interface with `CheckBox` components to `BenchmarkSuiteActivity`, allowing users to toggle specific benchmarks (UI, CPU, RAM, Image, API, Location).&#10;    - Improved state management in `BenchmarkSuiteActivity` to preserve UI state during test execution and prevent multiple simultaneous runs.&#10;&#10;- **Flutter Implementation**:&#10;    - Migrated `SampleConfig` to a unified `Config` class in `lib/consts/config.dart`.&#10;    - Refactored `CPUTest` and `UITest` to reference standardized physical-to-logical pixel conversion and unified sample counts.&#10;    - Introduced explicit model classes (`CPUResult`, `TestEntry`) for better type safety.&#10;&#10;- **React Native &amp; Workspace Cleanup**:&#10;    - Removed legacy iOS project files, Xcode workspaces, and CocoaPods artifacts to focus on the core benchmark logic.&#10;    - Updated Android Gradle configurations and settings to align with the new directory structure and constants naming convention.&#10;    - Cleaned up obsolete mocks and test files in the React implementation.&#10;&#10;- **Environment &amp; IDE**:&#10;    - Updated `.idea/workspace.xml` and `deviceStreaming.xml` with expanded Android device profiles (Galaxy A13, S24 Ultra, S25+, etc.) for internal testing." />
+    <MESSAGE value="Standardize benchmark configurations and physical unit scaling across platforms&#10;&#10;This commit synchronizes configuration usage across Java, Kotlin, and React Native implementations to ensure consistent benchmark execution and data collection.&#10;&#10;The following changes were made:&#10;- Standardized `BufferedCsvWriter` initialization across all Android activities (Java/Kotlin) to use `Config.bufferSize` instead of hardcoded values.&#10;- Updated `CpuTest` in both Java and Kotlin to use `Config.cpuIterations` for benchmark loops instead of `sampleCount`.&#10;- Adjusted React Native `ui-test.tsx` to use physical pixel scaling for object size and velocity, ensuring visual consistency with native implementations by dividing constants by `PixelRatio`.&#10;- Refactored `BaseTestActivity` in Java for improved readability and consistent CSV writer initialization.&#10;- Unified CSV buffer settings for `LocationTest` across Java and Kotlin to follow the global configuration." />
+    <option name="LAST_COMMIT_MESSAGE" value="Standardize benchmark configurations and physical unit scaling across platforms&#10;&#10;This commit synchronizes configuration usage across Java, Kotlin, and React Native implementations to ensure consistent benchmark execution and data collection.&#10;&#10;The following changes were made:&#10;- Standardized `BufferedCsvWriter` initialization across all Android activities (Java/Kotlin) to use `Config.bufferSize` instead of hardcoded values.&#10;- Updated `CpuTest` in both Java and Kotlin to use `Config.cpuIterations` for benchmark loops instead of `sampleCount`.&#10;- Adjusted React Native `ui-test.tsx` to use physical pixel scaling for object size and velocity, ensuring visual consistency with native implementations by dividing constants by `PixelRatio`.&#10;- Refactored `BaseTestActivity` in Java for improved readability and consistent CSV writer initialization.&#10;- Unified CSV buffer settings for `LocationTest` across Java and Kotlin to follow the global configuration." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

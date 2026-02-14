@@ -227,7 +227,7 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
                         style: const TextStyle(fontSize: 14, color: Colors.black),
                     ),
                     ),
-                ),
+                  ),
                 ],
             );
         },
