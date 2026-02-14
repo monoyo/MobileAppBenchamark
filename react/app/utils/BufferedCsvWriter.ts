@@ -1,7 +1,6 @@
 import RNFS from 'react-native-fs';
 
-const DEFAULT_HEADER = 'platform,test_name,iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms';
-const PLATFORM = 'react_native';
+const DEFAULT_HEADER = 'iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms';
 
 export class BufferedCsvWriter {
     private buffer: string[] = [];
@@ -48,8 +47,7 @@ export class BufferedCsvWriter {
         cumulativeTimeMs: number = 0
     ) {
         const safeDetails = this.csvEscape(details);
-        const safeTestName = this.csvEscape(this.testName);
-        const line = `${PLATFORM},${safeTestName},${iteration},${executionTimeMs},${safeDetails},${intervalStartMs},${intervalDurationMs},${cumulativeTimeMs}`;
+        const line = `${iteration},${executionTimeMs},${safeDetails},${intervalStartMs},${intervalDurationMs},${cumulativeTimeMs}`;
         this.buffer.push(line);
 
         if (this.buffer.length >= this.bufferSize) {
