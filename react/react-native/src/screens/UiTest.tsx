@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, PixelRatio, StyleSheet, View, Text } from 'react-native';
+import { Config } from '../../../app/consts/Config';
 
-const TEST_DURATION_MS = 5000;
 const UPDATE_INTERVAL_MS = 200; // 5 FPS
 const INITIAL_OBJECT_COUNT = 250;
 const OBJECT_INCREMENT_PER_SECOND = 250;
+const MIN_FPS = 10;
+const WARMUP_FRAMES = 30;
 
 interface Square {
   key: number;
@@ -29,6 +31,7 @@ export default function UiTest({ navigation, route }: any) {
 
   const frameCountRef = useRef(0);
   const squaresRef = useRef<Square[]>([]); // Ref to avoid closure staleness in interval
+  const lastFrameTimeRef = useRef(0);
 
   useEffect(() => {
     // Initial objects
@@ -38,11 +41,15 @@ export default function UiTest({ navigation, route }: any) {
       const now = Date.now();
       const elapsed = now - startRef.current;
 
-      if (elapsed >= TEST_DURATION_MS) {
-        clearInterval(interval);
-        finishTest(elapsed);
-        return;
+      // Calculate instantaneous FPS
+      let currentFps = 0;
+      if (lastFrameTimeRef.current > 0) {
+        const delta = now - lastFrameTimeRef.current;
+        if (delta > 0) {
+          currentFps = 1000 / delta;
+        }
       }
+      lastFrameTimeRef.current = now;
 
       // Manage object count
       const secondsElapsed = Math.floor(elapsed / 1000);
@@ -58,7 +65,22 @@ export default function UiTest({ navigation, route }: any) {
 
       // Trigger render
       setSquares([...squaresRef.current]);
-      setInfo(`Samples: ${frameCountRef.current}\nObjects: ${squaresRef.current.length}\nFPS: ${(frameCountRef.current / (elapsed / 1000)).toFixed(1)}`);
+      setInfo(`Samples: ${frameCountRef.current} / ${Config.sampleCount}\nObjects: ${squaresRef.current.length}\nFPS: ${currentFps.toFixed(1)}`);
+
+      // Check termination: sample count reached
+      if (frameCountRef.current >= Config.sampleCount) {
+        clearInterval(interval);
+        finishTest(elapsed);
+        return;
+      }
+
+      // Check FPS lower bound after warmup
+      if (frameCountRef.current > WARMUP_FRAMES && currentFps > 0 && currentFps <= MIN_FPS) {
+        console.log(`FPS dropped to ${currentFps} (<= ${MIN_FPS}), stopping test at frame ${frameCountRef.current}`);
+        clearInterval(interval);
+        finishTest(elapsed);
+        return;
+      }
 
     }, UPDATE_INTERVAL_MS);
 

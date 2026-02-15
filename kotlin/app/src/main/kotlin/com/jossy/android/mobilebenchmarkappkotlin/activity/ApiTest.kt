@@ -1,11 +1,9 @@
 package com.jossy.android.mobilebenchmarkappkotlin.activity
 
-import android.content.Intent
 import android.util.Log
 import android.widget.TextView
 import android.widget.LinearLayout
 import android.graphics.Color
-import com.jossy.android.mobilebenchmarkappkotlin.BenchmarkApplication
 import com.jossy.android.mobilebenchmarkappkotlin.consts.Config
 import com.jossy.android.mobilebenchmarkappkotlin.data.Post
 import com.jossy.android.mobilebenchmarkappkotlin.data.TestResult
@@ -17,6 +15,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class ApiTest : BaseTestActivity() {
 
@@ -25,6 +25,7 @@ class ApiTest : BaseTestActivity() {
     }
 
     private lateinit var apiService: ApiService
+    private val completionLatch = CountDownLatch(1)
 
     override fun initializeActivity() {
         val layout = LinearLayout(this).apply {
@@ -52,7 +53,12 @@ class ApiTest : BaseTestActivity() {
 
     override fun executeBenchmark() {
         initializeCsvWriter()
+        Log.d(TAG, "Starting batch test, sampleCount=${Config.sampleCount}")
         startBatchTest()
+        Log.d(TAG, "Awaiting completionLatch...")
+        val completed = completionLatch.await(5, TimeUnit.MINUTES)
+        Log.d(TAG, "Latch released, completed=$completed")
+        csvWriter?.flush()
     }
 
     private fun setupRetrofit() {
@@ -105,6 +111,7 @@ class ApiTest : BaseTestActivity() {
 
         private fun recordResult(success: Boolean, details: String) {
             val duration = System.currentTimeMillis() - startTime
+            Log.d(TAG, "recordResult iteration=$iteration, duration=$duration, success=$success")
 
             try {
                 val result = TestResult("API Test", duration, details, success)
@@ -119,21 +126,8 @@ class ApiTest : BaseTestActivity() {
     }
 
     private fun finishBatch() {
-        closeCsvWriter()
-        val totalTime = System.currentTimeMillis() - suiteStartTime
-        val result = TestResult(
-            testName = "API Test",
-            executionTimeMs = totalTime,
-            details = "Batch completed: $currentSampleIndex",
-            success = true
-        )
-        runOnUiThread {
-            Intent().apply {
-                putExtra(BenchmarkApplication.RESULT, result)
-                setResult(RESULT_OK, this)
-            }
-            finish()
-        }
+        Log.d(TAG, "finishBatch called, countDown latch. currentSampleIndex=$currentSampleIndex")
+        completionLatch.countDown()
     }
 
     override fun getProgressDisplayText(currentIteration: Int): String =

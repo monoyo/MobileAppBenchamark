@@ -29,6 +29,8 @@ class UiTest : AppCompatActivity(), Choreographer.FrameCallback {
         private const val INITIAL_OBJECT_COUNT = 250
         private const val OBJECT_INCREMENT_PER_SECOND = 250
         private const val OBJECT_SIZE = 50f
+        private const val MIN_FPS = 10.0
+        private const val WARMUP_FRAMES = 30
     }
 
     private lateinit var stressTestView: StressTestView
@@ -85,7 +87,7 @@ class UiTest : AppCompatActivity(), Choreographer.FrameCallback {
             val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
             val dir = getBenchmarkDirectory(timestamp)
 
-            val file = File(dir, "stress_test_java_$timestamp.csv")
+            val file = File(dir, "ui_test_$timestamp.csv")
             csvWriter = BufferedWriter(FileWriter(file))
             csvWriter?.write("Frame,ObjectCount,FrameTimeMs,FPS,ElapsedMs\n")
         } catch (e: Exception) {
@@ -140,8 +142,6 @@ class UiTest : AppCompatActivity(), Choreographer.FrameCallback {
         Choreographer.getInstance().postFrameCallback(this)
     }
 
-
-
     override fun doFrame(frameTimeNanos: Long) {
         if (!isRunning) return
 
@@ -160,6 +160,9 @@ class UiTest : AppCompatActivity(), Choreographer.FrameCallback {
         frameCount++
 
         if (frameCount >= Config.sampleCount) {
+            finishTest(true)
+        } else if (frameCount > WARMUP_FRAMES && fps <= MIN_FPS) {
+            Log.i(TAG, "FPS dropped to $fps (<= $MIN_FPS), stopping test at frame $frameCount")
             finishTest(true)
         } else {
             Choreographer.getInstance().postFrameCallback(this)

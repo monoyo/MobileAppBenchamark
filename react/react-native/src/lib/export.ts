@@ -27,7 +27,7 @@ export async function writeCsvFiles(
     try {
       await ensureDir(dir);
       for (const [testName, list] of Object.entries(resultsByTest)) {
-        const safeName = testName.replace(/[^a-zA-Z0-9-_]+/g, '_');
+        const safeName = testName.toLowerCase().replace(/[^a-zA-Z0-9-_]+/g, '_');
         const path = `${dir}${safeName}.csv`;
         const csv = buildCsv(testName, list);
         await FileSystem.writeAsStringAsync(path, csv, { encoding: FileSystem.EncodingType.UTF8 });

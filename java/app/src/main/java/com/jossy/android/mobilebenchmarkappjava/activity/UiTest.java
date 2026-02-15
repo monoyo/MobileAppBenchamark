@@ -34,6 +34,8 @@ public class UiTest extends AppCompatActivity implements Choreographer.FrameCall
     private static final int INITIAL_OBJECT_COUNT = 250;
     private static final int OBJECT_INCREMENT_PER_SECOND = 250;
     private static final float OBJECT_SIZE = 50f;
+    private static final double MIN_FPS = 10.0;
+    private static final int WARMUP_FRAMES = 30;
 
     private StressTestView stressTestView;
     private TextView infoText;
@@ -93,7 +95,7 @@ public class UiTest extends AppCompatActivity implements Choreographer.FrameCall
             String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
             File dir = getBenchmarkDirectory(timestamp);
 
-            File file = new File(dir, "stress_test_java_" + timestamp + ".csv");
+            File file = new File(dir, "ui_test_" + timestamp + ".csv");
             csvWriter = new BufferedWriter(new FileWriter(file));
             csvWriter.write("Frame,ObjectCount,FrameTimeMs,FPS,ElapsedMs\n");
         } catch (IOException e) {
@@ -171,6 +173,9 @@ public class UiTest extends AppCompatActivity implements Choreographer.FrameCall
         frameCount++;
 
         if (frameCount >= Config.sampleCount) {
+            finishTest(true);
+        } else if (frameCount > WARMUP_FRAMES && fps <= MIN_FPS) {
+            Log.i(TAG, "FPS dropped to " + fps + " (<= " + MIN_FPS + "), stopping test at frame " + frameCount);
             finishTest(true);
         } else {
             Choreographer.getInstance().postFrameCallback(this);

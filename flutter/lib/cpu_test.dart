@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'models/test_result.dart';
 import 'consts/config.dart';
+import 'utils/buffered_csv_writer.dart';
 import 'models/cpu_result.dart';
 
 /// CPU benchmark page that distributes computation across isolates.
@@ -11,11 +12,13 @@ import 'models/cpu_result.dart';
 class CpuTest extends StatefulWidget {
   final int iterations;
   final Duration? timeLimitDuration;
+  final BufferedCsvWriter? writer;
   
   const CpuTest({
     super.key,
     this.iterations = Config.sampleCount,
     this.timeLimitDuration,
+    this.writer,
   });
 
   @override
@@ -50,38 +53,43 @@ class _CpuTestState extends State<CpuTest> {
       await _benchmark!.initialize();
       threadCount = _benchmark!.threadCount;
 
-      // Outer loop: 10,000 "Samples"
-      // We process 1 by 1 to strictly match Kotlin's UI behavior (test after test).
-      const int batchSize = 1;
-      
-      for (int i = 0; i < widget.iterations; i += batchSize) {
+      for (int i = 0; i < widget.iterations; i++) {
           if (!mounted) return;
 
-          int remaining = widget.iterations - i;
-          int currentBatch = remaining > batchSize ? batchSize : remaining;
-          
-          // Distribute this batch of "Samples" across workers.
-          // Each sample involves [Config.cpuIterations] ops.
-          // So we ask workers to perform (currentBatch * cpuIterations) / threads ops?
-          // No, to strictly match Kotlin:
-          // Kotlin: 10,000 outer loops. Each loop calls runBenchmarkIterations(10,000).
-          // So Total Ops = 10,000 * 10,000.
-          // Our `_benchmark.runBatch` should distribute (currentBatch * widget.iterations) ops.
-          // Wait, widget.iterations IS Config.sampleCount (10,000).
-          // So we need to run (currentBatch * 10,000) ops distributed across threads.
+          final sampleStart = DateTime.now().millisecondsSinceEpoch;
           
           final result = await _benchmark!.runBatch(
-             samples: currentBatch, 
-             opsPerSample: widget.iterations // 10,000 ops per sample
+             samples: 1, 
+             opsPerSample: Config.cpuIterations
           );
+
+          final sampleEnd = DateTime.now().millisecondsSinceEpoch;
+          final sampleDuration = sampleEnd - sampleStart;
 
           iterationsProcessed += result.iterations;
           totalChecksum += result.checksum;
 
+          // Write per-sample row to CSV
+          if (widget.writer != null) {
+            await widget.writer!.write(
+              i + 1,
+              sampleDuration,
+              'threads=$threadCount',
+              intervalStartMs: sampleStart,
+              intervalDurationMs: sampleDuration,
+              cumulativeTimeMs: sampleEnd - start,
+            );
+          }
+
           setState(() {
-            _currentIteration = i + currentBatch;
+            _currentIteration = i + 1;
             _statusMsg = 'CPU Test: $_currentIteration / ${widget.iterations}';
           });
+          
+          // Periodic flush to avoid data loss
+          if (widget.writer != null && (i + 1) % 100 == 0) {
+            await widget.writer!.flush();
+          }
           
           // Yield to allow UI update
           await Future.delayed(Duration.zero);
@@ -90,6 +98,12 @@ class _CpuTestState extends State<CpuTest> {
       final elapsed = DateTime.now().millisecondsSinceEpoch - start;
       
       if (!mounted) return;
+
+      // Flush remaining buffered data
+      if (widget.writer != null) {
+        await widget.writer!.flush();
+      }
+
       Navigator.pop(
         context,
         TestResult(

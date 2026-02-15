@@ -8,9 +8,6 @@ import '../consts/config.dart';
 /// RAM benchmark suite testing memory allocation, manipulation, and management.
 /// Implements patterns from Java RAMTest: sorting, filtering, serialization, and aggregation.
 class RAMTest {
-  /// Number of iterations for each test variant.
-  static const int runs = Config.sampleCount;
-  
   /// Counters for name frequency analysis.
   static final Map<String, int> nameFrequency = {};
   static final Map<String, int> surnameFrequency = {};
@@ -38,7 +35,8 @@ class RAMTest {
   /// 3. Filtering by active status and age
   /// 4. Data transformation (toUpperCase)
   /// 5. Frequency counting (name and surname aggregation)
-  static Future<TestResult> runBenchmark() async {
+  static Future<TestResult> runBenchmark({int? runs}) async {
+    final effectiveRuns = runs ?? Config.sampleCount;
     final stopwatch = Stopwatch()..start();
     
     try {
@@ -51,7 +49,7 @@ class RAMTest {
       surnameFrequency.clear();
 
       // Execute multiple iterations of memory operations
-      for (int iteration = 0; iteration < runs; iteration++) {
+      for (int iteration = 0; iteration < effectiveRuns; iteration++) {
         // 1. Shuffle and concatenate (memory allocation)
         final shuffled = List<User>.from(users)..shuffle(random);
         accumulator.addAll(shuffled);
@@ -93,7 +91,7 @@ class RAMTest {
       return TestResult(
         'RAM Test',
         elapsedMs,
-        'Completed $runs iterations: ${nameFrequency.length} unique names, '
+        'Completed $effectiveRuns iterations: ${nameFrequency.length} unique names, '
         '${surnameFrequency.length} unique surnames',
         true,
       );

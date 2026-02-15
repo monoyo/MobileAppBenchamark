@@ -1,6 +1,5 @@
 package com.jossy.android.mobilebenchmarkappjava.activity;
 
-import android.content.Intent;
 import android.util.Log;
 import androidx.annotation.NonNull;
 
@@ -11,6 +10,7 @@ import com.jossy.android.mobilebenchmarkappjava.data.TestResult;
 import com.jossy.android.mobilebenchmarkappjava.service.ApiService;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -23,6 +23,7 @@ public class ApiTest extends BaseTestActivity {
     private static final String TAG = "ApiTest";
 
     private ApiService apiService;
+    private final CountDownLatch completionLatch = new CountDownLatch(1);
 
     @Override
     protected void initializeActivity() {
@@ -35,6 +36,9 @@ public class ApiTest extends BaseTestActivity {
     protected void executeBenchmark() throws Exception {
         initializeCsvWriter();
         startBatchTest();
+        completionLatch.await();
+        if (csvWriter != null)
+            csvWriter.flush();
     }
 
     private void setupRetrofit() {
@@ -106,19 +110,7 @@ public class ApiTest extends BaseTestActivity {
     }
 
     private void finishBatch() {
-        closeCsvWriter();
-        long totalTime = System.currentTimeMillis() - suiteStartTime;
-        TestResult result = new TestResult(
-                "API Test",
-                totalTime,
-                "Batch completed: " + currentSampleIndex,
-                true);
-        runOnUiThread(() -> {
-            Intent intent = new Intent();
-            intent.putExtra(com.jossy.android.mobilebenchmarkappjava.BenchmarkApplication.RESULT, result);
-            setResult(RESULT_OK, intent);
-            finish();
-        });
+        completionLatch.countDown();
     }
 
     @Override

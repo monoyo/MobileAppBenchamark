@@ -26,7 +26,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   // Fixed 10000 samples as per requirement
   
   late final int _allTests;
-  int _currentIteration = 0;
   int _currentTestIndex = 0;
   bool _running = false;
   bool _disposed = false;
@@ -41,7 +40,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
   final Map<String, BufferedCsvWriter> _writers = {};
   final FpsCounter _fpsCounter = FpsCounter();
   Directory? _sessionDir;
-  int _suiteStartTime = 0;
 
   final List<String> _testNames = const [
     'UI Test',
@@ -104,14 +102,12 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     setState(() {
       _running = true;
       _perTestResults.clear();
-      _currentIteration = 0;
       _currentTestIndex = 0;
       _progress = 0.0;
       _averagesBlock = null;
       _currentInfo = 'Running Tests...';
     });
     
-    _suiteStartTime = DateTime.now().millisecondsSinceEpoch;
     await _initializeSession();
     
     await _runNext();
@@ -161,46 +157,41 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
     final name = _testNames[_currentTestIndex];
     setState(() {
       _currentInfo = 'Running: $name';
-      _currentIteration = 0; // Reset iteration for internal use if needed
     });
 
     // Start FPS counter
     _fpsCounter.start();
     
-    final intervalStart = DateTime.now().millisecondsSinceEpoch;
     TestResult? res;
     
-    // Navigate to test
-    // Tests are responsible for their own internal looping/sampling now (Batch Mode)
-    // We pass the CSV writer to them so they can log per-sample models if needed.
-    // For simple tests, we log the summary result.
+    // All tests receive a CSV writer for per-sample logging
     final writer = _writers[_testNames[_currentTestIndex]];
 
     switch (_currentTestIndex) {
       case 0:
         res = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const UiTest()),
+          MaterialPageRoute(builder: (_) => UiTest(writer: writer)),
         );
         break;
       case 1:
         res = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => CpuTest(iterations: Config.cpuIterations)),
+          MaterialPageRoute(builder: (_) => CpuTest(iterations: Config.cpuIterations, writer: writer)),
         );
         break;
       case 2:
         res = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const RamTest()),
+          MaterialPageRoute(builder: (_) => RamTest(writer: writer)),
         );
         break;
       case 3:
         final int runId = DateTime.now().millisecondsSinceEpoch ^ _currentTestIndex;
         res = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ImageLoadingTest(runId: runId)),
+          MaterialPageRoute(builder: (_) => ImageLoadingTest(runId: runId, writer: writer)),
         );
         break;
       case 4:
         res = await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const ApiTest()),
+          MaterialPageRoute(builder: (_) => ApiTest(writer: writer)),
         );
         break;
       case 5:
@@ -209,9 +200,6 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         );
         break;
     }
-    
-    final intervalEnd = DateTime.now().millisecondsSinceEpoch;
-    final intervalDuration = intervalEnd - intervalStart;
     
     _fpsCounter.stop();
 
@@ -224,23 +212,13 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
           list = <TestEntry>[];
           _perTestResults[res.testName] = list;
       }
-      list.add(TestEntry(1, res)); // Use 1 as iteration count since we run once
+      list.add(TestEntry(1, res));
+    }
 
-      // Write summary result to CSV if the test didn't write details itself
-      // Note: UiTest now writes details itself. Others might returning summary.
-      // We will write the summary row anyway for now, or we can skip if writer was used?
-      // For now, let's keep writing the summary row to maintain compat with simple tests.
-      if (writer != null) {
-          final cumulativeMs = DateTime.now().millisecondsSinceEpoch - _suiteStartTime;
-          await writer.write(
-              1, 
-              res.executionTimeMs, 
-              res.details, 
-              intervalStartMs: intervalStart, 
-              intervalDurationMs: intervalDuration,
-              cumulativeTimeMs: cumulativeMs,
-          );
-      }
+    // Flush the writer to ensure all buffered data is written,
+    // even if the test was canceled (res == null).
+    if (writer != null) {
+        await writer.flush();
     }
 
     setState(() {

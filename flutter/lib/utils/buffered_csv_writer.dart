@@ -23,6 +23,7 @@ class BufferedCsvWriter {
       
       if (await file.length() == 0) {
         _sink?.writeln(header);
+        await _sink?.flush(); // Ensure header is written immediately
       }
       _initialized = true;
     } catch (e) {
@@ -50,12 +51,15 @@ class BufferedCsvWriter {
   }
 
   Future<void> flush() async {
-    if (_buffer.isEmpty || _sink == null) return;
+    if (_sink == null) return;
     try {
-      final chunk = _buffer.join('\n');
-      _sink?.writeln(chunk);
+      if (_buffer.isNotEmpty) {
+        final chunk = _buffer.join('\n');
+        _sink?.writeln(chunk);
+        _buffer.clear();
+      }
+      // Always flush the sink to ensure data is written to disk
       await _sink?.flush();
-      _buffer.clear();
     } catch (e) {
       print('Flush error: $e');
     }
