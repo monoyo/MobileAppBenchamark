@@ -107,6 +107,8 @@ export default function UITest(): React.ReactElement {
     });
   }, [width, height]);
 
+  const currentFpsRef = React.useRef<number>(0);
+
   // Initialize and run animation loop
   React.useEffect(() => {
     const startTime = Date.now();
@@ -130,9 +132,25 @@ export default function UITest(): React.ReactElement {
       framesSinceFpsUpdateRef.current++;
       if (now - lastFpsUpdateRef.current >= 500) {
         const elapsedSeconds = (now - lastFpsUpdateRef.current) / 1000;
-        setCurrentFps(framesSinceFpsUpdateRef.current / elapsedSeconds);
+        const fps = framesSinceFpsUpdateRef.current / elapsedSeconds;
+        setCurrentFps(fps);
+        currentFpsRef.current = fps;
         framesSinceFpsUpdateRef.current = 0;
         lastFpsUpdateRef.current = now;
+      }
+
+      // Check min FPS
+      if (frame > 30 && currentFpsRef.current > 0 && currentFpsRef.current <= 10) { // WARMUP_FRAMES=30, MIN_FPS=10
+        const duration = Date.now() - startTime;
+        const res: TestResult = {
+          testName: 'UI Test',
+          executionTimeMs: duration,
+          details: `Max Objects: ${objCount}, Samples: ${frame} (Low FPS: ${currentFpsRef.current.toFixed(1)})`,
+          success: true,
+        };
+        resolveResult(params.key as string, res);
+        router.back();
+        return;
       }
 
       // Manage object count (+250 per second)

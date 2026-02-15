@@ -82,7 +82,9 @@ export default function Suite(): React.ReactElement {
       const timestamp = new Date()
         .toISOString()
         .replace(/[:.]/g, '-');
-      const dir = `${RNFS.DocumentDirectoryPath}/benchmarks/${timestamp}`;
+      // Use ExternalDirectoryPath to save in Android/data/<package>/files/benchmarks
+      const baseDir = Platform.OS === 'android' ? RNFS.ExternalDirectoryPath : RNFS.DocumentDirectoryPath;
+      const dir = `${baseDir}/benchmarks/${timestamp}`;
       await RNFS.mkdir(dir);
       sessionDir.current = dir;
 
@@ -147,7 +149,14 @@ export default function Suite(): React.ReactElement {
     []
   );
 
-  const BATCH_TESTS = ['Location Test', 'API Test'];
+  const BATCH_TESTS = [
+    'UI Test',
+    'CPU Test',
+    'RAM Test',
+    'Image Loading Test',
+    'API Test',
+    'Location Test'
+  ];
 
   // ...
 
