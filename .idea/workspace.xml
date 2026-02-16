@@ -51,9 +51,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="refactor: Remove unused `RAMTest` benchmark implementation from Android&#10;&#10;This commit deletes the `sfef.kt` file which contained a Kotlin-based `RAMTest` object. The implementation included logic for list manipulation, JSON serialization/deserialization, and name/surname frequency counting that is no longer required in this location.">
-      <change beforePath="$PROJECT_DIR$/react/android/app/sfef.kt" beforeDir="false" />
-    </list>
+    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="refactor: Remove unused `RAMTest` benchmark implementation from Android&#10;&#10;This commit deletes the `sfef.kt` file which contained a Kotlin-based `RAMTest` object. The implementation included logic for list manipulation, JSON serialization/deserialization, and name/surname frequency counting that is no longer required in this location." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

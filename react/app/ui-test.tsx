@@ -24,18 +24,8 @@ interface Square {
   color: string;
 }
 
-/**
- * UI rendering performance benchmark.
- * Matches Java/Kotlin GPUTestActivity algorithm:
- * - 50px squares
- * - Physics-based movement with wall bouncing
- * - +250 objects per second
- * - Frame-count based completion
- */
 import { Config } from './consts/Config';
 import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
-
-// ... (imports remain)
 
 export default function UITest(): React.ReactElement {
   const { width, height } = Dimensions.get('window');
