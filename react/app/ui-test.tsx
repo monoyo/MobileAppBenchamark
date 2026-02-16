@@ -48,8 +48,8 @@ export default function UITest(): React.ReactElement {
   const [currentFps, setCurrentFps] = React.useState<number>(0);
   const [currentObjectCount, setCurrentObjectCount] = React.useState<number>(0);
 
-  const startTimeRef = React.useRef<number>(Date.now());
-  const lastFpsUpdateRef = React.useRef<number>(Date.now());
+  const startTimeRef = React.useRef<number>(performance.now());
+  const lastFpsUpdateRef = React.useRef<number>(performance.now());
   const framesSinceFpsUpdateRef = React.useRef<number>(0);
   const animFrameRef = React.useRef<number | null>(null);
   const squaresRef = React.useRef<Square[]>([]);
@@ -117,7 +117,7 @@ export default function UITest(): React.ReactElement {
 
   // Initialize and run animation loop
   React.useEffect(() => {
-    const startTime = Date.now();
+    const startTime = performance.now();
     startTimeRef.current = startTime;
     lastFpsUpdateRef.current = startTime;
 
@@ -135,12 +135,12 @@ export default function UITest(): React.ReactElement {
     let frame = 0;
     let objCount = INITIAL_OBJECT_COUNT;
     let cancelled = false;
-    let lastFrameTime = Date.now();
+    let lastFrameTime = performance.now();
 
     const loop = async () => {
       if (cancelled) return;
 
-      const now = Date.now();
+      const now = performance.now();
       const elapsedMs = now - startTime;
 
       // Calculate instantaneous frame time (delta)
@@ -171,7 +171,7 @@ export default function UITest(): React.ReactElement {
       }
 
       if (frame > 30 && instantFps <= 10) {
-        const duration = Date.now() - startTime;
+        const duration = performance.now() - startTime;
 
         if (writerRef.current) {
           await writerRef.current.flush();
@@ -210,7 +210,7 @@ export default function UITest(): React.ReactElement {
           objCount,
           frameDelta.toFixed(2), // Instantaneous FrameTimeMs
           instantFps.toFixed(1), // Instantaneous FPS
-          elapsedMs
+          elapsedMs.toFixed(2)
         ]);
       }
 
@@ -219,7 +219,7 @@ export default function UITest(): React.ReactElement {
 
       // Check completion
       if (frame >= config.sampleCount) {
-        const duration = Date.now() - startTime;
+        const duration = performance.now() - startTime;
 
         if (writerRef.current) {
           await writerRef.current.flush();
