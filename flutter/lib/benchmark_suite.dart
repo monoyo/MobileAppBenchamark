@@ -142,9 +142,9 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
       // Finished all tests
       await _closeWriters();
       
-      // Generate summary.csv with aggregated statistics
+      // Generate summary.csv removed as per request
       if (_sessionDir != null) {
-        await SummaryWriter.writeSummary(_sessionDir!);
+        // await SummaryWriter.writeSummary(_sessionDir!);
       }
       
       _appendAverages();

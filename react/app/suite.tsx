@@ -126,7 +126,8 @@ export default function Suite(): React.ReactElement {
           }
         }
 
-        // Generate summary.csv with aggregated statistics
+        // Generate summary.csv removed as per request
+        /*
         if (sessionDir.current) {
           try {
             await exportSummary(acc, sessionDir.current, 'react_native');
@@ -134,6 +135,7 @@ export default function Suite(): React.ReactElement {
             console.warn('Failed to export summary:', summaryErr);
           }
         }
+        */
 
         setRunning(false);
         setLastSavedPath(sessionDir.current);

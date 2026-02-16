@@ -391,14 +391,17 @@ public class BenchmarkSuiteActivity extends AppCompatActivity {
         // Show selection again
         testSelectionContainer.setVisibility(android.view.View.VISIBLE);
 
-        // Generate summary.csv with aggregated statistics
-        if (outputDir != null) {
-            try {
-                com.jossy.android.mobilebenchmarkappjava.utils.SummaryWriter.writeSummary(outputDir);
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to write summary", e);
-            }
-        }
+        // Generate summary.csv removed as per request
+        /*
+         * if (outputDir != null) {
+         * try {
+         * com.jossy.android.mobilebenchmarkappjava.utils.SummaryWriter.writeSummary(
+         * outputDir);
+         * } catch (Exception e) {
+         * Log.e(TAG, "Failed to write summary", e);
+         * }
+         * }
+         */
 
         long totalTime = System.currentTimeMillis() - testSuiteStartTime;
         String summary = String.format(Locale.US,
