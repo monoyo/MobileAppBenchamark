@@ -41,6 +41,31 @@ public class ApiTest extends BaseTestActivity {
             csvWriter.flush();
     }
 
+    @Override
+    protected void initializeCsvWriter() throws Exception {
+        if (csvWriter != null)
+            return;
+
+        java.io.File file = new java.io.File(csvPath != null ? csvPath : getDefaultCsvPath());
+        csvWriter = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(
+                file,
+                Config.bufferSize,
+                64 * 1024,
+                "API Test",
+                new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter.CsvFormatter() {
+                    @Override
+                    public String format(TestEntry entry) {
+                        return entry.iteration + "," + entry.result.getExecutionTimeMs() + "\n";
+                    }
+
+                    @Override
+                    public String getHeader() {
+                        return "iteration,elapsedTimeMs\n";
+                    }
+                });
+        csvWriter.initialize();
+    }
+
     private void setupRetrofit() {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.NONE);

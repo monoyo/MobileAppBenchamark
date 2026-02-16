@@ -69,17 +69,10 @@ class _CpuTestState extends State<CpuTest> {
           iterationsProcessed += result.iterations;
           totalChecksum += result.checksum;
 
-          // Write per-sample row to CSV
-            if (widget.writer != null) {
               await widget.writer!.write([
                 i + 1,
                 sampleDuration,
-                'threads=$threadCount',
-                sampleStart,
-                sampleDuration,
-                sampleEnd - start,
               ]);
-            }
 
           setState(() {
             _currentIteration = i + 1;

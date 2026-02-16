@@ -82,9 +82,14 @@ class _BenchmarkSuitePageState extends State<BenchmarkSuitePage> {
         
         final safeName = name.toLowerCase().replaceAll(' ', '_');
         final writer = BufferedCsvWriter('${dir.path}/$safeName.csv', bufferSize: Config.bufferSize);
-        final header = name == 'UI Test'
-            ? 'Frame,ObjectCount,FrameTimeMs,FPS,ElapsedMs'
-            : 'iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms';
+        String header;
+        if (name == 'UI Test') {
+          header = 'Frame,ObjectCount,FrameTimeMs,FPS,ElapsedMs';
+        } else if (name == 'RAM Test' || name == 'CPU Test') {
+          header = 'iteration,elapsedTimeMs';
+        } else {
+          header = 'iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms';
+        }
         await writer.initialize(header);
         _writers[name] = writer;
       }

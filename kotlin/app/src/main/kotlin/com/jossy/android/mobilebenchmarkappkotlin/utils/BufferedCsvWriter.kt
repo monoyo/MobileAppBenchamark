@@ -18,7 +18,9 @@ class BufferedCsvWriter(
     private val outputFile: File,
     private val bufferCapacity: Int,
     private val writeBufferBytes: Int,
-    private val testName: String = "unknown"
+    private val testName: String = "unknown",
+    private val header: String? = null,
+    private val formatter: ((TestEntry) -> String)? = null
 ) : AutoCloseable {
 
     companion object {
@@ -120,19 +122,23 @@ class BufferedCsvWriter(
         val currentWriter = writer ?: return
         val csvContent = buildString {
             entries.forEach { entry ->
-                append(entry.iteration).append(',')
-                append(entry.result.executionTimeMs).append(',')
-                append(csvEscape(entry.result.details)).append(',')
-                append(entry.intervalStartMs).append(',')
-                append(entry.intervalDurationMs).append(',')
-                append(entry.cumulativeTimeMs).append('\n')
+                if (formatter != null) {
+                    append(formatter.invoke(entry))
+                } else {
+                    append(entry.iteration).append(',')
+                    append(entry.result.executionTimeMs).append(',')
+                    append(csvEscape(entry.result.details)).append(',')
+                    append(entry.intervalStartMs).append(',')
+                    append(entry.intervalDurationMs).append(',')
+                    append(entry.cumulativeTimeMs).append('\n')
+                }
             }
         }
         currentWriter.write(csvContent)
     }
 
     private fun writeHeader() {
-        writer?.write("iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms\n")
+        writer?.write(header ?: "iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms\n")
     }
 
     private fun saveCheckpoint() {

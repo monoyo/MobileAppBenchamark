@@ -1,39 +1,79 @@
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import { TestResult } from '../lib/testTypes';
 
 type ResultCallback = (r: { executionTimeMs: number; details: string; success: boolean }) => void;
 
+const TARGET_SAMPLES = 10000;
+
 export default function ApiTest({ navigation, route }: any) {
     const onResult = route?.params?.onResult as ResultCallback | undefined;
-    const [status, setStatus] = useState('Fetching...');
+    const [status, setStatus] = useState('Initializing...');
 
     useEffect(() => {
-        const start = Date.now();
+        let cancelled = false;
 
-        fetch('https://jsonplaceholder.typicode.com/posts')
-            .then(response => response.json())
-            .then(data => {
-                const elapsed = Date.now() - start;
-                if (onResult) {
-                    onResult({
-                        executionTimeMs: elapsed,
-                        details: `Fetched ${data.length} posts`,
-                        success: true,
-                    });
+        const runTest = async () => {
+            const startTime = Date.now();
+            let successCount = 0;
+            let errorCount = 0;
+            const results: string[] = [];
+
+            // Header
+            results.push('iteration,elapsedTimeMs');
+
+            for (let i = 0; i < TARGET_SAMPLES; i++) {
+                if (cancelled) return;
+
+                const loopStart = Date.now();
+                try {
+                    await fetch('https://jsonplaceholder.typicode.com/posts');
+                    successCount++;
+                } catch (e) {
+                    errorCount++;
                 }
-                navigation.goBack();
-            })
-            .catch(error => {
-                const elapsed = Date.now() - start;
-                if (onResult) {
-                    onResult({
-                        executionTimeMs: elapsed,
-                        details: `Error: ${error.message}`,
-                        success: false,
-                    });
+                const duration = Date.now() - loopStart;
+
+                // Buffer result
+                results.push(`${i + 1},${duration}`);
+
+                // Update UI every 100 iterations to avoid blocking
+                if (i % 100 === 0) {
+                    setStatus(`API Test: ${i + 1} / ${TARGET_SAMPLES}`);
+                    await new Promise(r => setTimeout(r, 0));
                 }
+            }
+
+            const totalTime = Date.now() - startTime;
+            const details = `Executed ${TARGET_SAMPLES} calls. Success: ${successCount}, Errors: ${errorCount}`;
+
+            // Write CSV
+            try {
+                const path = `${FileSystem.documentDirectory}api_test.csv`;
+                await FileSystem.writeAsStringAsync(path, results.join('\n'), {
+                    encoding: FileSystem.EncodingType.UTF8
+                });
+                console.log(`Saved API test results to ${path}`);
+            } catch (e) {
+                console.error('Failed to write CSV', e);
+            }
+
+            if (!cancelled && onResult) {
+                onResult({
+                    executionTimeMs: totalTime,
+                    details,
+                    success: true,
+                });
                 navigation.goBack();
-            });
+            }
+        };
+
+        runTest();
+
+        return () => {
+            cancelled = true;
+        };
     }, [navigation, onResult]);
 
     return (

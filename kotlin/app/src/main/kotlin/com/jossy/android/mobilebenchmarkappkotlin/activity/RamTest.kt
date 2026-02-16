@@ -37,6 +37,20 @@ class RamTest : BaseTestActivity() {
         setContentView(layout)
     }
 
+    override fun initializeCsvWriter() {
+        if (csvWriter != null) return
+        
+        val file = java.io.File(csvPath ?: getDefaultCsvPath())
+        csvWriter = com.jossy.android.mobilebenchmarkappkotlin.utils.BufferedCsvWriter(
+            outputFile = file,
+            bufferCapacity = Config.bufferSize,
+            writeBufferBytes = 64 * 1024,
+            testName = "RAM Test",
+            header = "iteration,elapsedTimeMs\n",
+            formatter = { entry -> "${entry.iteration},${entry.result.executionTimeMs}\n" }
+        ).apply { initialize() }
+    }
+
     override fun executeBenchmark() {
         initializeCsvWriter()
         val runsPerSample = calculateRunsPerSample()

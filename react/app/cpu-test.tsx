@@ -26,7 +26,7 @@ export default function CPUTest(): React.ReactElement {
     const run = async (): Promise<void> => {
       if (params.csvPath) {
         writer = new BufferedCsvWriter(params.csvPath, Config.bufferSize);
-        // await writer.initialize(); // Suite already initialized it
+        await writer.initialize('iteration,elapsedTimeMs');
       }
 
       // iterations = SampleConfig.sampleCount (10000)
@@ -61,11 +61,7 @@ export default function CPUTest(): React.ReactElement {
             const sampleDuration = now - sampleStart; // This is duration for this batch (1 sample)
             await writer.write([
               s + 1,
-              sampleDuration,
-              '', // details
-              sampleStart,
-              sampleDuration,
-              now - startTimeMs
+              sampleDuration
             ]);
           }
         }

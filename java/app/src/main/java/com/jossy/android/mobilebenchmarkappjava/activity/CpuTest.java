@@ -63,4 +63,26 @@ public class CpuTest extends BaseTestActivity {
     protected String getTestName() {
         return "CPU Test";
     }
+
+    @Override
+    protected void initializeCsvWriter() throws Exception {
+        if (csvWriter != null)
+            return;
+
+        java.io.File file = new java.io.File(csvPath != null ? csvPath : getDefaultCsvPath());
+        csvWriter = new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter(file, Config.bufferSize,
+                64 * 1024, "CPU Test",
+                new com.jossy.android.mobilebenchmarkappjava.io.BufferedCsvWriter.CsvFormatter() {
+                    @Override
+                    public String format(com.jossy.android.mobilebenchmarkappjava.data.TestEntry entry) {
+                        return entry.iteration + "," + entry.result.getExecutionTimeMs() + "\n";
+                    }
+
+                    @Override
+                    public String getHeader() {
+                        return "iteration,elapsedTimeMs\n";
+                    }
+                });
+        csvWriter.initialize();
+    }
 }

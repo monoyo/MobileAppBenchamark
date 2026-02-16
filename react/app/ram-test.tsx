@@ -24,13 +24,14 @@ async function runBenchmarkAsync(
   const users: User[] = JSON.parse(JSON.stringify(usersData));
   const bigList: User[] = [];
 
-  const benchStartTime = Date.now();
+  const benchStartTime = performance.now();
 
   // Outer loop: Config.sampleCount (10000)
   for (let i = 0; i < Config.sampleCount; i++) {
-    const sampleStart = Date.now();
+    const sampleStartPos = performance.now();
+    const sampleStartTs = Date.now(); // Keep absolute timestamp for CSV if needed
 
-    // Inner loop: RUNS_PER_SAMPLE (50)
+    // Inner loop: RUNS_PER_SAMPLE (1000)
     for (let j = 0; j < RUNS_PER_SAMPLE; j++) {
       processSingleRun(users, bigList);
     }
@@ -38,28 +39,24 @@ async function runBenchmarkAsync(
     // Clear bigList after each run, matching Java behavior
     bigList.length = 0;
 
-    const sampleDuration = Date.now() - sampleStart;
+    const sampleEndPos = performance.now();
+    const sampleDuration = sampleEndPos - sampleStartPos;
 
     if (csvWriter) {
-      // Write result to CSV matching Java format
       await csvWriter.write([
-        i + 1, // Iteration 1-based
-        sampleDuration,
-        'Alloc: 1024 bytes', // extra
-        sampleStart,
-        sampleDuration,
-        Date.now() - testStartTime
+        i + 1,
+        sampleDuration
       ]);
     }
 
-    // Yield every sample to keep UI alive (50 runs)
-    if (i % 1 === 0) {
+    // Yield every 100 samples to keep UI alive without flooding bridge
+    if (i % 100 === 0) {
       onProgress(`RAM Test: ${i + 1} / ${Config.sampleCount}`);
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
     }
   }
 
-  const totalTime = Date.now() - benchStartTime;
+  const totalTime = performance.now() - benchStartTime;
   if (csvWriter) {
     await csvWriter.flush();
   }
@@ -142,7 +139,7 @@ export default function RAMTest(): React.ReactElement {
         let writer: BufferedCsvWriter | null = null;
         if (params.csvPath) {
           writer = new BufferedCsvWriter(params.csvPath, Config.bufferSize);
-          // await writer.initialize(); // Suite already initialized it
+          await writer.initialize('iteration,elapsedTimeMs');
         }
 
         const suiteStartTime = Date.now(); // Approximation if not passed

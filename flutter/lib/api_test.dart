@@ -59,10 +59,6 @@ class _ApiTestState extends State<ApiTest> {
           await widget.writer!.write([
             i + 1,
             sampleDuration,
-            details,
-            sampleStart,
-            sampleDuration,
-            sampleEnd - _startTime,
           ]);
         }
         

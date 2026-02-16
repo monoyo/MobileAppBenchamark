@@ -60,4 +60,18 @@ class CpuTest : BaseTestActivity() {
         "CPU Test: $currentIteration / ${Config.sampleCount}"
 
     override fun getTestName(): String = "CPU Test"
+
+    override fun initializeCsvWriter() {
+        if (csvWriter != null) return
+
+        val file = java.io.File(csvPath ?: getDefaultCsvPath())
+        csvWriter = com.jossy.android.mobilebenchmarkappkotlin.utils.BufferedCsvWriter(
+            outputFile = file,
+            bufferCapacity = Config.bufferSize,
+            writeBufferBytes = 64 * 1024,
+            testName = "CPU Test",
+            header = "iteration,elapsedTimeMs\n",
+            formatter = { entry -> "${entry.iteration},${entry.result.executionTimeMs}\n" }
+        ).apply { initialize() }
+    }
 }

@@ -45,19 +45,50 @@ public class BufferedCsvWriter implements AutoCloseable {
         this(outputFile, bufferCapacity, writeBufferBytes, "unknown");
     }
 
+    public interface CsvFormatter {
+        String format(TestEntry entry);
+
+        String getHeader();
+    }
+
+    private final CsvFormatter formatter;
+
     public BufferedCsvWriter(File outputFile, int bufferCapacity, int writeBufferBytes, String testName) {
+        this(outputFile, bufferCapacity, writeBufferBytes, testName, null);
+    }
+
+    public BufferedCsvWriter(File outputFile, int bufferCapacity, int writeBufferBytes, String testName,
+            CsvFormatter formatter) {
         this.outputFile = outputFile;
         this.checkpointFile = new File(outputFile.getParent(),
                 outputFile.getName().replace(".csv", "_checkpoint.csv"));
         this.bufferCapacity = bufferCapacity;
         this.writeBufferBytes = writeBufferBytes;
         this.testName = testName;
+        this.formatter = formatter != null ? formatter : new DefaultCsvFormatter();
         this.buffer = new ArrayList<>(bufferCapacity);
         this.writeExecutor = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r, "csv-writer-" + outputFile.getName());
             t.setPriority(Thread.MIN_PRIORITY);
             return t;
         });
+    }
+
+    private class DefaultCsvFormatter implements CsvFormatter {
+        @Override
+        public String format(TestEntry entry) {
+            return entry.iteration + "," +
+                    entry.result.getExecutionTimeMs() + "," +
+                    csvEscape(entry.result.getDetails()) + "," +
+                    entry.intervalStartMs + "," +
+                    entry.intervalDurationMs + "," +
+                    entry.cumulativeTimeMs + "\n";
+        }
+
+        @Override
+        public String getHeader() {
+            return "iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms\n";
+        }
     }
 
     public void initialize() throws IOException {
@@ -157,20 +188,14 @@ public class BufferedCsvWriter implements AutoCloseable {
             throw new IOException("Writer not initialized");
         StringBuilder sb = new StringBuilder(entries.size() * 120);
         for (TestEntry entry : entries) {
-            sb.append(entry.iteration).append(',')
-                    .append(entry.result.getExecutionTimeMs()).append(',')
-                    .append(csvEscape(entry.result.getDetails())).append(',')
-                    .append(entry.intervalStartMs).append(',')
-                    .append(entry.intervalDurationMs).append(',')
-                    .append(entry.cumulativeTimeMs).append('\n');
+            sb.append(formatter.format(entry));
         }
         writer.write(sb.toString());
     }
 
     private void writeHeader() throws IOException {
         if (writer != null) {
-            writer.write(
-                    "iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms\n");
+            writer.write(formatter.getHeader());
         }
     }
 

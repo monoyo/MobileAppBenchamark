@@ -56,8 +56,10 @@ class ApiTest : BaseTestActivity() {
         Log.d(TAG, "Starting batch test, sampleCount=${Config.sampleCount}")
         startBatchTest()
         Log.d(TAG, "Awaiting completionLatch...")
-        val completed = completionLatch.await(5, TimeUnit.MINUTES)
-        Log.d(TAG, "Latch released, completed=$completed")
+        // Wait indefinitely for completion, or up to 30 minutes if preferred.
+        // Changed from await(30, TimeUnit.MINUTES) to await() for indefinite wait.
+        completionLatch.await()
+        Log.d(TAG, "Latch released.")
         csvWriter?.flush()
     }
 

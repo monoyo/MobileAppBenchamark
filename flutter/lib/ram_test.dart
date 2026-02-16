@@ -49,10 +49,6 @@ class _RamTestState extends State<RamTest> {
         await widget.writer!.write([
           i + 1,
           duration,
-          result.success ? 'RAM benchmark' : 'FAILED: ${result.details}',
-          sampleStart,
-          duration,
-          sampleEnd - suiteStart,
         ]);
       }
 
