@@ -21,6 +21,29 @@ class MainActivity : ReactActivity() {
     SplashScreenManager.registerOnActivity(this)
     // @generated end expo-splashscreen
     super.onCreate(null)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        window.setDecorFitsSystemWindows(false)
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val window = window
+        val display = windowManager.defaultDisplay
+        val supportedModes = display.supportedModes
+        val currentMode = display.mode
+
+        val bestMode = supportedModes.filter { 
+            it.physicalWidth == currentMode.physicalWidth && 
+            it.physicalHeight == currentMode.physicalHeight 
+        }.maxByOrNull { it.refreshRate }
+
+        if (bestMode != null && bestMode.refreshRate > currentMode.refreshRate) {
+            val layoutParams = window.attributes
+            layoutParams.preferredDisplayModeId = bestMode.modeId
+            layoutParams.preferredRefreshRate = bestMode.refreshRate
+            window.attributes = layoutParams
+        }
+    }
   }
 
   /**

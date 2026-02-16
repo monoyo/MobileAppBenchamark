@@ -46,14 +46,14 @@ class _RamTestState extends State<RamTest> {
 
       // Write per-sample row to CSV
       if (widget.writer != null) {
-        await widget.writer!.write(
+        await widget.writer!.write([
           i + 1,
           duration,
           result.success ? 'RAM benchmark' : 'FAILED: ${result.details}',
-          intervalStartMs: sampleStart,
-          intervalDurationMs: duration,
-          cumulativeTimeMs: sampleEnd - suiteStart,
-        );
+          sampleStart,
+          duration,
+          sampleEnd - suiteStart,
+        ]);
       }
 
       setState(() {

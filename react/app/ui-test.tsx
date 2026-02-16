@@ -32,10 +32,15 @@ interface Square {
  * - +250 objects per second
  * - Frame-count based completion
  */
+import { Config } from './consts/Config';
+import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
+
+// ... (imports remain)
+
 export default function UITest(): React.ReactElement {
   const { width, height } = Dimensions.get('window');
   const router = useRouter();
-  const params = useLocalSearchParams<{ key: string }>();
+  const params = useLocalSearchParams<{ key: string; csvPath?: string }>();
   const config = getSampleConfig(0);
 
   const [squares, setSquares] = React.useState<Square[]>([]);
@@ -48,6 +53,7 @@ export default function UITest(): React.ReactElement {
   const framesSinceFpsUpdateRef = React.useRef<number>(0);
   const animFrameRef = React.useRef<number | null>(null);
   const squaresRef = React.useRef<Square[]>([]);
+  const writerRef = React.useRef<BufferedCsvWriter | null>(null);
 
   // Generate deterministic color
   const generateColor = React.useCallback((index: number): string => {
@@ -115,6 +121,11 @@ export default function UITest(): React.ReactElement {
     startTimeRef.current = startTime;
     lastFpsUpdateRef.current = startTime;
 
+    if (params.csvPath) {
+      writerRef.current = new BufferedCsvWriter(params.csvPath, Config.bufferSize);
+      writerRef.current.initialize('Frame,ObjectCount,FrameTimeMs,FPS,ElapsedMs');
+    }
+
     // Initialize with initial objects
     const initial = addObjects(INITIAL_OBJECT_COUNT, 0);
     squaresRef.current = initial;
@@ -123,29 +134,53 @@ export default function UITest(): React.ReactElement {
 
     let frame = 0;
     let objCount = INITIAL_OBJECT_COUNT;
+    let cancelled = false;
+    let lastFrameTime = Date.now();
 
-    const loop = () => {
+    const loop = async () => {
+      if (cancelled) return;
+
       const now = Date.now();
       const elapsedMs = now - startTime;
 
-      // Update FPS every 500ms
-      framesSinceFpsUpdateRef.current++;
+      // Calculate instantaneous frame time (delta)
+      const frameDelta = now - lastFrameTime;
+      lastFrameTime = now;
+
+      // instantaneous FPS = 1000 / delta
+      // If delta is 0 (shouldn't happen often in RAFL), guard it.
+      const instantFps = frameDelta > 0 ? 1000 / frameDelta : 0;
+
+      currentFpsRef.current = instantFps;
+
+      // Update UI only every 500ms to avoid bridge overload, BUT CSV gets every frame
       if (now - lastFpsUpdateRef.current >= 500) {
-        const elapsedSeconds = (now - lastFpsUpdateRef.current) / 1000;
-        const fps = framesSinceFpsUpdateRef.current / elapsedSeconds;
-        setCurrentFps(fps);
-        currentFpsRef.current = fps;
-        framesSinceFpsUpdateRef.current = 0;
+        setCurrentFps(instantFps); // Show instant FPS on UI too, but sampled
         lastFpsUpdateRef.current = now;
       }
 
-      // Check min FPS
-      if (frame > 30 && currentFpsRef.current > 0 && currentFpsRef.current <= 10) { // WARMUP_FRAMES=30, MIN_FPS=10
+      // Check min FPS (using instant or maybe a small moving average for stability? 
+      // User wants raw 8ms/120fps, so we use instant for logging. 
+      // For termination, maybe we should be lenient or use a short average, 
+      // but let's stick to the instant check for now as requested or check if it drops consistently.
+      // Actually existing check was: if (currentFpsRef.current <= 10)
+
+      if (frame > 30 && frameDelta > 100) { // > 100ms frame time = < 10 FPS
+        // Log warning or stop? Standard logic is stopping.
+        // Let's stick to the previous logic but using frameDelta
+      }
+
+      if (frame > 30 && instantFps <= 10) {
         const duration = Date.now() - startTime;
+
+        if (writerRef.current) {
+          await writerRef.current.flush();
+        }
+
         const res: TestResult = {
           testName: 'UI Test',
           executionTimeMs: duration,
-          details: `Max Objects: ${objCount}, Samples: ${frame} (Low FPS: ${currentFpsRef.current.toFixed(1)})`,
+          details: `Max Objects: ${objCount}, Samples: ${frame} (Low FPS: ${instantFps.toFixed(1)})`,
           success: true,
         };
         resolveResult(params.key as string, res);
@@ -168,12 +203,28 @@ export default function UITest(): React.ReactElement {
       squaresRef.current = updatePositions(squaresRef.current);
       setSquares([...squaresRef.current]);
 
+      // Write sample (frame)
+      if (writerRef.current) {
+        writerRef.current.write([
+          frame + 1,
+          objCount,
+          frameDelta.toFixed(2), // Instantaneous FrameTimeMs
+          instantFps.toFixed(1), // Instantaneous FPS
+          elapsedMs
+        ]);
+      }
+
       frame++;
       setFrameCount(frame);
 
       // Check completion
       if (frame >= config.sampleCount) {
         const duration = Date.now() - startTime;
+
+        if (writerRef.current) {
+          await writerRef.current.flush();
+        }
+
         const res: TestResult = {
           testName: 'UI Test',
           executionTimeMs: duration,
@@ -190,6 +241,7 @@ export default function UITest(): React.ReactElement {
     animFrameRef.current = requestAnimationFrame(loop);
 
     return () => {
+      cancelled = true;
       if (animFrameRef.current !== null) {
         cancelAnimationFrame(animFrameRef.current);
       }

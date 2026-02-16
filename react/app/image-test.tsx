@@ -1,7 +1,9 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { FlatList, View, ListRenderItem } from 'react-native';
+import { Config } from './consts/Config';
+import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
 import type { TestResult } from './types';
 import { resolveResult } from './utils/navResult';
 
@@ -18,88 +20,157 @@ const IMAGE_URLS: ReadonlyArray<string> = [
   'https://fastly.picsum.photos/id/764/300/200.jpg?hmac=1sBuxBDUdVzEEnIKB5S4cXJ_sQ5Tp3ZSnjrHOWF_E20',
 ];
 
-/**
- * Image loading benchmark test.
- * Tests I/O performance with batch image loading, error tracking, and resource management.
- * Provides visual feedback via scrolling as images load.
- */
+interface ImageItem {
+  index: number;
+  url: string;
+}
+
 export default function ImageTest(): React.ReactElement {
   const router = useRouter();
-  const params = useLocalSearchParams<{ key: string }>();
-  const scrollRef = React.useRef<ScrollView>(null);
-  const [loaded, setLoaded] = React.useState<number>(0);
-  const [errors, setErrors] = React.useState<number>(0);
+  const params = useLocalSearchParams<{ key: string; csvPath?: string; batchSize?: string }>();
+  const flatListRef = React.useRef<FlatList>(null);
+
+  // Determine target count
+  const targetSamples = params.batchSize
+    ? parseInt(params.batchSize, 10)
+    : Config.sampleCount;
+
+  // Sequential State
+  // We start with 1 image. When it finishes, we add another.
+  const [items, setItems] = React.useState<ImageItem[]>([
+    { index: 0, url: IMAGE_URLS[0] }
+  ]);
+
   const countRef = React.useRef<{ completed: number; succeeded: number }>(
     {
       completed: 0,
       succeeded: 0,
     }
   );
-  const startRef = React.useRef<number>(Date.now());
 
-  // Initialize timer on mount
+  const startRef = React.useRef<number>(Date.now());
+  const writerRef = React.useRef<BufferedCsvWriter | null>(null);
+  const currentItemStartTimeRef = React.useRef<number>(Date.now());
+
+  // Initialize timer and writer on mount
   React.useEffect(() => {
     startRef.current = Date.now();
-  }, []);
+    currentItemStartTimeRef.current = Date.now();
 
-  const maybeFinish = React.useCallback((): void => {
-    const { completed, succeeded } = countRef.current;
-    if (completed >= IMAGE_URLS.length) {
-      const elapsedMs = Date.now() - startRef.current;
-      const failed = completed - succeeded;
-      const res: TestResult = {
-        testName: 'Image Loading Test',
-        executionTimeMs: elapsedMs,
-        details:
-          failed > 0
-            ? `Loaded ${succeeded}/${IMAGE_URLS.length} (${failed} failed)`
-            : 'All images loaded',
-        success: failed === 0,
-      };
-      resolveResult(params.key as string, res);
-      router.back();
+    if (params.csvPath) {
+      writerRef.current = new BufferedCsvWriter(params.csvPath, Config.bufferSize);
     }
-  }, [params.key, router]);
 
-  const handleImageLoad = React.useCallback((index: number): void => {
-    countRef.current.succeeded += 1;
+    return () => {
+      // cleanup
+    };
+  }, [params.csvPath]);
+
+  const finish = React.useCallback(async (): Promise<void> => {
+    if (writerRef.current) {
+      await writerRef.current.flush();
+    }
+
+    const elapsedMs = Date.now() - startRef.current;
+    const { completed, succeeded } = countRef.current;
+    const failed = completed - succeeded;
+    const res: TestResult = {
+      testName: 'Image Loading Test',
+      executionTimeMs: elapsedMs,
+      details:
+        failed > 0
+          ? `Loaded ${succeeded}/${targetSamples} (${failed} failed)`
+          : 'All images loaded',
+      success: failed === 0,
+    };
+    resolveResult(params.key as string, res);
+    router.back();
+  }, [params.key, router, targetSamples]);
+
+  const loadNext = React.useCallback((currentIndex: number) => {
+    if (currentIndex + 1 < targetSamples) {
+      const nextIndex = currentIndex + 1;
+      const nextUrl = IMAGE_URLS[nextIndex % IMAGE_URLS.length];
+
+      // Update start time for next item
+      currentItemStartTimeRef.current = Date.now();
+
+      setItems(prev => [...prev, { index: nextIndex, url: nextUrl }]);
+    } else {
+      finish();
+    }
+  }, [targetSamples, finish]);
+
+  const handleResult = React.useCallback((index: number, success: boolean) => {
+    const now = Date.now();
     countRef.current.completed += 1;
-    setLoaded((prev) => prev + 1);
+    if (success) countRef.current.succeeded += 1;
 
-    // Scroll to loaded image for visual feedback
+    // Write CSV
+    if (writerRef.current) {
+      // Start time for this specific item was set before render
+      const startTime = currentItemStartTimeRef.current;
+
+      const duration = now - startTime;
+      writerRef.current.write([
+        index + 1,
+        Math.max(0, duration),
+        success ? 'Success' : 'Error',
+        startTime,
+        Math.max(0, duration),
+        now - startRef.current
+      ]);
+    }
+
+    // Trigger next load
+    // We use setTimeout to allow UI to update and not block main thread
     setTimeout(() => {
-      scrollRef.current?.scrollTo({ y: index * 200, animated: true });
+      loadNext(index);
     }, 0);
+  }, [loadNext]);
 
-    maybeFinish();
-  }, [maybeFinish]);
-
-  const handleImageError = React.useCallback((): void => {
-    countRef.current.completed += 1;
-    setErrors((prev) => prev + 1);
-    maybeFinish();
-  }, [maybeFinish]);
+  const renderItem: ListRenderItem<ImageItem> = React.useCallback(({ item }) => {
+    return (
+      <View
+        style={{
+          height: 200,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Image
+          source={{ uri: item.url }}
+          style={{ width: '100%', height: '100%' }}
+          onLoad={() => {
+            if (item.index === countRef.current.completed) {
+              handleResult(item.index, true);
+            }
+          }}
+          onError={() => {
+            if (item.index === countRef.current.completed) {
+              handleResult(item.index, false);
+            }
+          }}
+          contentFit="cover"
+          cachePolicy="none"
+        />
+      </View>
+    );
+  }, [handleResult]);
 
   return (
-    <ScrollView ref={scrollRef}>
-      {IMAGE_URLS.map((url, i) => (
-        <View
-          key={i}
-          style={{
-            height: 200,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <Image
-            source={{ uri: url }}
-            style={{ width: '100%', height: '100%' }}
-            onLoad={() => handleImageLoad(i)}
-            onError={() => handleImageError()}
-            contentFit="cover"
-          />
-        </View>
-      ))}
-    </ScrollView>
+    <FlatList<ImageItem>
+      ref={flatListRef}
+      data={items}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.index.toString()}
+      onContentSizeChange={() => {
+        // Auto-scroll to bottom
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }}
+      getItemLayout={(data, index) => (
+        { length: 200, offset: 200 * index, index }
+      )}
+    />
   );
 }

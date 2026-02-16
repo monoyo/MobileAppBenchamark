@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'dart:ui' show FrameTiming;
+import 'dart:ui' show FrameTiming, FramePhase;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'models/test_result.dart';
@@ -46,6 +46,7 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
   final List<int> _renderTimestamps = []; // wall-clock ms of each rendered frame
 
   int _lastUiUpdateFrame = 0;
+  int _lastFrameTimestamp = 0; // Microseconds of previous frame's rasterFinish
   
   // Object models
   final List<double> _posX = [];
@@ -72,30 +73,8 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
     SchedulerBinding.instance.addTimingsCallback(_onFrameTimings);
   }
 
-  /// Called by the engine with actual rendered frame timings.
-  /// Each FrameTiming in the list represents one frame that was actually
-  /// rasterized and displayed. We count these in a 1-second sliding window
-  /// to get the real visual FPS.
-  void _onFrameTimings(List<FrameTiming> timings) {
-    if (_disposed || timings.isEmpty) return;
-    
-    final now = DateTime.now().millisecondsSinceEpoch;
-    _hasRenderData = true;
-    
-    // Each timing = 1 actually rendered frame
-    for (int i = 0; i < timings.length; i++) {
-      _renderTimestamps.add(now);
-    }
-    
-    // Remove timestamps older than 1 second
-    final cutoff = now - 1000;
-    while (_renderTimestamps.isNotEmpty && _renderTimestamps.first < cutoff) {
-      _renderTimestamps.removeAt(0);
-    }
-    
-    // FPS = number of actually rendered frames in the last 1 second
-    _renderFps = _renderTimestamps.length.toDouble();
-  }
+  // Queue to store frame data (id, objectCount) when submitted to engine
+  final List<_FrameData> _frameDataQueue = [];
 
   void _initObjects(int count) {
     _posX.clear();
@@ -155,17 +134,8 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
     // Notify painter to repaint (bypasses widget tree rebuild)
     _notifier.repaint();
 
-    // Write per-frame sample to CSV
-    if (widget.writer != null) {
-      widget.writer!.write(
-        _frameCount,
-        elapsedMs,
-        'objects=$_currentObjectCount renderFps=${_renderFps.toStringAsFixed(1)}',
-        intervalStartMs: now,
-        intervalDurationMs: 0,
-        cumulativeTimeMs: elapsedMs,
-      );
-    }
+    // Enqueue data for this frame. It will be matched with timing report later.
+    _frameDataQueue.add(_FrameData(_frameCount, _currentObjectCount, elapsedMs));
 
     // Update text overlay only every 10 frames to avoid widget rebuild overhead
     if (_frameCount - _lastUiUpdateFrame >= 10) {
@@ -173,21 +143,83 @@ class _UiTestState extends State<UiTest> with SingleTickerProviderStateMixin {
       setState(() {});
     }
 
-    // --- Termination checks ---
-    if (_frameCount >= Config.sampleCount) {
-      _completeTest();
-    }
-    // Check render FPS bound (only when we have actual timing data)
-    else if (_frameCount > _warmupFrames && _hasRenderData && _renderFps <= _minFps) {
-      debugPrint('Render FPS dropped to $_renderFps (<= $_minFps), '
-          'stopping test at frame $_frameCount');
-      _completeTest();
-    }
     // Fallback: max test duration (in case FrameTiming never reports)
-    else if (elapsedMs > _maxTestDurationMs) {
+    if (elapsedMs > _maxTestDurationMs) {
       debugPrint('Test exceeded max duration ${_maxTestDurationMs}ms, '
           'stopping at frame $_frameCount');
       _completeTest();
+    }
+  }
+
+  /// Called by the engine with actual rendered frame timings.
+  void _onFrameTimings(List<FrameTiming> timings) {
+    if (_disposed || timings.isEmpty) return;
+    
+    _hasRenderData = true;
+
+    for (final timing in timings) {
+      if (_frameDataQueue.isEmpty) break;
+      
+      final frameData = _frameDataQueue.removeAt(0);
+      
+      // Calculate display refresh rate using VSync timestamps.
+      // We use vsyncStart because it aligns with the device's display refresh cycle.
+      // rasterFinish measures GPU throughput, which can exceed the refresh rate (e.g. 300fps on 120Hz).
+      double frameTimeMs;
+
+      if (_lastFrameTimestamp == 0) {
+          // Skip the first frame for delta calculation as we don't have a previous reference
+          frameTimeMs = 0;
+      } else {
+          // Calculate delta in microseconds then convert to ms
+          // FrameTiming.timestampInMicroseconds(FramePhase.vsyncStart) gives the VSync signal time.
+          final currentTimestamp = timing.timestampInMicroseconds(FramePhase.vsyncStart);
+          final delta = currentTimestamp - _lastFrameTimestamp;
+          
+          if (delta <= 0) {
+            // Invalid or duplicate timestamp, ignore this frame for FPS calc
+            frameTimeMs = 0;
+          } else {
+            frameTimeMs = delta / 1000.0;
+          }
+          
+          _lastFrameTimestamp = currentTimestamp;
+      }
+      
+      // Initialize timestamp if it was 0
+      if (_lastFrameTimestamp == 0) {
+          _lastFrameTimestamp = timing.timestampInMicroseconds(FramePhase.vsyncStart);
+      }
+
+      final fps = frameTimeMs > 0 ? 1000.0 / frameTimeMs : 0.0;
+
+      // Update sliding window for UI display
+      final now = DateTime.now().millisecondsSinceEpoch;
+      _renderTimestamps.add(now);
+
+       // Remove timestamps older than 1 second
+      final cutoff = now - 1000;
+      while (_renderTimestamps.isNotEmpty && _renderTimestamps.first < cutoff) {
+        _renderTimestamps.removeAt(0);
+      }
+      _renderFps = _renderTimestamps.length.toDouble();
+
+      // Write to CSV
+      if (widget.writer != null) {
+        widget.writer!.write([
+          frameData.frameId,
+          frameData.objectCount,
+          frameTimeMs.toStringAsFixed(2),
+          fps.toStringAsFixed(1),
+          frameData.elapsedMs
+        ]);
+      }
+      
+      // Check termination condition based on PROCESSED frames
+      if (frameData.frameId >= Config.sampleCount) {
+         _completeTest();
+         return;
+      }
     }
   }
 
@@ -333,4 +365,12 @@ class _SquaresPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SquaresPainter oldDelegate) => false;
   // Repainting is driven by the ChangeNotifier, not by shouldRepaint
+}
+
+class _FrameData {
+  final int frameId;
+  final int objectCount;
+  final int elapsedMs;
+
+  _FrameData(this.frameId, this.objectCount, this.elapsedMs);
 }

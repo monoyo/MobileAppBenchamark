@@ -82,14 +82,14 @@ class _ImageLoadingTestState extends State<ImageLoadingTest> {
     final imageDuration = now - imageStart;
     
     if (widget.writer != null) {
-      widget.writer!.write(
+      widget.writer!.write([
         _loadedCount,
         imageDuration,
         success ? 'Success' : 'Error',
-        intervalStartMs: imageStart,
-        intervalDurationMs: imageDuration,
-        cumulativeTimeMs: now - _startMs,
-      );
+        imageStart,
+        imageDuration,
+        now - _startMs,
+      ]);
     }
     
     if (_loadedCount >= _itemCount) {

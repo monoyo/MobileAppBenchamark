@@ -100,7 +100,10 @@ export default function Suite(): React.ReactElement {
           `${dir}/${safeName}.csv`,
           config.bufferSize
         );
-        await writer.initialize();
+        const header = test.name === 'UI Test'
+          ? 'Frame,ObjectCount,FrameTimeMs,FPS,ElapsedMs'
+          : 'iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms';
+        await writer.initialize(header);
         csvWriters.current[test.name] = writer;
       }
     } catch (err) {
@@ -241,14 +244,14 @@ export default function Suite(): React.ReactElement {
 
         if (writer) {
           try {
-            await writer.write(
+            await writer.write([
               isBatch ? 0 : iter + 1, // Use 0 or 9999 for summary? 0 is fine.
               res.executionTimeMs,
               res.details || '',
               intervalStart,
               intervalDuration,
               intervalEnd - testSuiteStartTime.current
-            );
+            ]);
           } catch (csvErr) {
             console.warn('CSV write error:', csvErr);
           }

@@ -56,14 +56,14 @@ class _ApiTestState extends State<ApiTest> {
         
         // Write per-sample row to CSV
         if (widget.writer != null) {
-          await widget.writer!.write(
+          await widget.writer!.write([
             i + 1,
             sampleDuration,
             details,
-            intervalStartMs: sampleStart,
-            intervalDurationMs: sampleDuration,
-            cumulativeTimeMs: sampleEnd - _startTime,
-          );
+            sampleStart,
+            sampleDuration,
+            sampleEnd - _startTime,
+          ]);
         }
         
         if (mounted) {

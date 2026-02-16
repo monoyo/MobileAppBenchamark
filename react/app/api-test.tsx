@@ -50,14 +50,14 @@ export default function ApiTest(): React.ReactElement {
 
           // Log sample
           if (writer) {
-            await writer.write(
+            await writer.write([
               samples,
               duration,
               samples % 10 === 0 ? `Success: ${successCount}` : '', // sparse details
               loopStart,
               duration,
               loopEnd - startTimeMs
-            );
+            ]);
           }
 
           if (samples % 10 === 0) {

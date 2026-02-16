@@ -113,22 +113,22 @@ class _LocationTestState extends State<LocationTest> {
         samples++;
         
         // Write sample to CSV
-        if (widget.writer != null) {
-             final details = pos != null 
-                 ? 'Lat:${pos.latitude.toStringAsFixed(6)},Lon:${pos.longitude.toStringAsFixed(6)}' 
-                 : 'No Signal';
-             
-             // timestamp, duration, details, intervalStart, intervalDuration, cumulative
-             // We use loopStart as intervalStart for single-sample granularity
-             await widget.writer!.write(
-                 samples,
-                 duration,
-                 details,
-                 intervalStartMs: loopStart,
-                 intervalDurationMs: duration,
-                 cumulativeTimeMs: loopEnd - _startTime,
-             );
-        }
+             if (widget.writer != null) {
+                 final details = pos != null 
+                     ? 'Lat:${pos.latitude.toStringAsFixed(6)},Lon:${pos.longitude.toStringAsFixed(6)}' 
+                     : 'No Signal';
+                 
+                 // timestamp, duration, details, intervalStart, intervalDuration, cumulative
+                 // We use loopStart as intervalStart for single-sample granularity
+                 await widget.writer!.write([
+                     samples,
+                     duration,
+                     details,
+                     loopStart,
+                     duration,
+                     loopEnd - _startTime,
+                 ]);
+             }
         
         // Yield execution to allow stream updates to process
         // 1ms delay is enough to let the event loop process the stream

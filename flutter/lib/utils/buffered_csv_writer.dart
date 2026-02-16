@@ -10,7 +10,7 @@ class BufferedCsvWriter {
 
   BufferedCsvWriter(this.filePath, {this.bufferSize = 1000, this.testName = 'unknown'});
 
-  Future<void> initialize({String header = 'iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms'}) async {
+  Future<void> initialize(String header) async {
     if (_initialized) return;
     try {
       final file = File(filePath);
@@ -31,18 +31,10 @@ class BufferedCsvWriter {
     }
   }
 
-  Future<void> write(
-    int iteration,
-    int executionTimeMs,
-    String details, {
-    int intervalStartMs = 0,
-    int intervalDurationMs = 0,
-    int cumulativeTimeMs = 0,
-  }) async {
+  Future<void> write(List<dynamic> values) async {
     if (!_initialized) return;
 
-    final safeDetails = csvEscape(details);
-    final line = '$iteration,$executionTimeMs,$safeDetails,$intervalStartMs,$intervalDurationMs,$cumulativeTimeMs';
+    final line = values.map((v) => csvEscape(v.toString())).join(',');
     _buffer.add(line);
 
     if (_buffer.length >= bufferSize) {

@@ -9,42 +9,30 @@ import { resolveResult } from './utils/navResult';
  * Uses chunked processing to keep UI responsive while maintaining high load.
  * Implements Java-style checksum accumulation with complex math operations.
  */
+import { Config } from './consts/Config';
+import { BufferedCsvWriter } from './utils/BufferedCsvWriter';
+
+// ... (imports remain)
+
 export default function CPUTest(): React.ReactElement {
   const router = useRouter();
-  const params = useLocalSearchParams<{ key: string; iterations?: string }>();
+  const params = useLocalSearchParams<{ key: string; iterations?: string; csvPath?: string }>();
   const [statusMsg, setStatusMsg] = React.useState('Initializing...');
 
   React.useEffect(() => {
     let cancelled = false;
+    let writer: BufferedCsvWriter | null = null;
 
     const run = async (): Promise<void> => {
+      if (params.csvPath) {
+        writer = new BufferedCsvWriter(params.csvPath, Config.bufferSize);
+        // await writer.initialize(); // Suite already initialized it
+      }
+
       // iterations = SampleConfig.sampleCount (10000)
       const targetSamples = params.iterations
         ? parseInt(params.iterations, 10)
         : 10000;
-
-      // Inner workload size matching Kotlin (Config.samplesAmount which user set to 10000 in cpuIterations)
-      // We pass cpuIterations from Suite which comes from SampleConfig.
-      // Wait, params has `iterations` (outer) but not `cpuIterations` explicit?
-      // In Suite.tsx we pass: `&iterations=${config.cpuIterations}`.
-      // Wait. In Suite.tsx:
-      // `&iterations=${config.cpuIterations}` 
-      // ACTUALLY config.cpuIterations is now 10000.
-      // But we want OUTER loop to be 10000 (SampleCount) and INNER to be 10000 (CpuIterations).
-      // Suite passes `iterations` as `config.cpuIterations`. This is confusing naming in Suite.
-      // Suite code: `&iterations=${config.cpuIterations}`. 
-      // But SampleConfig has `sampleCount` AND `cpuIterations`.
-      // If both are 10000, it doesn't matter.
-      // But strictly: `iterations` param maps to OUTER loop target.
-      // We need INNER loop target.
-      // I should read `cpuIterations` if I update Suite to pass it, or just assume it is 10000?
-      // Let's hardcode 10000 for now or read from a new param if I updated Suite?
-      // Suite passes `&iterations=${config.cpuIterations}`. 
-      // It DOES NOT pass `sampleCount`.
-      // It passes `iterations` which is usually the 'Duration/Amount'.
-      // For CPU test:
-      // Kotlin uses `samplesAmount` for BOTH outer and inner.
-      // So I will use `targetSamples` for both.
 
       const opsPerSample = targetSamples;
 
@@ -57,6 +45,7 @@ export default function CPUTest(): React.ReactElement {
 
         const batchEnd = Math.min(targetSamples, currentSample + 1); // Process 1 sample per frame to match Kotlin UI behavior
 
+        const sampleStart = Date.now();
         for (let s = currentSample; s < batchEnd; s++) {
           // Inner Math Loop (opsPerSample)
           for (let i = 0; i < opsPerSample; i++) {
@@ -64,6 +53,20 @@ export default function CPUTest(): React.ReactElement {
             const cosVal = Math.cos(checksum);
             const sqrtVal = Math.sqrt(checksum * checksum + 1.234567);
             checksum += sinVal * cosVal + sqrtVal;
+          }
+
+          // Write sample
+          if (writer) {
+            const now = Date.now();
+            const sampleDuration = now - sampleStart; // This is duration for this batch (1 sample)
+            await writer.write([
+              s + 1,
+              sampleDuration,
+              '', // details
+              sampleStart,
+              sampleDuration,
+              now - startTimeMs
+            ]);
           }
         }
 
@@ -75,12 +78,16 @@ export default function CPUTest(): React.ReactElement {
           await new Promise<void>(resolve => setTimeout(resolve, 0));
           await processBatch();
         } else {
-          finish();
+          await finish();
         }
       };
 
-      const finish = (): void => {
+      const finish = async (): Promise<void> => {
         if (cancelled) return;
+
+        if (writer) {
+          await writer.flush();
+        }
 
         const elapsedMs = Date.now() - startTimeMs;
         const res: TestResult = {
@@ -113,7 +120,7 @@ export default function CPUTest(): React.ReactElement {
     return () => {
       cancelled = true;
     };
-  }, [params.key, router]);
+  }, [params.key, params.csvPath, router]);
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' }}>

@@ -42,14 +42,14 @@ async function runBenchmarkAsync(
 
     if (csvWriter) {
       // Write result to CSV matching Java format
-      await csvWriter.write(
+      await csvWriter.write([
         i + 1, // Iteration 1-based
         sampleDuration,
-        '', // extra
+        'Alloc: 1024 bytes', // extra
         sampleStart,
         sampleDuration,
-        sampleStart - testStartTime
-      );
+        Date.now() - testStartTime
+      ]);
     }
 
     // Yield every sample to keep UI alive (50 runs)

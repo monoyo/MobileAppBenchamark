@@ -108,23 +108,23 @@ export default function LocationTest(): React.ReactElement {
 
           // Write sample
           if (writer && latestLocation) {
-            await writer.write(
+            await writer.write([
               samples,
               duration,
-              `${latestLocation.coords.latitude.toFixed(6)},${latestLocation.coords.longitude.toFixed(6)}`,
+              `Lat: ${latestLocation.coords.latitude.toFixed(6)}, Lon: ${latestLocation.coords.longitude.toFixed(6)}`,
               loopStart,
               duration,
               loopEnd - startTimeMs
-            );
+            ]);
           } else if (writer) {
-            await writer.write(
+            await writer.write([
               samples,
               duration,
               'No Signal',
               loopStart,
               duration,
               loopEnd - startTimeMs
-            );
+            ]);
           }
 
           // Yield to Event Loop (0ms)

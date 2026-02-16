@@ -1,6 +1,6 @@
 import RNFS from 'react-native-fs';
 
-const DEFAULT_HEADER = 'iteration,execution_time_ms,details,interval_start_ms,interval_duration_ms,cumulative_time_ms';
+
 
 export class BufferedCsvWriter {
     private buffer: string[] = [];
@@ -19,7 +19,7 @@ export class BufferedCsvWriter {
         return this.filePath;
     }
 
-    async initialize(header: string = DEFAULT_HEADER) {
+    async initialize(header: string) {
         if (this.initialized) return;
         try {
             // Verify path is writable. usually RNFS.DocumentDirectoryPath is used.
@@ -38,16 +38,16 @@ export class BufferedCsvWriter {
         return needsQuote ? `"${escaped}"` : escaped;
     }
 
-    async write(
-        iteration: number,
-        executionTimeMs: number,
-        details: string,
-        intervalStartMs: number = 0,
-        intervalDurationMs: number = 0,
-        cumulativeTimeMs: number = 0
-    ) {
-        const safeDetails = this.csvEscape(details);
-        const line = `${iteration},${executionTimeMs},${safeDetails},${intervalStartMs},${intervalDurationMs},${cumulativeTimeMs}`;
+    /**
+     * Writes a row to the CSV file.
+     * @param values List of values to write. They will be joined by commas.
+     */
+    async write(values: (string | number | boolean | null | undefined)[]) {
+        const line = values.map(v => {
+            if (v === null || v === undefined) return '';
+            return this.csvEscape(String(v));
+        }).join(',');
+
         this.buffer.push(line);
 
         if (this.buffer.length >= this.bufferSize) {
