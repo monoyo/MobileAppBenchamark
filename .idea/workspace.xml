@@ -51,8 +51,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="Standardize benchmark configurations and physical unit scaling across platforms&#10;&#10;This commit synchronizes configuration usage across Java, Kotlin, and React Native implementations to ensure consistent benchmark execution and data collection.&#10;&#10;The following changes were made:&#10;- Standardized `BufferedCsvWriter` initialization across all Android activities (Java/Kotlin) to use `Config.bufferSize` instead of hardcoded values.&#10;- Updated `CpuTest` in both Java and Kotlin to use `Config.cpuIterations` for benchmark loops instead of `sampleCount`.&#10;- Adjusted React Native `ui-test.tsx` to use physical pixel scaling for object size and velocity, ensuring visual consistency with native implementations by dividing constants by `PixelRatio`.&#10;- Refactored `BaseTestActivity` in Java for improved readability and consistent CSV writer initialization.&#10;- Unified CSV buffer settings for `LocationTest` across Java and Kotlin to follow the global configuration.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="e0781cf0-a6a2-433c-964e-517c217de573" name="Changes" comment="refactor: Remove unused `RAMTest` benchmark implementation from Android&#10;&#10;This commit deletes the `sfef.kt` file which contained a Kotlin-based `RAMTest` object. The implementation included logic for list manipulation, JSON serialization/deserialization, and name/surname frequency counting that is no longer required in this location.">
+      <change beforePath="$PROJECT_DIR$/react/android/app/sfef.kt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
